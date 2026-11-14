@@ -19,5 +19,6 @@ python3 scripts/08_fetch_reference_and_probes.py commons || echo "WARN: Wikimedi
 python3 scripts/09_fetch_building_heights.py
 python3 scripts/10_render_overview.py
 python3 scripts/11_build_demo_data.py
+python3 scripts/12_build_demo_imagery.py
 python3 scripts/build_source_catalog.py
 python3 scripts/verify_checksums.py --write

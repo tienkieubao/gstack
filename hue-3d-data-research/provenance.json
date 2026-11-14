@@ -660,6 +660,20 @@
    "licence": "ODbL 1.0 (OSM/Overture/Microsoft rows) + CC BY 4.0 (Google Open Buildings, ESA WorldCover) + Copernicus DEM licence",
    "script": "scripts/11_build_demo_data.py"
   },
+  "demo/data/ground_s2.jpg": {
+   "attribution": "Contains modified Copernicus Sentinel data 2026",
+   "bytes": 406569,
+   "derived_from": [
+    "samples/raw/sentinel2/S2B_48QYD_20260330_0_L2A_TCI_pilot_window.tif"
+   ],
+   "generated_at": "2026-11-14T08:54:37Z",
+   "kind": "derived (display rendering for the demo)",
+   "licence": "Copernicus Sentinel data — free and open; attribution required",
+   "processing": "reprojected to the demo frame (EPSG:32648, origin E775352 N1823015), Lanczos 10 m -> 4.0 m, gamma 0.78, saturation x1.22, contrast x1.08, unsharp mask",
+   "script": "scripts/12_build_demo_imagery.py",
+   "sha256_file": "829a76c978219311cd172cd1553a60c86b3b6311384225e24d2aca62394ff73b",
+   "source": "Sentinel-2 L2A S2B_48QYD_20260330_0_L2A TCI"
+  },
   "samples/normalized/": {
    "attribution": "© OpenStreetMap contributors; Overture Maps Foundation; Google Open Buildings; Microsoft ML Building Footprints",
    "derived_from": [
@@ -1402,5 +1416,5 @@
   }
  },
  "schema": "hue3d-provenance/1",
- "updated_at": "2026-11-14T05:45:16Z"
+ "updated_at": "2026-11-14T08:54:37Z"
 }
