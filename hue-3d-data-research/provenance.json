@@ -1,0 +1,594 @@
+{
+ "note": "One record per raw or normalized artefact. retrieved_at is when this project fetched the bytes; it is NOT the data's capture date.",
+ "records": {
+  "samples/raw/dem/copernicus_glo30_N16E107_pilot_window.tif": {
+   "bytes": 78786,
+   "crs": "EPSG:4326 horizontal; heights in metres above EGM2008 geoid (per product spec)",
+   "data_date_note": "TanDEM-X acquisitions 2010-12 to 2015-01; this COG object last modified 2022-05-09 (not a re-survey).",
+   "data_url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N16_00_E107_00_DEM/Copernicus_DSM_COG_10_N16_00_E107_00_DEM.tif",
+   "landing_url": "https://registry.opendata.aws/copernicus-dem/",
+   "licence": "Copernicus DEM GLO-30 licence (free, worldwide, incl. commercial use, with mandatory attribution) — see source_catalog.md",
+   "licence_url": "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM",
+   "provider": "ESA / Copernicus (data © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018)",
+   "raster": {
+    "bounds": [
+     107.555972,
+     16.452083,
+     107.602083,
+     16.494028
+    ],
+    "crs": "EPSG:4326",
+    "dtype": "float32",
+    "height": 151,
+    "nodata": null,
+    "res": [
+     0.0002777777777777778,
+     0.0002777777777777778
+    ],
+    "tags": {
+     "AREA_OR_POINT": "Point"
+    },
+    "width": 166
+   },
+   "retrieved_at": "2026-11-14T03:38:35Z",
+   "script": "scripts/04_fetch_rasters.py dem",
+   "selection": "lossless window of the source grid covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
+   "sha256_file": "659b713319acfd14b57077ebc8da43b8ef1bf9754c3bcc5b50a6fc46e40144ce",
+   "source": "Copernicus DEM GLO-30 Public (DSM), COG on AWS Open Data",
+   "source_object": {
+    "Content-Length": "32968719",
+    "ETag": "\"1f30cdad46e3619ab9b3659114bc1b04\"",
+    "Last-Modified": "Mon, 09 May 2022 14:06:18 GMT"
+   }
+  },
+  "samples/raw/dem/tilezen_skadi_N16E107_pilot_window.tif": {
+   "bytes": 11510,
+   "crs": "EPSG:4326 horizontal; integer metres, EGM96 geoid for SRTM-derived cells",
+   "data_date_note": "SRTM acquisition February 2000; object last modified 2016-04-27.",
+   "data_url": "https://elevation-tiles-prod.s3.amazonaws.com/skadi/N16/N16E107.hgt.gz",
+   "landing_url": "https://registry.opendata.aws/terrain-tiles/",
+   "licence": "Composite of open sources (for this area SRTM, public domain); attribution required per Tilezen terrain attribution doc",
+   "licence_url": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
+   "provider": "Mapzen/Tilezen via AWS Open Data",
+   "retrieved_at": "2026-11-14T03:38:36Z",
+   "script": "scripts/04_fetch_rasters.py skadi",
+   "selection": "window covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
+   "sha256_file": "ea5acdb093a0c61ee9b87c94f71cf2c3c590347789caf3729996a9e00a6efa2a",
+   "source": "Tilezen/Mapzen Terrain Tiles 'skadi' N16E107 (SRTM-style HGT composite)",
+   "source_object": {
+    "Content-Length": "9179957",
+    "ETag": "\"84118dca818c8cc2b81dd6a75b7957bf-2\"",
+    "Last-Modified": "Wed, 27 Apr 2016 10:40:14 GMT"
+   },
+   "source_sha256": "e8a432849c4073f16b5f1cc9645eb700c003abe8c2047f5c999da6ed3469b8d7"
+  },
+  "samples/raw/landcover/esa_worldcover_2021_v200_pilot_window.tif": {
+   "attribution": "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium",
+   "bytes": 30924,
+   "crs": "EPSG:4326; class codes 10..100",
+   "data_date_note": "Based on Sentinel-1/2 imagery of calendar year 2021; released 2022-10.",
+   "data_url": "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N15E105_Map.tif",
+   "landing_url": "https://esa-worldcover.org/",
+   "licence": "CC BY 4.0",
+   "licence_url": "https://esa-worldcover.org/en/data-access",
+   "provider": "ESA WorldCover consortium (VITO et al.)",
+   "raster": {
+    "bounds": [
+     107.556,
+     16.452,
+     107.602,
+     16.494
+    ],
+    "crs": "EPSG:4326",
+    "dtype": "uint8",
+    "height": 504,
+    "nodata": 0.0,
+    "res": [
+     8.333333333333333e-05,
+     8.333333333333333e-05
+    ],
+    "tags": {
+     "AREA_OR_POINT": "Area",
+     "algorithm_version": "V2.0.0",
+     "copyright": "ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium",
+     "creation_time": "2022-10-21 07:35:40.236136",
+     "legend": "10  Tree cover\n20  Shrubland\n30  Grassland\n40  Cropland\n50  Built-up\n60  Bare/sparse vegetation\n70  Snow and ice\n80  Permanent water bodies\n90  Herbaceous wetland\n95  Mangroves\n100 Moss and lichen\n",
+     "license": "CC-BY 4.0 - https://creativecommons.org/licenses/by/4.0/",
+     "product_crs": "EPSG:4326",
+     "product_grid": "3x3 degree tiling grid",
+     "product_tile": "N15E105",
+     "product_type": "LandCover Map",
+     "product_version": "V2.0.0",
+     "reference": "https://esa-worldcover.org",
+     "time_end": "2021-12-31T23:59:59Z",
+     "time_start": "2021-01-01T00:00:00Z",
+     "title": "ESA WorldCover product at 10m resolution for year 2021"
+    },
+    "width": 552
+   },
+   "retrieved_at": "2026-11-14T03:38:39Z",
+   "script": "scripts/04_fetch_rasters.py worldcover",
+   "selection": "lossless window covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
+   "sha256_file": "22cfd57fd00dc4f0e509819c75c5cd1b61bede7fd051b3727afcd2da20a74bac",
+   "source": "ESA WorldCover 10 m 2021 v200",
+   "source_object": {
+    "Content-Length": "69305227",
+    "ETag": "\"78ec11c0ffaf26b54f26d33a0cd3f029-9\"",
+    "Last-Modified": "Wed, 26 Oct 2022 12:40:39 GMT"
+   }
+  },
+  "samples/raw/osm/boundaries/": {
+   "attribution": "© OpenStreetMap contributors",
+   "crs": "EPSG:4326",
+   "data_date_note": "Community-mapped boundaries; last-edit timestamps per relation are stored in the AOI GeoJSON properties.",
+   "data_url": "https://www.openstreetmap.org/api/0.6/relation/<id>/full",
+   "derived": [
+    "aoi/zone_b_central_urban.geojson",
+    "aoi/zone_c_hue_city_admin.geojson",
+    "aoi/wards_osm.geojson"
+   ],
+   "files": [
+    {
+     "bytes_uncompressed": 1720459,
+     "file": "samples/raw/osm/boundaries/relation_1891483_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:24Z",
+     "sha256_file": "b7b0d89506684efda9479e725cb9991470d5d4a68802ea569c7d667001a0cdb2",
+     "sha256_uncompressed": "363c719faf11d887a41e8f6654662321c33f307033e140027622791817812bc5",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/1891483/full"
+    },
+    {
+     "bytes_uncompressed": 80880,
+     "file": "samples/raw/osm/boundaries/relation_19324115_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:26Z",
+     "sha256_file": "362578335bacf1ca812824a2f3f287dd5bae07ce363a72272949118401095cf5",
+     "sha256_uncompressed": "aa8b0abeea658369283f88138a27b4fd2e0f35970619dc4e3f2b244d7300a4e7",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19324115/full"
+    },
+    {
+     "bytes_uncompressed": 171839,
+     "file": "samples/raw/osm/boundaries/relation_19324114_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:28Z",
+     "sha256_file": "2e20ea6144b25a6fb83d3444734c59b2ab5b8ef957bc7059d2a76fde98b3838d",
+     "sha256_uncompressed": "289b2f7b7b176badc2f32ff5e95996f67ed2a0793aa3661a17d84b439586d612",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19324114/full"
+    },
+    {
+     "bytes_uncompressed": 540410,
+     "file": "samples/raw/osm/boundaries/relation_19324110_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:30Z",
+     "sha256_file": "c3fb40d83868eba4f2e49e641775fefeb96fca843462c57686d468b8d14306e6",
+     "sha256_uncompressed": "e023ff2e96384d861458a974e27c33c85c9373416afb5a9af190f5b2546bea2e",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19324110/full"
+    },
+    {
+     "bytes_uncompressed": 117983,
+     "file": "samples/raw/osm/boundaries/relation_19324113_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:32Z",
+     "sha256_file": "227f8cc4b5d9e15a6a77cf73f2ac75588b189b2d4d0035ce51e2903c52f630ba",
+     "sha256_uncompressed": "1c4b1ca6826f4823fadac0e5eb3a6b30a95fade1ab2cca0101ec178f7db57734",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19324113/full"
+    },
+    {
+     "bytes_uncompressed": 285752,
+     "file": "samples/raw/osm/boundaries/relation_19324112_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:34Z",
+     "sha256_file": "d0aea032f3436f2073592f1607a0d7e26c85338008993b8f3730493d075298cf",
+     "sha256_uncompressed": "9a51eaff3f87ab1f14f1b9f63e815351146c8351c1d80204b06f8e2f174049df",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19324112/full"
+    },
+    {
+     "bytes_uncompressed": 342171,
+     "file": "samples/raw/osm/boundaries/relation_19324109_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:36Z",
+     "sha256_file": "4108d01a247f0378bb9e27e3409710582fd42f07dc0656cc46740acdf9962399",
+     "sha256_uncompressed": "16f14319f1419d28502617068fdb7f87e3c92551ddb1e4b03978a182992f945b",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19324109/full"
+    },
+    {
+     "bytes_uncompressed": 281170,
+     "file": "samples/raw/osm/boundaries/relation_19324111_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:38Z",
+     "sha256_file": "d3ef4d598d5f4fdf8faa39098b8e8973fd1b501309afc873f22ca3a120c28319",
+     "sha256_uncompressed": "be22f4087d1854d0fb6df4a045886385fe54ce26aafe09ef3e49117afd633c77",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19324111/full"
+    },
+    {
+     "bytes_uncompressed": 135359,
+     "file": "samples/raw/osm/boundaries/relation_19325227_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:40Z",
+     "sha256_file": "57fb607def2c82f3387bd2c47e0689ccf2d99ab10c96517a2c51a0da400c6431",
+     "sha256_uncompressed": "d8787f0224e8ea8560bfbf79af3a703539429fc7e3ac768831ff3a9fdfbd76a4",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19325227/full"
+    },
+    {
+     "bytes_uncompressed": 162836,
+     "file": "samples/raw/osm/boundaries/relation_19325235_full.osm.gz",
+     "retrieved_at": "2026-11-14T03:34:42Z",
+     "sha256_file": "29e27403cb7800a1a7a3d21ba5a48285baf58c601b3dd36c62bce833afbd5621",
+     "sha256_uncompressed": "557abd8bb8fddfa01bb216d5195720f9a58a5e220979078de3ae31dfdc05f836",
+     "url": "https://www.openstreetmap.org/api/0.6/relation/19325235/full"
+    }
+   ],
+   "landing_url": "https://www.openstreetmap.org/relation/1891483",
+   "licence": "ODbL 1.0",
+   "licence_url": "https://www.openstreetmap.org/copyright",
+   "provider": "OpenStreetMap Foundation / contributors",
+   "retrieved_at": "2026-11-14T03:34:42Z",
+   "script": "scripts/01_fetch_boundaries_make_aoi.py",
+   "source": "OpenStreetMap administrative boundary relations (API 0.6 relation/<id>/full)"
+  },
+  "samples/raw/osm/tiles/": {
+   "attribution": "© OpenStreetMap contributors",
+   "crs": "EPSG:4326 (WGS 84 lon/lat degrees)",
+   "data_date_note": "Live database state at retrieval time; per-object edit timestamps are inside the XML.",
+   "data_url": "https://www.openstreetmap.org/api/0.6/map?bbox=<w,s,e,n>",
+   "files": [
+    {
+     "bbox_wsen": [
+      107.556,
+      16.452,
+      107.5675,
+      16.4625
+     ],
+     "bytes_uncompressed": 826750,
+     "file": "samples/raw/osm/tiles/map_107.55600_16.45200_107.56750_16.46250.osm.gz",
+     "retrieved_at": "2026-11-14T03:32:46Z",
+     "sha256_file": "23b0e38f41e0d07a64c91af6c0cbbca02a8e4b19f17f8784a7796924bc6578da",
+     "sha256_uncompressed": "f003b361b4ebe33d54f319e0d0bf2257e873b4417efb5872e18025657825e065"
+    },
+    {
+     "bbox_wsen": [
+      107.556,
+      16.4625,
+      107.5675,
+      16.473
+     ],
+     "bytes_uncompressed": 970178,
+     "file": "samples/raw/osm/tiles/map_107.55600_16.46250_107.56750_16.47300.osm.gz",
+     "retrieved_at": "2026-11-14T03:32:48Z",
+     "sha256_file": "37f2f084201cb662b3cbb184ef9076a2b65085a1e35edf726f8f1c8462369aea",
+     "sha256_uncompressed": "5a64322008a5224fdac990036d3aa5ffe18f901197c9dd6784b63e81f58ef51c"
+    },
+    {
+     "bbox_wsen": [
+      107.556,
+      16.473,
+      107.5675,
+      16.4835
+     ],
+     "bytes_uncompressed": 1064898,
+     "file": "samples/raw/osm/tiles/map_107.55600_16.47300_107.56750_16.48350.osm.gz",
+     "retrieved_at": "2026-11-14T03:32:50Z",
+     "sha256_file": "9c1cf8623fc344b03a3b68eff0857c10451a152015f5dc09bc1a50a19d0b32e7",
+     "sha256_uncompressed": "a2e10f9e32a3aa495dd749117666ac8498c73fe838edd3c27ab8e6d664913b42"
+    },
+    {
+     "bbox_wsen": [
+      107.556,
+      16.4835,
+      107.5675,
+      16.494
+     ],
+     "bytes_uncompressed": 477513,
+     "file": "samples/raw/osm/tiles/map_107.55600_16.48350_107.56750_16.49400.osm.gz",
+     "retrieved_at": "2026-11-14T03:32:52Z",
+     "sha256_file": "af5887f1798096a80e9bc787c2768d5e02944fdab36cef0591413f98a03b9c5d",
+     "sha256_uncompressed": "03464a6b9a9a4aba9c60f8e65599659744d749d0a3dd0ecdfa3d915c8f2bbf90"
+    },
+    {
+     "bbox_wsen": [
+      107.5675,
+      16.452,
+      107.579,
+      16.4625
+     ],
+     "bytes_uncompressed": 1174806,
+     "file": "samples/raw/osm/tiles/map_107.56750_16.45200_107.57900_16.46250.osm.gz",
+     "retrieved_at": "2026-11-14T03:32:54Z",
+     "sha256_file": "b4062000db3ac91cb5d12bd2e190ec219d272825e0ad5d34f754c798a0aff249",
+     "sha256_uncompressed": "43d3ac01d270ea03609a5f82b95378868308ddbe9548e750e5bbb48ffacef293"
+    },
+    {
+     "bbox_wsen": [
+      107.5675,
+      16.4625,
+      107.579,
+      16.473
+     ],
+     "bytes_uncompressed": 1518871,
+     "file": "samples/raw/osm/tiles/map_107.56750_16.46250_107.57900_16.47300.osm.gz",
+     "retrieved_at": "2026-11-14T03:32:56Z",
+     "sha256_file": "2ca3dc54f3f739008efddc4600d4f53605537ccc658ac45e9d47ca398e92d36f",
+     "sha256_uncompressed": "f076ac8fd97f167effcf7be49b6ce7632bd20f4535638737fbc6bf4fe419b379"
+    },
+    {
+     "bbox_wsen": [
+      107.5675,
+      16.473,
+      107.579,
+      16.4835
+     ],
+     "bytes_uncompressed": 1224321,
+     "file": "samples/raw/osm/tiles/map_107.56750_16.47300_107.57900_16.48350.osm.gz",
+     "retrieved_at": "2026-11-14T03:32:59Z",
+     "sha256_file": "6113dde2465d3f332952775e7e83c9825956dddd508bd7c5f646bb5965487fe6",
+     "sha256_uncompressed": "6a426e1aa28472d28e8003ac00762834707fdaeb0f706133a077fa25d039b1e2"
+    },
+    {
+     "bbox_wsen": [
+      107.5675,
+      16.4835,
+      107.579,
+      16.494
+     ],
+     "bytes_uncompressed": 930118,
+     "file": "samples/raw/osm/tiles/map_107.56750_16.48350_107.57900_16.49400.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:00Z",
+     "sha256_file": "4dff6d4c3e1257e0c853c538b1023a4a4d3d129d235b0591ee974c65a5d59036",
+     "sha256_uncompressed": "24a5d27fe6725d99ae5c43a6b762ee993fa184dfe03e600a4417c39739196b96"
+    },
+    {
+     "bbox_wsen": [
+      107.579,
+      16.452,
+      107.5905,
+      16.4625
+     ],
+     "bytes_uncompressed": 1575761,
+     "file": "samples/raw/osm/tiles/map_107.57900_16.45200_107.59050_16.46250.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:02Z",
+     "sha256_file": "19b6c74c689a0d5ccc00dbb46bdc3d86b36fc97043144a1e0b793a926f11b742",
+     "sha256_uncompressed": "d305f2c3847ce5a5f2b8470a84e4dc48cef2f00a35cb3c3b754a9b3b4eac3ac9"
+    },
+    {
+     "bbox_wsen": [
+      107.579,
+      16.4625,
+      107.5905,
+      16.473
+     ],
+     "bytes_uncompressed": 1331558,
+     "file": "samples/raw/osm/tiles/map_107.57900_16.46250_107.59050_16.47300.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:04Z",
+     "sha256_file": "501084e8a17fecba0696a229162c87ce5eb9b30586e8a7c13bb9e6277afb3b80",
+     "sha256_uncompressed": "3886a930bb8b206d668b3ba05df3729497cdd9ad0a30f852cf9efb99d9ec36bf"
+    },
+    {
+     "bbox_wsen": [
+      107.579,
+      16.473,
+      107.5905,
+      16.4835
+     ],
+     "bytes_uncompressed": 1004795,
+     "file": "samples/raw/osm/tiles/map_107.57900_16.47300_107.59050_16.48350.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:06Z",
+     "sha256_file": "3e520a40496117ee0473bfe8b6aa7ba9f04b650cd807c3a14b107a408500b61a",
+     "sha256_uncompressed": "046071fe984aaa47d0d9de50d9bf0e80566abfd57234589cc1618cf997dd85a1"
+    },
+    {
+     "bbox_wsen": [
+      107.579,
+      16.4835,
+      107.5905,
+      16.494
+     ],
+     "bytes_uncompressed": 663077,
+     "file": "samples/raw/osm/tiles/map_107.57900_16.48350_107.59050_16.49400.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:08Z",
+     "sha256_file": "230f2da203dfce1ea538d1b4f252ed3fef032864b1de0308e1d7d2b0f92abd39",
+     "sha256_uncompressed": "4fb65ebe0ed9bafefb439737e00f4396fb05ba12cf48e3e3bcca3b04680bd42f"
+    },
+    {
+     "bbox_wsen": [
+      107.5905,
+      16.452,
+      107.602,
+      16.4625
+     ],
+     "bytes_uncompressed": 2432229,
+     "file": "samples/raw/osm/tiles/map_107.59050_16.45200_107.60200_16.46250.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:11Z",
+     "sha256_file": "8077299ce98cdbc7a642a799815e411860ced5d4851333dde344931c5a1d3050",
+     "sha256_uncompressed": "2fae6bf0b18d38f3c9e2043e7ecc01c2cfbc91a6b7912f9d272fffb5cdfddf63"
+    },
+    {
+     "bbox_wsen": [
+      107.5905,
+      16.4625,
+      107.602,
+      16.473
+     ],
+     "bytes_uncompressed": 2133362,
+     "file": "samples/raw/osm/tiles/map_107.59050_16.46250_107.60200_16.47300.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:13Z",
+     "sha256_file": "9ac1c032fdfa0ed0e63ed4569d5327b5b12616b0b53e9b3172dd60e9fb0e32de",
+     "sha256_uncompressed": "46ff4081480e3ff862055d5f7deeb78f120baa3236557847abd58d1a18bdcf38"
+    },
+    {
+     "bbox_wsen": [
+      107.5905,
+      16.473,
+      107.602,
+      16.4835
+     ],
+     "bytes_uncompressed": 824861,
+     "file": "samples/raw/osm/tiles/map_107.59050_16.47300_107.60200_16.48350.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:15Z",
+     "sha256_file": "be2dda307b5965a71c257aa1b9e3947b4b582a5e1342053b46a892694bf54e69",
+     "sha256_uncompressed": "d02cd11705149a2b4f84f91b4a4570a8ac04efa2b183bc6c408e449044eaaf6a"
+    },
+    {
+     "bbox_wsen": [
+      107.5905,
+      16.4835,
+      107.602,
+      16.494
+     ],
+     "bytes_uncompressed": 668098,
+     "file": "samples/raw/osm/tiles/map_107.59050_16.48350_107.60200_16.49400.osm.gz",
+     "retrieved_at": "2026-11-14T03:33:16Z",
+     "sha256_file": "51bd9b4075904079e8855d4fdeddd684e7992c20d50e70b2fd7e30c5396f1c02",
+     "sha256_uncompressed": "7a5d20198ccb8a580ffd45f7e1375922d11d2965f57b958b2c6678b106e0921a"
+    }
+   ],
+   "landing_url": "https://www.openstreetmap.org/",
+   "licence": "ODbL 1.0",
+   "licence_url": "https://www.openstreetmap.org/copyright",
+   "manifest": "samples/raw/osm/manifest.json",
+   "provider": "OpenStreetMap Foundation / contributors",
+   "retrieved_at": "2026-11-14T03:33:16Z",
+   "script": "scripts/02_fetch_osm_pilot.py",
+   "source": "OpenStreetMap (OSM API 0.6 map call)"
+  },
+  "samples/raw/overture/2026-10-21.0/": {
+   "attribution": "© OpenStreetMap contributors, Overture Maps Foundation (+ Microsoft, Google, Esri Community Maps where named in `sources`)",
+   "crs": "EPSG:4326 (geometry as WKB in GeoParquet)",
+   "data_date_note": "Release id is the publication date of the Overture release, not the capture date of the underlying features.",
+   "data_url": "s3://overturemaps-us-west-2/release/2026-10-21.0/theme=<theme>/type=<type>/",
+   "files": [
+    {
+     "bytes": 782307,
+     "file": "samples/raw/overture/2026-10-21.0/segment.parquet",
+     "rows": 5665,
+     "sha256_file": "880023e1413aad1ea4af9c17ae278d3df173d9d7278f3f720851c5ef2b8c349f",
+     "theme": "transportation",
+     "type": "segment"
+    },
+    {
+     "bytes": 367115,
+     "file": "samples/raw/overture/2026-10-21.0/connector.parquet",
+     "rows": 6361,
+     "sha256_file": "9e58336a9850452ab6293fdecadf2dff50f745e06e55c86870db737abc24ee4e",
+     "theme": "transportation",
+     "type": "connector"
+    },
+    {
+     "bytes": 5856655,
+     "file": "samples/raw/overture/2026-10-21.0/building.parquet",
+     "rows": 61115,
+     "sha256_file": "0be9d0154c692043602ab2fdefc43171b4dd75cdedf3e4cb4e82dabe44e9d35e",
+     "theme": "buildings",
+     "type": "building"
+    },
+    {
+     "bytes": 16343,
+     "file": "samples/raw/overture/2026-10-21.0/building_part.parquet",
+     "rows": 11,
+     "sha256_file": "5eb91b6969e7bf5525649a37513cd6c46a72359c42a6fd816ef913cdb9d5b75a",
+     "theme": "buildings",
+     "type": "building_part"
+    },
+    {
+     "bytes": 111922,
+     "file": "samples/raw/overture/2026-10-21.0/water.parquet",
+     "rows": 127,
+     "sha256_file": "1bb795f7153f4d3ecf150140e0c6dec84244791582c44f9c5f0367ff3c5bf050",
+     "theme": "base",
+     "type": "water"
+    },
+    {
+     "bytes": 211295,
+     "file": "samples/raw/overture/2026-10-21.0/land_use.parquet",
+     "rows": 305,
+     "sha256_file": "9792637dad67ca4870d60b26f3966eda1511a6294a0de01c8124b46f5f875116",
+     "theme": "base",
+     "type": "land_use"
+    },
+    {
+     "bytes": 50941,
+     "file": "samples/raw/overture/2026-10-21.0/land.parquet",
+     "rows": 110,
+     "sha256_file": "986672d9ee2d24da283cd8dac63636b1ae3803a753278ce72fcb52f3a6f560c1",
+     "theme": "base",
+     "type": "land"
+    },
+    {
+     "bytes": 102851,
+     "file": "samples/raw/overture/2026-10-21.0/infrastructure.parquet",
+     "rows": 807,
+     "sha256_file": "e246b5e8e81cd227d5f995cec0b5f65d4b1c3b150223a571fdc88afd2abab46b",
+     "theme": "base",
+     "type": "infrastructure"
+    },
+    {
+     "bytes": 738984,
+     "file": "samples/raw/overture/2026-10-21.0/land_cover.parquet",
+     "rows": 90,
+     "sha256_file": "fca44adbc440555946d00b8ab59924cdeee0e3855ff7c60ce6f6c2432592ca04",
+     "theme": "base",
+     "type": "land_cover"
+    }
+   ],
+   "landing_url": "https://overturemaps.org/",
+   "licence": "Per source dataset (see `sources` column): ODbL 1.0 for OSM- and Microsoft-derived rows; CC BY 4.0 for Google Open Buildings / Esri; CDLA-Permissive-2.0 for some themes",
+   "licence_url": "https://docs.overturemaps.org/attribution/",
+   "provider": "Overture Maps Foundation",
+   "retrieved_at": "2026-11-14T03:37:12Z",
+   "script": "scripts/03_fetch_overture.py pilot",
+   "selection": "rows whose bbox intersects pilot rectangle (107.556, 16.452, 107.602, 16.494)",
+   "source": "Overture Maps Foundation release 2026-10-21.0"
+  },
+  "samples/raw/overture/2026-10-21.0/division_area_hue.parquet": {
+   "bytes": 131143,
+   "crs": "EPSG:4326",
+   "data_url": "s3://overturemaps-us-west-2/release/2026-10-21.0/theme=divisions/type=division_area/",
+   "landing_url": "https://docs.overturemaps.org/guides/divisions/",
+   "licence": "ODbL 1.0 (OSM-derived divisions) — see `sources` column",
+   "provider": "Overture Maps Foundation",
+   "retrieved_at": "2026-11-14T03:37:19Z",
+   "script": "scripts/03_fetch_overture.py divisions",
+   "selection": "country=VN, region=VN-26, subtype=region",
+   "sha256_file": "9a571c0d11e9a52c0d0fdbcce518e6f0f8d6f355f81923ba572f4b7905448d27",
+   "source": "Overture Maps divisions/division_area, release 2026-10-21.0"
+  },
+  "samples/raw/sentinel2/S2B_48QYD_20260330_0_L2A_TCI_pilot_window.tif": {
+   "attribution": "Contains modified Copernicus Sentinel data 2026",
+   "bytes": 637802,
+   "capture_datetime": "2026-03-30T03:33:25.697000Z",
+   "crs": "EPSG:32648",
+   "data_url": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/48/Q/YD/2026/3/S2B_48QYD_20260330_0_L2A/TCI.tif",
+   "derived": [
+    "samples/normalized/reference/S2B_48QYD_20260330_0_L2A_TCI_pilot_quicklook.png"
+   ],
+   "landing_url": "https://registry.opendata.aws/sentinel-2-l2a-cogs/",
+   "licence": "Copernicus Sentinel data — free, full and open (Legal notice on the use of Copernicus Sentinel Data); attribution required",
+   "licence_url": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+   "mgrs": "MGRS-48QYD",
+   "provider": "ESA / Copernicus; COGs hosted by Element 84 Earth Search on AWS",
+   "raster": {
+    "bounds": [
+     772860.0,
+     1820670.0,
+     777830.0,
+     1825380.0
+    ],
+    "dtype": "uint8",
+    "height": 471,
+    "res": [
+     10.0,
+     10.0
+    ],
+    "width": 497
+   },
+   "retrieved_at": "2026-11-14T03:38:41Z",
+   "scene_cloud_cover_pct": 0.007392,
+   "script": "scripts/04_fetch_rasters.py sentinel2",
+   "selection": "lossless window covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
+   "sha256_file": "b27c80b76d95948c1fe5af516827fcd0c7d1f4cc736deaa6178298972d48e7c3",
+   "source": "Sentinel-2 L2A scene S2B_48QYD_20260330_0_L2A (true-colour TCI, 10 m)",
+   "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_48QYD_20260330_0_L2A"
+  },
+  "samples/raw/sentinel2/stac_search_low_cloud.json": {
+   "data_url": "https://earth-search.aws.element84.com/v1/search",
+   "licence": "metadata",
+   "provider": "Element 84",
+   "retrieved_at": "2026-11-14T03:38:41Z",
+   "script": "scripts/04_fetch_rasters.py sentinel2",
+   "sha256_file": "60ccde7f111cf594d7b3fc501429345e116214f5779169f92e52953a6916ed8c",
+   "source": "Earth Search STAC API search result (sentinel-2-l2a, cloud < 10 %, 2025-11-01..2026-11-13, pilot bbox)"
+  }
+ },
+ "schema": "hue3d-provenance/1",
+ "updated_at": "2026-11-14T03:38:41Z"
+}

@@ -1,0 +1,8 @@
+{
+ "file": "samples/raw/osm/boundaries/relation_19324111_full.osm.gz",
+ "url": "https://www.openstreetmap.org/api/0.6/relation/19324111/full",
+ "retrieved_at": "2026-11-14T03:34:38Z",
+ "bytes_uncompressed": 281170,
+ "sha256_uncompressed": "be22f4087d1854d0fb6df4a045886385fe54ce26aafe09ef3e49117afd633c77",
+ "sha256_file": "d3ef4d598d5f4fdf8faa39098b8e8973fd1b501309afc873f22ca3a120c28319"
+}

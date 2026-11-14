@@ -1,0 +1,14 @@
+{
+ "file": "samples/raw/osm/tiles/map_107.56750_16.45200_107.57900_16.46250.osm.gz",
+ "bbox_wsen": [
+  107.5675,
+  16.452,
+  107.579,
+  16.4625
+ ],
+ "url": "https://www.openstreetmap.org/api/0.6/map?bbox=107.56750%2C16.45200%2C107.57900%2C16.46250",
+ "retrieved_at": "2026-11-14T03:32:54Z",
+ "bytes_uncompressed": 1174806,
+ "sha256_uncompressed": "43d3ac01d270ea03609a5f82b95378868308ddbe9548e750e5bbb48ffacef293",
+ "sha256_file": "b4062000db3ac91cb5d12bd2e190ec219d272825e0ad5d34f754c798a0aff249"
+}
