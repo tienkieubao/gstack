@@ -23,7 +23,7 @@ npm install && npm run build               # src/*.js -> app.js, page.html -> in
 | Chế độ | Điều khiển |
 |---|---|
 | Khám phá | Chuột trái kéo, chuột phải xoay, cuộn để phóng to; trên điện thoại dùng một ngón kéo, hai ngón xoay/phóng. Bấm vào công trình, cầu, tường thành, mặt đất hoặc mặt nước để xem nguồn dữ liệu và mức tin cậy |
-| Lái UAV | `W/S` tiến lùi · `A/D` sang ngang · `Q/E` xoay · `Space/Shift` lên xuống · `C` đổi góc nhìn · `Esc` thoát. Trên điện thoại có hai cần điều khiển ảo |
+| Lái UAV | `↑/↓` hoặc `W/S` tiến lùi · `←/→` hoặc `Q/E` xoay · `A/D` sang ngang · `Space/Shift` hoặc `R/F` lên xuống · `C` đổi góc nhìn · `Esc` thoát. Hai cần điều khiển trên màn hình dùng được bằng chuột (máy tính) hoặc ngón tay (điện thoại). Dòng "Điều khiển" trong bảng thông số cho biết trang đang nhận lệnh nào |
 | Bay dưới cầu Trường Tiền | Bay tự động ~55 giây: hạ thấp trên mặt sông, chạm nước, luồn qua nhịp 3, vòng lại qua nhịp 4, rồi trả quyền lái |
 
 Bảng thông số khi bay: độ cao trên mặt nước/mặt đất, tốc độ, khoảng trống tới đáy cầu (khi đang ở dưới mặt cầu), số lần chạm nước, số lần va chạm.
@@ -64,6 +64,12 @@ Hai chi tiết đến thẳng từ đợt kiểm định dữ liệu:
 | `data/*.json` | Dữ liệu cảnh sinh bởi `../scripts/11_build_demo_data.py` |
 
 Hệ tọa độ cảnh: mét, gốc tại tâm pilot trong EPSG:32648 (E 775352, N 1823015); x hướng đông, z hướng nam, y hướng lên (theo cao độ GLO-30, EGM2008).
+
+## Nếu không điều khiển được
+
+- Bấm một lần vào cảnh 3D. Nếu tiêu điểm đang ở ngoài khung demo, giữa màn hình sẽ hiện nút "Bấm vào đây để bàn phím điều khiển được UAV".
+- Bộ gõ tiếng Việt (Unikey, EVKey, Telex/VNI) có thể đổi phím W thành "ư". Trang đã nhận cả hai, nhưng phím mũi tên luôn an toàn hơn; hoặc tắt bộ gõ khi lái.
+- Dùng hai cần tròn ở giữa đáy màn hình bằng chuột nếu bàn phím vẫn không ăn.
 
 ## Giới hạn đã biết
 

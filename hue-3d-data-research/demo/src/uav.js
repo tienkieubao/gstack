@@ -26,24 +26,61 @@ export function buildUavModel() {
   return g;
 }
 
+// Keyboard: physical key codes first (layout- and IME-independent), then the produced character as a
+// fallback, because Vietnamese input methods (Telex/VNI) can deliver W as "ư" with an empty code.
+const BY_CODE = {
+  KeyW: 'fwd', ArrowUp: 'fwd', KeyS: 'back', ArrowDown: 'back', KeyA: 'left', KeyD: 'right',
+  KeyQ: 'yawL', ArrowLeft: 'yawL', KeyE: 'yawR', ArrowRight: 'yawR',
+  Space: 'up', KeyR: 'up', PageUp: 'up', ShiftLeft: 'down', ShiftRight: 'down', KeyF: 'down', PageDown: 'down',
+};
+const BY_KEY = {
+  w: 'fwd', 'ư': 'fwd', s: 'back', a: 'left', 'ă': 'left', 'â': 'left', d: 'right', 'đ': 'right', q: 'yawL', e: 'yawR', 'ê': 'yawR',
+  ' ': 'up', r: 'up', f: 'down', shift: 'down', arrowup: 'fwd', arrowdown: 'back', arrowleft: 'yawL', arrowright: 'yawR',
+};
+export const ACTION_NAME = { fwd: 'Tiến', back: 'Lùi', left: 'Sang trái', right: 'Sang phải', yawL: 'Xoay trái', yawR: 'Xoay phải', up: 'Lên', down: 'Xuống' };
+
+function isTextEntry(el) {
+  if (!el) return false;
+  if (el.isContentEditable || el.tagName === 'TEXTAREA') return true;
+  return el.tagName === 'INPUT' && !/^(radio|checkbox|button|range|submit|reset)$/i.test(el.type);
+}
+
 export class Input {
   constructor() {
-    this.keys = new Set();
+    this.held = new Map();            // key id -> { action, expires }
+    this.active = false;              // true while the UAV is being flown: game keys are captured
+    this.last = '';                   // last recognised action, for the on-screen indicator
+    this.lastAt = 0;
     this.left = { x: 0, y: 0 }; this.right = { x: 0, y: 0 };   // virtual sticks, -1..1
-    window.addEventListener('keydown', (e) => { if (!e.metaKey && !e.ctrlKey && !/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) { this.keys.add(e.code); if (/^(Arrow|Space)/.test(e.code)) e.preventDefault(); } });
-    window.addEventListener('keyup', (e) => this.keys.delete(e.code));
-    window.addEventListener('blur', () => this.keys.clear());
+    window.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || isTextEntry(e.target)) return;
+      const action = BY_CODE[e.code] || BY_KEY[(e.key || '').toLowerCase()];
+      if (!action) return;
+      const id = e.code || `key:${e.key}`;
+      // events without a physical code (some IMEs) never get a reliable keyup: let them expire unless repeated
+      this.held.set(id, { action, expires: e.code ? Infinity : performance.now() + 650 });
+      this.last = ACTION_NAME[action]; this.lastAt = performance.now();
+      if (this.active) e.preventDefault();          // no page scroll, no toggling a focused button or radio
+    }, true);
+    window.addEventListener('keyup', (e) => {
+      this.held.delete(e.code || `key:${e.key}`);
+      if (!e.code) for (const [k, v] of this.held) if (v.expires !== Infinity) this.held.delete(k);
+      if (this.active && (BY_CODE[e.code] || BY_KEY[(e.key || '').toLowerCase()])) e.preventDefault();
+    }, true);
+    window.addEventListener('blur', () => this.held.clear());
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.held.clear(); });
   }
 
-  axis(neg, pos) { let v = 0; for (const k of neg) if (this.keys.has(k)) v -= 1; for (const k of pos) if (this.keys.has(k)) v += 1; return v; }
-
   read() {
+    const now = performance.now(), on = new Set();
+    for (const [k, v] of this.held) { if (v.expires < now) this.held.delete(k); else on.add(v.action); }
     const clamp = (v) => Math.max(-1, Math.min(1, v));
+    const ax = (neg, pos) => (on.has(pos) ? 1 : 0) - (on.has(neg) ? 1 : 0);
     return {
-      forward: clamp(this.axis(['KeyS'], ['KeyW']) - this.right.y),
-      strafe: clamp(this.axis(['KeyA'], ['KeyD']) + this.right.x),
-      up: clamp(this.axis(['KeyF', 'ArrowDown', 'ShiftLeft', 'ShiftRight'], ['KeyR', 'ArrowUp', 'Space']) - this.left.y),
-      yaw: clamp(this.axis(['KeyE', 'ArrowRight'], ['KeyQ', 'ArrowLeft']) - this.left.x),
+      forward: clamp(ax('back', 'fwd') - this.right.y),
+      strafe: clamp(ax('left', 'right') + this.right.x),
+      up: clamp(ax('down', 'up') - this.left.y),
+      yaw: clamp(ax('yawR', 'yawL') - this.left.x),
     };
   }
 }

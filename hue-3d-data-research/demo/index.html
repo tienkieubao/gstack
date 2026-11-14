@@ -83,6 +83,10 @@ label.opt input { accent-color: var(--gold); width: 15px; height: 15px; margin: 
 #hud-alert { margin: 0; padding: 5px 9px; border-radius: 6px; background: var(--vermilion); color: #fff6ee; font-weight: 600; font-size: 12.5px; }
 
 #keys { right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); padding: 10px 12px; font-size: 12px; color: var(--muted); display: grid; grid-template-columns: auto auto; gap: 3px 12px; }
+#keys .keys-note { grid-column: 1 / -1; margin-top: 4px; max-width: 30ch; color: var(--ivory); }
+.input-state { margin: 0; font-size: 12px; color: var(--muted); }
+.input-state b { font-weight: 600; color: var(--gold); }
+#focus-hint { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 12px 18px; border-radius: 10px; border: 1px solid var(--gold); background: color-mix(in srgb, var(--ink) 92%, transparent); color: var(--ivory); font-weight: 600; font-size: 14px; max-width: calc(100vw - 32px); }
 #keys kbd { font: 500 11.5px var(--f-num); color: var(--ivory); background: var(--ink-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
 
 /* bottom-right: info card */
@@ -108,10 +112,15 @@ body.flying #info { display: none; }
 .label-river { border-left-color: var(--jade); font-style: italic; font-weight: 500; }
 
 /* touch sticks */
-#sticks { position: fixed; inset: auto 0 calc(58px + env(safe-area-inset-bottom, 0px)) 0; display: flex; justify-content: space-between; padding: 0 max(18px, env(safe-area-inset-right, 0px)) 0 max(18px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+#sticks { position: fixed; z-index: 2; inset: auto 0 calc(58px + env(safe-area-inset-bottom, 0px)) 0; display: flex; justify-content: space-between; padding: 0 max(18px, env(safe-area-inset-right, 0px)) 0 max(18px, env(safe-area-inset-left, 0px)); pointer-events: none; }
 .stick { width: 118px; height: 118px; border-radius: 50%; border: 1.5px solid rgb(239 232 214 / 0.55); background: rgb(17 26 26 / 0.35); display: grid; place-items: center; pointer-events: auto; touch-action: none; position: relative; }
 .stick .knob { width: 46px; height: 46px; border-radius: 50%; background: rgb(225 181 74 / 0.85); }
-.stick span { position: absolute; bottom: -18px; font-size: 10.5px; color: #1e2a28; font-weight: 600; }
+.stick span { position: absolute; bottom: -18px; font-size: 10.5px; color: #1e2a28; font-weight: 600; white-space: nowrap; }
+@media (min-width: 721px) {
+  #sticks { left: 50%; right: auto; transform: translateX(-50%); bottom: calc(44px + env(safe-area-inset-bottom, 0px)); gap: 28px; justify-content: center; padding: 0; }
+  .stick { width: 96px; height: 96px; cursor: grab; }
+  .stick .knob { width: 38px; height: 38px; }
+}
 
 #toast { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); padding: 8px 14px; border-radius: 8px; background: var(--ink); border: 1px solid var(--gold); font-size: 13px; max-width: calc(100vw - 32px); }
 
@@ -208,6 +217,7 @@ body.flying #info { display: none; }
     <div class="gauge" id="hud-gap-row"><dt>Tới đáy cầu</dt><dd id="hud-gap">—</dd></div>
   </dl>
   <div class="counts"><span>Chạm nước <b id="hud-touch">0</b></span><span>Va chạm <b id="hud-crash">0</b></span></div>
+  <p class="input-state">Điều khiển: <b id="hud-input">Chưa nhận phím nào</b></p>
   <p id="hud-alert" hidden></p>
   <div class="hud-btns">
     <button type="button" class="ghost" id="btn-view">Góc nhìn: bám sau</button>
@@ -216,12 +226,13 @@ body.flying #info { display: none; }
 </section>
 
 <section id="keys" class="panel" aria-label="Phím điều khiển" hidden>
-  <span><kbd>W</kbd><kbd>S</kbd></span><span>Tiến / lùi</span>
+  <span><kbd>↑</kbd><kbd>↓</kbd> <kbd>W</kbd><kbd>S</kbd></span><span>Tiến / lùi</span>
+  <span><kbd>←</kbd><kbd>→</kbd> <kbd>Q</kbd><kbd>E</kbd></span><span>Xoay trái / phải</span>
   <span><kbd>A</kbd><kbd>D</kbd></span><span>Sang trái / phải</span>
-  <span><kbd>Q</kbd><kbd>E</kbd></span><span>Xoay trái / phải</span>
-  <span><kbd>Space</kbd><kbd>Shift</kbd></span><span>Lên / xuống</span>
+  <span><kbd>Space</kbd><kbd>Shift</kbd> <kbd>R</kbd><kbd>F</kbd></span><span>Lên / xuống</span>
   <span><kbd>C</kbd></span><span>Đổi góc nhìn</span>
   <span><kbd>Esc</kbd></span><span>Về chế độ khám phá</span>
+  <span class="keys-note">Không dùng bàn phím được? Kéo hai cần tròn ở giữa đáy màn hình bằng chuột.</span>
 </section>
 
 <section id="info" class="panel" aria-live="polite" hidden>
@@ -233,6 +244,7 @@ body.flying #info { display: none; }
   <div class="stick" id="stick-left" aria-label="Cần trái: lên xuống và xoay"><div class="knob"></div><span>Lên/xuống · xoay</span></div>
   <div class="stick" id="stick-right" aria-label="Cần phải: tiến lùi và sang ngang"><div class="knob"></div><span>Tiến/lùi · ngang</span></div>
 </div>
+<button type="button" id="focus-hint" hidden>Bấm vào đây để bàn phím điều khiển được UAV</button>
 <div id="toast" role="status" hidden></div>
 
 <footer id="foot">

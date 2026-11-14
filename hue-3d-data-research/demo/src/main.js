@@ -6,7 +6,7 @@ import {
   buildWalls, buildLandmarks, buildTrees, buildSky, SRC_NAME, HS_NAME,
 } from './world.js';
 import { WaterFx } from './fx.js';
-import { Uav, Input, truongTienPath } from './uav.js';
+import { Uav, Input, truongTienPath, ACTION_NAME } from './uav.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (v, d = 1) => (Number.isFinite(v) ? v.toLocaleString('vi-VN', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—');
@@ -124,10 +124,13 @@ async function main() {
     mode = m;
     document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
     const flying = m !== 'explore';
-    controls.enabled = !flying; uav.model.visible = flying;
+    controls.enabled = !flying; uav.model.visible = flying; input.active = m === 'manual';
     $('hud').hidden = !flying; $('places').hidden = flying; $('keys').hidden = !flying || m === 'auto';
     document.body.classList.toggle('flying', flying);
-    $('sticks').hidden = !(flying && m === 'manual' && matchMedia('(pointer: coarse)').matches);
+    $('sticks').hidden = m !== 'manual';
+    if (flying) { $('layers').classList.remove('open'); $('btn-layers').setAttribute('aria-expanded', 'false'); }
+    // keyboard focus must be on the scene, not on the button just clicked or a layer radio
+    if (flying) { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); canvas.focus({ preventScroll: true }); }
     if (m === 'explore') {
       const p = uav.pos; if (uav.model.visible || p.lengthSq() > 0) flyTo(p.x, Math.max(p.y, 4), p.z, 260, 0.6, 0.55);
       return;
@@ -150,10 +153,12 @@ async function main() {
     camera.position.copy(camPos);
   }
   document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  canvas.addEventListener('pointerdown', () => canvas.focus({ preventScroll: true }));
+  $('focus-hint').addEventListener('click', () => canvas.focus({ preventScroll: true }));
   $('btn-view').addEventListener('click', () => { view = view === 'chase' ? 'fpv' : 'chase'; $('btn-view').textContent = view === 'chase' ? 'Góc nhìn: bám sau' : 'Góc nhìn: buồng lái'; });
   $('btn-reset').addEventListener('click', () => { uav.started = false; uav.crashes = 0; uav.touches = 0; setMode('manual'); });
   window.addEventListener('keydown', (e) => {
-    if (e.code === 'KeyC' && mode !== 'explore') $('btn-view').click();
+    if ((e.code === 'KeyC' || e.key === 'c') && mode !== 'explore' && !e.repeat) { e.preventDefault(); $('btn-view').click(); }
     if (e.code === 'Escape' && mode !== 'explore') setMode('explore');
   });
 
@@ -313,6 +318,11 @@ async function main() {
         $('hud-gap-row').classList.toggle('active', Number.isFinite(s.clearanceUp));
         $('hud-touch').textContent = uav.touches; $('hud-crash').textContent = uav.crashes;
         $('hud-alert').hidden = uav.flash <= 0; if (uav.flash > 0) $('hud-alert').textContent = `Va chạm: ${uav.lastHit}`;
+        if (mode === 'manual') {
+          const c = input.read(), moving = c.forward || c.strafe || c.up || c.yaw;
+          $('hud-input').textContent = moving ? (input.left.x || input.left.y || input.right.x || input.right.y ? 'Cần điều khiển' : `Phím: ${input.last}`) : (input.lastAt ? 'Đang chờ lệnh' : 'Chưa nhận phím nào');
+          $('focus-hint').hidden = document.hasFocus();
+        } else { $('focus-hint').hidden = true; $('hud-input').textContent = 'Bay tự động'; }
       }
     }
     fx.update(dt);
