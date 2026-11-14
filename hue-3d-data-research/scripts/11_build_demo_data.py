@@ -61,7 +61,8 @@ ROAD_CLASS = {  # highway -> (group, width m, kind)
     "service": (2, 3.5), "track": (2, 3.0),
     "pedestrian": (3, 5.0), "footway": (3, 1.8), "path": (3, 1.6), "steps": (3, 1.8), "cycleway": (3, 2.0),
 }
-LANDMARK_WAYS = {218427614: "ky_dai", 172657562: "ngo_mon", 531031566: "thai_hoa"}
+LANDMARK_WAYS = {218427614: "ky_dai", 172657562: "ngo_mon", 531031566: "thai_hoa", 749331141: "vincom", 118792054: "phu_cam"}
+OB25D_2M = C.NORM / "buildings_height" / "open_buildings_25d_2023_pilot_2m.tif"
 TRUONG_TIEN_WAY = 174759688
 
 
@@ -182,6 +183,67 @@ def access_rules(t):
     return mask, cond
 
 
+def landmark_heights(landmarks, F):
+    """Per-landmark height evidence from the Open Buildings 2.5D (2023, ML) raster, and for Vincom Plaza the outline
+    of the tower that stands on the shopping podium: raster cells >= 60 m inside the OSM footprint, closed and
+    simplified. The raster is a model estimate, not a survey; it is used for WHERE the tall part is, not how tall."""
+    from rasterio import features
+    from rasterio.mask import mask as rmask
+    with rasterio.open(OB25D_2M) as r:
+        for key, lm in landmarks.items():
+            ring = [(lm["ring"][i] / 10 + F.e0, -lm["ring"][i + 1] / 10 + F.n0) for i in range(0, len(lm["ring"]), 2)]
+            poly = Polygon(ring)
+            a, tf = rmask(r, [poly.__geo_interface__], crop=True, nodata=np.nan, filled=True)
+            v = a[0][~np.isnan(a[0])]
+            if not v.size:
+                continue
+            lm["ml_height_m"] = {"p50": round(float(np.percentile(v, 50)), 1), "p90": round(float(np.percentile(v, 90)), 1),
+                                 "max": round(float(v.max()), 1), "source": "Open Buildings 2.5D 2023 (2 m), machine-learning estimate"}
+            if key == "vincom":
+                tall = [shapely.geometry.shape(g) for g, val in features.shapes((np.nan_to_num(a[0]) >= 60).astype("uint8"), transform=tf) if val == 1]
+                tall = unary_union(tall).buffer(2.0).buffer(-2.0).intersection(poly) if tall else None
+                if tall is not None and not tall.is_empty:
+                    parts = [p_.simplify(0.8) for p_ in polys(tall) if p_.area >= 60]
+                    lm["tower"] = [ring_xz([(x - F.e0, y - F.n0) for x, y in p_.exterior.coords]) for p_ in parts]
+                    rest = a[0][~np.isnan(a[0]) & (a[0] < 45) & (a[0] > 3)]
+                    lm["ml_height_m"]["podium_p50"] = round(float(np.percentile(rest, 50)), 1)
+                    lm["ml_height_m"]["tower_area_m2"] = round(sum(p_.area for p_ in parts))
+    log.info("landmark ML heights: %s", {k: v.get("ml_height_m") for k, v in landmarks.items()})
+
+
+def phu_cam_sketch(lm, d, F):
+    """Plan parameters for the Phủ Cam cathedral sketch, measured on the OSM footprint (cross-shaped):
+    long axis, nave width, transept position/width. The FRONT (where the two bell towers stand, see the
+    2024 Commons photo) is taken as the end of the long axis nearer to the head of Nguyễn Trường Tộ street,
+    which published descriptions place the church at."""
+    ring = [(lm["ring"][i] / 10, -lm["ring"][i + 1] / 10) for i in range(0, len(lm["ring"]), 2)]     # x, y-north
+    poly = Polygon(ring)
+    rr = list(poly.minimum_rotated_rectangle.exterior.coords)
+    e1 = np.subtract(rr[1], rr[0]); e2 = np.subtract(rr[2], rr[1])
+    ax = e1 if np.hypot(*e1) >= np.hypot(*e2) else e2
+    u = ax / np.hypot(*ax); v = np.array([-u[1], u[0]])
+    c = np.array(poly.centroid.coords[0])
+    head = None
+    for wid, w in d.ways.items():
+        if w["tags"].get("name") == "Nguyễn Trường Tộ" and "highway" in w["tags"] and d.way_coords(wid):
+            ln = F.to_local(LineString(d.way_coords(wid)))
+            for q in (ln.coords[0], ln.coords[-1]):
+                if head is None or np.hypot(*(np.subtract(q, c))) < np.hypot(*(np.subtract(head, c))):
+                    head = q
+    if head is not None and np.dot(np.subtract(head, c), u) > 0:
+        u, v = -u, -v                                  # u now points from the front towards the apse
+    P = np.array(ring) - c
+    s_, t_ = P @ u, P @ v
+    s0, s1 = float(s_.min()), float(s_.max())
+    front = np.abs(t_[s_ < s0 + 0.3 * (s1 - s0)])
+    nave_hw = float(np.median(front)) if front.size else float(np.abs(t_).max())
+    wide = s_[np.abs(t_) > 0.5 * (nave_hw + float(np.abs(t_).max()))]     # the transept arms reach well past the nave walls
+    lm["plan"] = {"c": [round(c[0], 2), round(-c[1], 2)], "u": [round(u[0], 4), round(-u[1], 4)],      # x/z frame (z = -north)
+                  "s0": round(s0, 2), "s1": round(s1, 2), "nave_hw": round(nave_hw, 2),
+                  "tr_s0": round(float(wide.min()), 2) if wide.size else None, "tr_s1": round(float(wide.max()), 2) if wide.size else None,
+                  "tr_hw": round(float(np.abs(t_).max()), 2), "front_from": "end nearer to the head of Nguyễn Trường Tộ (OSM)" if head is not None else "unknown"}
+
+
 def write_traffic_graph(d, roads, row, bridges_out, carved, ground, F):
     """Road graph for the simulated traffic: OSM ways split at every node shared with another way (junctions),
     so vehicles can turn wherever OSM connects two roads. Heights: draped like the road ribbons, or taken from the
@@ -211,8 +273,14 @@ def write_traffic_graph(d, roads, row, bridges_out, carved, ground, F):
         acc = access_rules(d.ways[w]["tags"])
         for a, b in zip(cuts[:-1], cuts[1:]):
             piece = F.to_local(LineString([d.nodes[n] for n in nodes[a:b + 1]]))
-            if piece.length < 1 or not F.box.buffer(60).intersects(piece):
+            if piece.length < 1 or not F.box.intersects(piece):
                 continue
+            if not F.box.buffer(-5).contains(piece):       # keep vehicles on the modelled terrain: clip at the pilot edge
+                piece = piece.intersection(F.box.buffer(-5))
+                piece = max([g_ for g_ in ([piece] if isinstance(piece, LineString) else getattr(piece, "geoms", [])) if isinstance(g_, LineString)],
+                            key=lambda g_: g_.length, default=None)
+                if piece is None or piece.length < 1:
+                    continue
             pts = densify(piece, 10.0)
             xs = np.array([q.x for q in pts]); ys = np.array([q.y for q in pts])
             if w in deck_y:                       # on a bridge: follow the deck profile (sampled every 8 m from the way start)
@@ -521,6 +589,10 @@ def main():
     json.dump({"n": n_arr, "xz": xz, "h": h_arr, "base": base_arr, "src": src_arr, "hs": hs_arr, "names": names},
               open(OUT / "buildings.json", "w"), separators=(",", ":"), ensure_ascii=False)
     log.info("buildings: %d kept, dropped %s; landmarks %s", len(n_arr), dict(dropped), list(landmarks))
+    landmark_heights(landmarks, F)
+    if "phu_cam" in landmarks:
+        phu_cam_sketch(landmarks["phu_cam"], d, F)
+        log.info("Phủ Cam plan: %s", landmarks["phu_cam"]["plan"])
 
     # ------------------------------------------------------------------ citadel walls
     irows = pq.read_table(rel_dir / "infrastructure.parquet").to_pylist()

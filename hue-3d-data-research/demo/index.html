@@ -57,6 +57,10 @@ fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 5px; }
 legend { padding: 0; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
 label.opt { display: flex; gap: 8px; align-items: center; font-size: 13px; }
 label.opt input { accent-color: var(--gold); width: 15px; height: 15px; margin: 0; }
+label.opt.sub { padding-left: 23px; font-size: 12.5px; color: var(--muted); }
+label.opt select { font: inherit; font-size: 12.5px; background: rgba(255,255,255,.08); color: inherit; border: 1px solid rgba(255,255,255,.18); border-radius: 6px; padding: 3px 6px; }
+label.opt select option { color: #111; }
+#traffic-status { margin: 2px 0 4px 23px; font-size: 11.5px; color: var(--muted); line-height: 1.35; }
 .legend { display: grid; gap: 3px; font-size: 12px; color: var(--muted); padding-left: 2px; }
 .legend span { display: flex; gap: 7px; align-items: center; }
 .legend i { width: 11px; height: 11px; border-radius: 2px; flex: none; }
@@ -248,6 +252,16 @@ body.flying #info { display: none; }
     <label class="opt"><input type="checkbox" id="opt-shadows"> Bóng đổ (nặng hơn trên máy yếu)</label>
     <label class="opt"><input type="checkbox" id="opt-buildings" checked> Công trình</label>
     <label class="opt"><input type="checkbox" id="opt-trees" checked> Cây (vị trí minh họa)</label>
+    <label class="opt"><input type="checkbox" id="opt-traffic" checked> Xe cộ và người đi bộ (mô phỏng)</label>
+    <label class="opt sub">Mật độ
+      <select id="traffic-mode">
+        <option value="clock" selected>Theo giờ Huế hiện tại</option>
+        <option value="low">Thưa</option>
+        <option value="mid">Vừa</option>
+        <option value="high">Đông (giờ cao điểm)</option>
+      </select>
+    </label>
+    <p class="hint" id="traffic-status">—</p>
     <label class="opt"><input type="checkbox" id="opt-labels" checked> Nhãn địa danh</label>
   </fieldset>
   <div class="stats">
@@ -256,7 +270,7 @@ body.flying #info { display: none; }
     <span>Nhóm cầu</span><b id="stat-bridges">—</b>
     <span>Cây</span><b id="stat-trees">—</b>
     <span>Chiều cao từ học máy</span><b id="stat-hml">—</b>
-    <p>Cao độ cầu, gầm cầu, hình khối di tích và vị trí cây là giả định để minh họa. Chi tiết trong <code>demo/README.md</code>.</p>
+    <p>Cao độ cầu, gầm cầu, hình khối di tích và vị trí cây là giả định để minh họa. Xe cộ và người đi bộ là mô phỏng: không có dữ liệu giao thông thật thời gian thực cho Huế; tỷ lệ loại xe, tốc độ và mật độ theo giờ là giả định. Chi tiết trong <code>demo/README.md</code>.</p>
   </div>
 </section>
 

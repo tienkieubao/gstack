@@ -86,6 +86,8 @@ Bảng "Lớp dữ liệu" có hai công tắc: "Ảnh vệ tinh mặt đất" (
 | Cao độ mặt cầu | Mô hình ràng buộc: cao độ mặt đất hai đầu, dốc lên mượt, phẳng ở độ cao = mực nước + khoảng tĩnh không giả định (6,5 m cầu lớn, 2,2 m cầu nhỏ) | Giả định |
 | Cầu Trường Tiền | 6 nhịp đều dọc tim cầu OSM (số nhịp, chiều dài 402,6 m theo nguồn công bố); vòm cao 9 m, dầm 1,2 m, kích thước trụ là giả định | Phác thảo |
 | Ngọ Môn, Kỳ Đài, điện Thái Hòa | Dấu chân OSM + số liệu công bố (Kỳ Đài 17,5 m, cột cờ 37 m; nền Ngọ Môn ~5 m); tỷ lệ các tầng mái là giả định | Phác thảo |
+| Vincom Plaza Huế + tháp Meliá Vinpearl | Khối đế 5 tầng thương mại (công bố) trên dấu chân OSM; tháp 33 tầng nổi (Nhà Đầu Tư 2018; Meliá ghi 34) đặt theo vùng ≥ 60 m của ảnh độ cao học máy Open Buildings 2.5D 2023. Cao ~116 m = 5 × 4,5 m + 28 × 3,3 m (chiều cao tầng giả định). OSM ghi cả khối 160 m / 39 tầng, học máy ~99 m: các nguồn chưa khớp | Phác thảo |
+| Nhà thờ chính tòa Phủ Cam | Mặt bằng chữ thập đo trên dấu chân OSM; mặt trước là đầu gần đường Nguyễn Trường Tộ; hai tháp chuông 43,5 m (7 tầng) và mái 32 m theo số liệu công bố; hình tháp theo ảnh Commons 2024 (CC BY 4.0, Chainwit.). Mái hiên, độ dốc mái, cửa sổ là giả định | Phác thảo |
 | Cây | Rải ngẫu nhiên (hạt giống cố định) trong ô "tree cover" của ESA WorldCover, tránh nhà/đường/nước; 72 cây có vị trí OSM | Minh họa |
 | Vật lý UAV, va chạm, nước bắn, âm thanh động cơ | Mô hình đơn giản kiểu trò chơi; âm thanh tổng hợp, không ghi từ máy bay thật | Minh họa |
 

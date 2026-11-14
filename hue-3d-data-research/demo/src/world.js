@@ -640,9 +640,112 @@ export function buildLandmarks(meta, solids) {
     tier(ring, 0.78, y + 7.8, y + 10.0, '#9b3d2d', '#9b3d2d', info);
     tier(ring, 0.92, y + 10.0, y + 11.0, '#c9982c', '#d4a63a', info);
   }
+  if (L.phu_cam && L.phu_cam.plan) {
+    // Phủ Cam cathedral: cross plan measured on the OSM footprint (nave, transept, apse, two diamond tower bases at the
+    // front). Heights: bell towers 43.5 m and roof 32 m (published); eave 13 m and roof pitch follow from them
+    // (assumed). Form of the towers (tall tapering stone blades with a cross) from a 2024 Commons photo (CC BY 4.0).
+    const lm = L.phu_cam, pl = lm.plan, y = lm.base * DM, info = { type: 'landmark', key: 'phu_cam', name: 'Nhà thờ chính tòa Phủ Cam' };
+    const ux = pl.u[0], uz = pl.u[1], vx = -uz, vz = ux, cx = pl.c[0], cz = pl.c[1];
+    const P = (sv, tv, yy) => new THREE.Vector3(cx + ux * sv + vx * tv, yy, cz + uz * sv + vz * tv);
+    const eave = y + 13, ridge = y + PHU_CAM.roof, wall = col('#e8d9ab'), roof = col('#a3482f'), stone = col('#8e8a82');
+    const solidBox = (sA, sB, hw, y0, y1) => {
+      const q = [P(sA, -hw, 0), P(sB, -hw, 0), P(sB, hw, 0), P(sA, hw, 0)];
+      solids.add([new Float32Array(q.flatMap((v) => [v.x, v.z]))], y0, y1, info);
+    };
+    const nave = [pl.s0 + 9.5, pl.s1 - 3.5], hw = pl.nave_hw, tr = [pl.tr_s0 ?? 1.3, pl.tr_s1 ?? 20], thw = pl.tr_hw;
+    b.box(cx + ux * (nave[0] + nave[1]) / 2, cz + uz * (nave[0] + nave[1]) / 2, ux, uz, (nave[1] - nave[0]) / 2, hw, y, eave, wall);
+    b.box(cx + ux * (tr[0] + tr[1]) / 2, cz + uz * (tr[0] + tr[1]) / 2, ux, uz, (tr[1] - tr[0]) / 2, thw, y, eave, wall);
+    b.box(cx + ux * (nave[1] + 1.6), cz + uz * (nave[1] + 1.6), ux, uz, 2.0, hw * 0.62, y, eave - 2, wall);      // apse
+    solidBox(nave[0], nave[1] + 3.6, hw + 2.5, y, ridge); solidBox(tr[0], tr[1], thw + 2.5, y, ridge);
+    // gable roofs with deep eaves (2.5 m overhang)
+    const gable = (sA, sB, half, along) => {
+      const o = 2.5, h0 = eave - 0.6, cs = (sv, tv, yy) => (along ? P(sv, tv, yy) : P(sv, tv, yy));
+      const A = along ? [cs(sA, -half - o, h0), cs(sB, -half - o, h0), cs(sB, 0, ridge), cs(sA, 0, ridge), cs(sA, half + o, h0), cs(sB, half + o, h0)]
+        : [cs(sA - o, -half, h0), cs(sA - o, half, h0), cs((sA + sB) / 2, half, ridge), cs((sA + sB) / 2, -half, ridge), cs(sB + o, -half, h0), cs(sB + o, half, h0)];
+      const tri = (p0, p1, p2, c) => {
+        const n = new THREE.Vector3().subVectors(p1, p0).cross(new THREE.Vector3().subVectors(p2, p0)).normalize();
+        if (n.y < 0 || (Math.abs(n.y) < 1e-3 && false)) { n.negate(); [p1, p2] = [p2, p1]; }
+        const base = b.pos.length / 3;
+        for (const q of [p0, p1, p2]) { b.pos.push(q.x, q.y, q.z); b.nor.push(n.x, n.y, n.z); b.col.push(c.r, c.g, c.b); }
+        b.idx.push(base, base + 1, base + 2);
+      };
+      tri(A[0], A[1], A[2], roof); tri(A[0], A[2], A[3], roof); tri(A[4], A[3], A[2], roof); tri(A[4], A[2], A[5], roof);
+      // gable end walls (triangles under the ridge), both sides
+      const end = (sv) => (along ? [P(sv, -half, eave), P(sv, half, eave), P(sv, 0, ridge - 0.4)] : null);
+      if (along) for (const sv of [sA + 2.5, sB - 0.1]) { const [p0, p1, p2] = end(sv); const bs = b.pos.length / 3; const n = new THREE.Vector3(-ux, 0, -uz); for (const q of [p0, p1, p2]) { b.pos.push(q.x, q.y, q.z); b.nor.push(n.x, n.y, n.z); b.col.push(wall.r, wall.g, wall.b); } b.idx.push(bs, bs + 1, bs + 2, bs, bs + 2, bs + 1); }
+    };
+    gable(nave[0] - 2.5, nave[1] + 2.5, hw, true);
+    // transept roof: ridge across the nave axis
+    { const o = 2.5, h0 = eave - 0.6, mid = (tr[0] + tr[1]) / 2, half = (tr[1] - tr[0]) / 2;
+      const Q = (sv, tv, yy) => P(sv, tv, yy);
+      const quad = (a1, a2, a3, a4) => { for (const [p0, p1, p2] of [[a1, a2, a3], [a1, a3, a4]]) {
+        const n = new THREE.Vector3().subVectors(p1, p0).cross(new THREE.Vector3().subVectors(p2, p0)).normalize(); let q1 = p1, q2 = p2; if (n.y < 0) { n.negate(); q1 = p2; q2 = p1; }
+        const bs = b.pos.length / 3; for (const q of [p0, q1, q2]) { b.pos.push(q.x, q.y, q.z); b.nor.push(n.x, n.y, n.z); b.col.push(roof.r, roof.g, roof.b); } b.idx.push(bs, bs + 1, bs + 2); } };
+      quad(Q(mid - half - o, -thw - o, h0), Q(mid - half - o, thw + o, h0), Q(mid, thw + o, ridge), Q(mid, -thw - o, ridge));
+      quad(Q(mid + half + o, -thw - o, h0), Q(mid, -thw - o, ridge), Q(mid, thw + o, ridge), Q(mid + half + o, thw + o, h0));
+    }
+    // tall pointed windows along the nave (dark strips, illustrative spacing)
+    const winCol = col('#4b4038');
+    for (let sv = nave[0] + 3; sv < nave[1] - 2; sv += 4.6) {
+      if (sv > tr[0] - 1 && sv < tr[1] + 1) continue;
+      for (const sd of [-1, 1]) b.box(cx + ux * sv + vx * sd * (hw + 0.05), cz + uz * sv + vz * sd * (hw + 0.05), ux, uz, 0.8, 0.08, y + 3, y + 10.5, winCol);
+    }
+    // two bell towers on the diamond bases at the front, tapering upward, crosses on top
+    for (const sd of [-1, 1]) {
+      const sc = pl.s0 + 4.9, tc = sd * (hw + 0.2), r0 = 5.0;
+      const ring0 = [[r0, 0], [0, r0], [-r0, 0], [0, -r0]].map(([a, c]) => { const q = P(sc + a, tc + c, 0); return new THREE.Vector2(q.x, q.z); });
+      const steps = 7;                                   // "seven tiers" (published)
+      for (let k = 0; k < steps; k++) {
+        const f0 = k / steps, f1 = (k + 1) / steps;
+        const s0r = scaleRing(ring0, 1 - 0.32 * f0), s1r = scaleRing(ring0, 1 - 0.32 * f1);
+        b.extrude([s0r], y + PHU_CAM.tower * f0, y + PHU_CAM.tower * f1, stone, stone);
+        void s1r;
+      }
+      const top = y + PHU_CAM.tower, cxp = P(sc, tc, top);
+      b.box(cxp.x, cxp.z, ux, uz, 0.25, 0.25, top, top + 4.2, col('#e8e4da'));
+      b.box(cxp.x, cxp.z + 0, vx, vz, 1.3, 0.22, top + 2.6, top + 3.1, col('#e8e4da'));
+      solidBox(sc - r0, sc + r0, Math.abs(tc) + r0, y, top + 4.2);
+    }
+  }
+  if (L.vincom) {       // shopping podium (5 floors, published) + hotel tower (33 floors, published) on it
+    const lm = L.vincom, y = lm.base * DM, ring = ringToVec2(lm.ring), info = { type: 'landmark', key: 'vincom', name: 'Vincom Plaza Huế · Meliá Vinpearl Huế' };
+    const podTop = y + VINCOM.podium, towerTop = y + VINCOM.top;
+    tier(ring, 1.0, y, podTop, '#d7d2c6', '#8f969c', info);
+    const tb = new Builder();
+    for (const t of lm.tower || []) {
+      const r = ringToVec2(t);
+      tb.extrude([r], podTop, towerTop - 1.2, col('#ffffff'), col('#c9ced3'));
+      tb.extrude([scaleRing(r, 0.97)], towerTop - 1.2, towerTop, col('#aab0b6'), col('#b9bec4'));
+      const flat = new Float32Array(r.length * 2); r.forEach((p, i) => { flat[i * 2] = p.x; flat[i * 2 + 1] = p.y; });
+      solids.add([flat], podTop, towerTop, info);
+    }
+    if ((lm.tower || []).length) {
+      // curtain wall: dark glass with a light slab edge every 3.3 m (illustrative)
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.FrontSide, shadowSide: THREE.BackSide });
+      mat.onBeforeCompile = (sh) => {
+        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vTW; varying vec3 vTN;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTW = (modelMatrix * vec4(transformed, 1.0)).xyz; vTN = normal;');
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vTW; varying vec3 vTN;')
+          .replace('#include <color_fragment>', `#include <color_fragment>
+            if (abs(vTN.y) < 0.5 && diffuseColor.r > 0.7) {   // tower walls (vertex colour 0.78..1); the crown is darker
+              float f = fract((vTW.y - ${(podTop).toFixed(2)}) / 3.3);
+              float mull = step(0.93, fract((vTW.x + vTW.z) / 1.6));
+              vec3 glass = mix(vec3(0.24, 0.33, 0.40), vec3(0.42, 0.52, 0.60), clamp(0.5 + 0.5 * vTN.x, 0.0, 1.0));
+              diffuseColor.rgb = mix(glass, vec3(0.86, 0.87, 0.86), max(step(0.86, f), mull * 0.6));
+            }`);
+      };
+      const m = tb.mesh(mat); m.name = 'vincom-tower'; group.add(m);
+    }
+  }
   group.add(b.mesh());
   return group;
 }
+// Vincom/Meliá Vinpearl Huế: podium 5 floors x 4.5 m (floor height assumed); tower to 33 floors above ground
+// (Nhà Đầu Tư 2018) with 28 hotel floors x 3.3 m (assumed) + 1 m roof = ~116 m. OSM says 160 m / 39 floors and
+// the 2023 ML raster ~99 m: the sources disagree, see README.
+// Phủ Cam: two bell towers 43.5 m (published, 7 tiers); roof 32 m (VnExpress). ML raster max ~26 m.
+export const PHU_CAM = { tower: 43.5, roof: 32 };
+export const VINCOM = { podium: 22.5, top: 22.5 + 28 * 3.3 + 1.0 };
 
 // ---------------------------------------------------------------------------- trees
 export function buildTrees(tr) {

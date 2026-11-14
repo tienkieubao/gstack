@@ -355,7 +355,9 @@ async function main() {
         body = rows([['Chiều cao dựng', it.kind === 'rampart' ? '6,6 m' : '4,0 m'], ['Nguồn', 'Tim tường OSM; chiều cao theo số liệu công bố']]) + '<p class="note">Cổng thành được khoét ở nơi có đường đi qua. Kích thước cổng chưa đo.</p>';
       } else if (it.type === 'landmark') {
         title = it.name;
-        const extra = { ky_dai: 'Ba tầng đài tổng ~17,5 m, cột cờ 37 m (số liệu công bố, chưa đo kiểm).', ngo_mon: 'Nền đài chữ U cao ~5 m (công bố); lầu Ngũ Phụng phác thảo, tỷ lệ là giả định.', thai_hoa: 'Mái chồng hai tầng phác thảo; chiều cao là giả định.' };
+        const extra = { ky_dai: 'Ba tầng đài tổng ~17,5 m, cột cờ 37 m (số liệu công bố, chưa đo kiểm).', ngo_mon: 'Nền đài chữ U cao ~5 m (công bố); lầu Ngũ Phụng phác thảo, tỷ lệ là giả định.', thai_hoa: 'Mái chồng hai tầng phác thảo; chiều cao là giả định.',
+          vincom: 'Khối đế 5 tầng thương mại (công bố) phủ cả dấu chân OSM. Tháp khách sạn 33 tầng nổi (Nhà Đầu Tư 2018; Meliá ghi 34) dựng cao ~116 m = 5 tầng × 4,5 m + 28 tầng × 3,3 m (chiều cao tầng là giả định). Vị trí và hình chữ V của tháp lấy từ ảnh độ cao học máy Open Buildings 2.5D 2023 (vùng ≥ 60 m). OSM ghi 160 m / 39 tầng; học máy ước ~99 m: các nguồn chưa khớp.',
+          phu_cam: 'Mặt bằng hình chữ thập đo trên dấu chân OSM (gian giữa, cánh ngang, hậu cung, hai chân tháp hình thoi ở mặt trước). Hai tháp chuông cao 43,5 m và mái cao 32 m theo số liệu công bố; hình dáng tháp (khối đá xám thon dần, có thánh giá) theo ảnh Commons 2024 (CC BY 4.0, Chainwit.). Độ cao mái hiên, độ dốc mái và vị trí cửa sổ là giả định. Học máy 2023 ước mái ~26 m.' };
         body = rows([['Dấu chân', 'OpenStreetMap'], ['Hình khối', 'Phác thảo tham số']]) + `<p class="note">${extra[it.key] || ''}</p>`;
       }
     } else if (obj === bridges.group) {

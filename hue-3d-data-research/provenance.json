@@ -655,7 +655,7 @@
     "samples/raw/landcover/",
     "samples/normalized/buildings_height/overture_buildings_height_estimate.csv.gz"
    ],
-   "generated_at": "2026-11-14T05:45:16Z",
+   "generated_at": "2026-11-14T13:34:36Z",
    "kind": "derived (scene data for the browser demo)",
    "licence": "ODbL 1.0 (OSM/Overture/Microsoft rows) + CC BY 4.0 (Google Open Buildings, ESA WorldCover) + Copernicus DEM licence",
    "script": "scripts/11_build_demo_data.py"
@@ -901,6 +901,30 @@
     "ETag": "\"78ec11c0ffaf26b54f26d33a0cd3f029-9\"",
     "Last-Modified": "Wed, 26 Oct 2022 12:40:39 GMT"
    }
+  },
+  "samples/raw/landmark_photos/": {
+   "data_date_note": "date_taken comes from each file's metadata and is not verified",
+   "data_url": "https://commons.wikimedia.org/w/api.php",
+   "landing_url": "https://commons.wikimedia.org/",
+   "licence": "per file, see samples/normalized/validation/landmark_photos.csv; only CC0/PD/CC BY/CC BY-SA downloaded",
+   "provider": "Wikimedia Foundation; individual authors per file",
+   "retrieved_at": "2026-11-14T13:14:37Z",
+   "script": "scripts/13_fetch_landmark_photos.py collect",
+   "source": "Wikimedia Commons (MediaWiki API search + geosearch + imageinfo)",
+   "use": "modelling reference only (shapes, proportions, colours); not draped on the model"
+  },
+  "samples/raw/landmark_photos/previews/phu_cam/2024_Hu_-_Ph_Cam_Cathedral_Nh_th_ch_nh_t_a_Ph_Cam_-_img_01.jpg": {
+   "author": "Chainwit.",
+   "bytes": 42678,
+   "date_taken": "2024-07-30 16:44:12",
+   "kind": "reference photo (330 px rendition)",
+   "licence": "CC BY 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by/4.0",
+   "rendition_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/2024_Hu%E1%BA%BF_-_Ph%E1%BB%A7_Cam_Cathedral_%28Nh%C3%A0_th%E1%BB%9D_ch%C3%ADnh_t%C3%B2a_Ph%E1%BB%A7_Cam%29_-_img_01.jpg/330px-2024_Hu%E1%BA%BF_-_Ph%E1%BB%A7_Cam_Cathedral_%28Nh%C3%A0_th%E1%BB%9D_ch%C3%ADnh_t%C3%B2a_Ph%E1%BB%A7_Cam%29_-_img_01.jpg",
+   "retrieved_at": "2026-11-14T13:30:10Z",
+   "sha256_file": "cf8615c98652c0905489fb8c976de06128ede3a7af43bb9231524dc532c89628",
+   "source": "https://commons.wikimedia.org/wiki/File:2024_Hu%E1%BA%BF_-_Ph%E1%BB%A7_Cam_Cathedral_(Nh%C3%A0_th%E1%BB%9D_ch%C3%ADnh_t%C3%B2a_Ph%E1%BB%A7_Cam)_-_img_01.jpg",
+   "use": "modelling reference for the Phủ Cam sketch (tower form, roof, wall colour); not draped on the model"
   },
   "samples/raw/osm/boundaries/": {
    "attribution": "© OpenStreetMap contributors",
@@ -1416,5 +1440,5 @@
   }
  },
  "schema": "hue3d-provenance/1",
- "updated_at": "2026-11-14T08:54:37Z"
+ "updated_at": "2026-11-14T13:34:36Z"
 }
