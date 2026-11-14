@@ -18,11 +18,13 @@ and colours for the 3D sketches; they are not draped on the model. Requests are 
 from __future__ import annotations
 
 import argparse
+import collections
 import csv
 import json
 import math
 import re
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -53,6 +55,7 @@ LANDMARKS = {
     "aerial": (None, None, r"a(e|é)rial|drone|flycam|from above|t(ừ|u).?tr(ê|e)n.?cao|bird.?s.?eye|panorama",
                ["Hue aerial view", "Huế aerial", "Hue drone", "Huế flycam", "Perfume River aerial", "Hue from above"]),
 }
+PREVIEW_CAP = {"aerial": 8}
 HUE_BBOX = (16.43, 107.54, 16.50, 107.62)   # aerial hits must have coordinates in here or mention Huế
 
 
@@ -73,6 +76,12 @@ def jget(dest, params, refresh):
 def dist_m(a, b):
     k = 111320.0
     return math.hypot((a[0] - b[0]) * k, (a[1] - b[1]) * k * math.cos(math.radians(a[0])))
+
+
+def rendition(url):
+    # the API answers with thumb.wikimedia.org renditions; this environment's proxy only allows upload.wikimedia.org,
+    # which serves the same path
+    return url.split("?")[0].replace("//thumb.wikimedia.org/", "//upload.wikimedia.org/")
 
 
 def slug(s):
@@ -111,7 +120,9 @@ def collect(refresh):
             by_name = bool(rx.search(text))
             near = bool(ll and centre and dist_m(ll, centre) <= radius)
             if key == "aerial":
-                in_hue = bool(ll and HUE_BBOX[0] <= ll[0] <= HUE_BBOX[2] and HUE_BBOX[1] <= ll[1] <= HUE_BBOX[3]) or bool(re.search(r"hu(ế|e)\b", text, re.I))
+                # coordinates inside Huế, or an explicit place name ("Huế", "Hue" next to Vietnam/citadel/Perfume River...)
+                in_hue = bool(ll and HUE_BBOX[0] <= ll[0] <= HUE_BBOX[2] and HUE_BBOX[1] <= ll[1] <= HUE_BBOX[3]) or bool(
+                    re.search(r"huế", text, re.I) or (re.search(r"\bhue\b", text, re.I) and re.search(r"vietnam|việt|perfume|hương|citadel|kinh thành|imperial", text, re.I)))
                 relevant = by_name and in_hue
             else:
                 relevant = by_name or near
@@ -126,20 +137,33 @@ def collect(refresh):
                 "relevant": relevant, "open_licence": bool(OPEN_LICENCES.match(lic)), "preview": "", "_thumb": ii.get("thumburl")}
             r["found_by"].add(how)
             rows[(key, p["title"])] = r
-    # previews: open-licence JPEG/PNG, relevant, at least 1000 px wide
-    for r in rows.values():
-        if not (r["relevant"] and r["open_licence"] and r["mime"] in ("image/jpeg", "image/png") and (r["width"] or 0) >= 1000 and r["_thumb"]):
+    # previews: open-licence JPEG/PNG, relevant, at least 1000 px wide; at most PREVIEW_CAP per landmark,
+    # name matches first, then the newest uploads
+    per = collections.Counter()
+    order = sorted(rows.values(), key=lambda r: (r["landmark"] == "aerial", r["landmark"], not r["name_match"], -(int((r["upload_time"] or "0")[:4] or 0))))
+    pauses = 0
+    for r in order:
+        if not (r["relevant"] and r["open_licence"] and r["mime"] == "image/jpeg" and (r["width"] or 0) >= 1000 and r["_thumb"]):
             continue
+        if per[r["landmark"]] >= PREVIEW_CAP.get(r["landmark"], 14):
+            continue
+        per[r["landmark"]] += 1
         dest = OUT / "previews" / r["landmark"] / (slug(r["title"].replace("File:", "")) + ".jpg")
         try:
-            C.fetch(r["_thumb"].split("?")[0], dest, refresh=refresh, logger=log)
+            C.fetch(rendition(r["_thumb"]), dest, refresh=refresh, logger=log)
             r["preview"] = C.rel(dest)
+            pauses = 0
         except RuntimeError as e:
+            # a 429 can be specific to one rendition (thumbnail not generated yet): skip that file; only when
+            # several files in a row are refused, wait a minute for the host-wide throttle to clear
             log.warning("preview %s failed: %s", r["title"], e)
             errors.setdefault("previews", []).append(f"{r['title']}: {str(e)[:80]}")
             if "429" in str(e):
-                log.warning("image host is throttling; stop downloading previews")
-                break
+                pauses += 1
+                if pauses >= 3:
+                    log.warning("image host throttling; waiting 60 s")
+                    time.sleep(60)
+                    pauses = 0
     VAL.mkdir(parents=True, exist_ok=True)
     fields = ["landmark", "title", "page", "mime", "width", "height", "licence", "licence_url", "author", "date_taken",
               "upload_time", "lat", "lon", "dist_m", "found_by", "name_match", "within_radius", "relevant", "open_licence",
@@ -177,9 +201,9 @@ def pick(refresh):
         d = jget(OUT / "api" / f"ii1280_{slug(r['title'])}.json", {"titles": r["title"], "prop": "imageinfo", "iiprop": "url", "iiurlwidth": 1280}, refresh)
         ii = next(iter(d["query"]["pages"].values()))["imageinfo"][0]
         dest = OUT / "images" / item["landmark"] / (slug(r["title"].replace("File:", "")) + ".jpg")
-        C.fetch(ii["thumburl"].split("?")[0], dest, refresh=refresh, logger=log)
+        C.fetch(rendition(ii["thumburl"]), dest, refresh=refresh, logger=log)
         done.append({"file": C.rel(dest), "sha256_file": C.sha256_file(dest), "bytes": dest.stat().st_size, "landmark": item["landmark"],
-                     "source_page": r["page"], "rendition_url": ii["thumburl"].split("?")[0], "licence": r["licence"], "licence_url": r["licence_url"],
+                     "source_page": r["page"], "rendition_url": rendition(ii["thumburl"]), "licence": r["licence"], "licence_url": r["licence_url"],
                      "author": r["author"], "date_taken": r["date_taken"], "why": item.get("why", "")})
     C.record_provenance("samples/raw/landmark_photos/images/", source="Wikimedia Commons, 1280 px renditions of hand-picked files",
                         provider="Wikimedia Foundation; individual authors per file", licence="per file (CC0/PD/CC BY/CC BY-SA)",

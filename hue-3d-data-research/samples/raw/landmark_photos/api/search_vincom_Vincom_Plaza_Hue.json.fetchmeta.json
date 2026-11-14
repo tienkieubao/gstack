@@ -1,0 +1,10 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 16344,
+ "http_headers": {
+  "content-type": "application/json; charset=utf-8"
+ },
+ "retrieved_at": "2026-11-14T13:05:12Z",
+ "final_url": "https://commons.wikimedia.org/w/api.php?format=json&action=query&generator=search&gsrsearch=Vincom+Plaza+Hue&gsrnamespace=6&gsrlimit=40&prop=imageinfo%7Ccoordinates&iiprop=url%7Csize%7Cmime%7Cextmetadata%7Ctimestamp&iiurlwidth=330&iiextmetadatafilter=LicenseShortName%7CLicenseUrl%7CArtist%7CDateTimeOriginal%7CImageDescription%7CObjectName"
+}

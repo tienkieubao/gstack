@@ -33,6 +33,10 @@ PROVENANCE = ROOT / "provenance.json"
 LOG_FILE = ROOT / "scripts" / "fetch.log"
 
 USER_AGENT = "hue3d-data-research/0.1 (one-off pilot source survey; small cached requests)"
+# Some hosts (Wikimedia's robot policy) require contact details in the User-Agent. They are read from the
+# environment at run time and never written to the repository (set HUE3D_CONTACT before running a script).
+if os.environ.get("HUE3D_CONTACT"):
+    USER_AGENT = f"hue3d-data-research/0.1 (one-off pilot source survey; contact: {os.environ['HUE3D_CONTACT'].strip()})"
 
 # Project pilot rectangle (Zone A). This is a PROJECT extent, not an
 # administrative boundary. Order: west, south, east, north (EPSG:4326).

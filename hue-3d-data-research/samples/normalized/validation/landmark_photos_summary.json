@@ -1,0 +1,58 @@
+{
+ "checked_at": "2026-11-14T13:14:37Z",
+ "api_errors": {
+  "truong_tien/Truong Tien bridge": "giving up on https://commons.wikimedia.org/w/api.php after 3 attempts: HTTP 429",
+  "nguyen_hoang/Nguyen Hoang bridge Hue": "giving up on https://commons.wikimedia.org/w/api.php after 3 attempts: HTTP 429",
+  "vincom/geo": "giving up on https://commons.wikimedia.org/w/api.php after 3 attempts: HTTP 429",
+  "aerial/Hue aerial view": "giving up on https://commons.wikimedia.org/w/api.php after 3 attempts: HTTP 429",
+  "aerial/Huế aerial": "giving up on https://commons.wikimedia.org/w/api.php after 3 attempts: HTTP 429",
+  "aerial/Perfume River aerial": "giving up on https://commons.wikimedia.org/w/api.php after 3 attempts: HTTP 429",
+  "previews": [
+   "File:DFC 4586 Sunrise over a coastal city skyline high-rises catching the first light as streets wake below.jpg: giving up on https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/DFC_4586_"
+  ]
+ },
+ "by_landmark": {
+  "truong_tien": {
+   "hits": 91,
+   "relevant": 47,
+   "relevant_open": 47,
+   "previews": 0
+  },
+  "phu_xuan": {
+   "hits": 90,
+   "relevant": 22,
+   "relevant_open": 22,
+   "previews": 0
+  },
+  "da_vien": {
+   "hits": 142,
+   "relevant": 18,
+   "relevant_open": 18,
+   "previews": 0
+  },
+  "nguyen_hoang": {
+   "hits": 51,
+   "relevant": 3,
+   "relevant_open": 3,
+   "previews": 0
+  },
+  "phu_cam": {
+   "hits": 43,
+   "relevant": 37,
+   "relevant_open": 37,
+   "previews": 0
+  },
+  "vincom": {
+   "hits": 9,
+   "relevant": 7,
+   "relevant_open": 7,
+   "previews": 0
+  },
+  "aerial": {
+   "hits": 80,
+   "relevant": 6,
+   "relevant_open": 6,
+   "previews": 0
+  }
+ }
+}
