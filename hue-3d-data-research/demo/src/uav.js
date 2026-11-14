@@ -47,24 +47,30 @@ function isTextEntry(el) {
 
 export class Input {
   constructor() {
-    this.held = new Map();            // key id -> { action, expires }
+    // key id -> { action, since, expires }. A key whose keyup arrives almost together with its keydown
+    // (input methods such as Unikey/EVKey re-inject keystrokes as instant down+up pairs, without a held
+    // state) is kept alive for a short pulse; auto-repeat then chains the pulses into continuous motion.
+    this.held = new Map();
     this.active = false;              // true while the UAV is being flown: game keys are captured
-    this.last = '';                   // last recognised action, for the on-screen indicator
-    this.lastAt = 0;
+    this.last = ''; this.lastKey = ''; this.lastAt = 0;
     this.left = { x: 0, y: 0 }; this.right = { x: 0, y: 0 };   // virtual sticks, -1..1
+    const PULSE = 600, SHORT = 150;
     window.addEventListener('keydown', (e) => {
       if (e.metaKey || e.ctrlKey || e.altKey || isTextEntry(e.target)) return;
       const action = BY_CODE[e.code] || BY_KEY[(e.key || '').toLowerCase()];
       if (!action) return;
-      const id = e.code || `key:${e.key}`;
-      // events without a physical code (some IMEs) never get a reliable keyup: let them expire unless repeated
-      this.held.set(id, { action, expires: e.code ? Infinity : performance.now() + 650 });
-      this.last = ACTION_NAME[action]; this.lastAt = performance.now();
+      const id = e.code || `key:${e.key}`, now = performance.now();
+      const cur = this.held.get(id);
+      if (!cur || cur.released) this.held.set(id, { action, since: now, expires: Infinity, released: false });
+      else cur.expires = Infinity;
+      this.last = ACTION_NAME[action]; this.lastKey = e.key === ' ' ? 'Space' : (e.key || e.code); this.lastAt = now;
       if (this.active) e.preventDefault();          // no page scroll, no toggling a focused button or radio
     }, true);
     window.addEventListener('keyup', (e) => {
-      this.held.delete(e.code || `key:${e.key}`);
-      if (!e.code) for (const [k, v] of this.held) if (v.expires !== Infinity) this.held.delete(k);
+      const id = e.code || `key:${e.key}`, now = performance.now();
+      const cur = this.held.get(id);
+      if (cur) { cur.released = true; cur.expires = now - cur.since < SHORT ? now + PULSE : now; }
+      if (!e.code) for (const v of this.held.values()) if (!v.released && v.since < now - 1000) { v.released = true; v.expires = now; }
       if (this.active && (BY_CODE[e.code] || BY_KEY[(e.key || '').toLowerCase()])) e.preventDefault();
     }, true);
     window.addEventListener('blur', () => this.held.clear());
@@ -73,7 +79,7 @@ export class Input {
 
   read() {
     const now = performance.now(), on = new Set();
-    for (const [k, v] of this.held) { if (v.expires < now) this.held.delete(k); else on.add(v.action); }
+    for (const [k, v] of this.held) { if (v.expires <= now) this.held.delete(k); else on.add(v.action); }
     const clamp = (v) => Math.max(-1, Math.min(1, v));
     const ax = (neg, pos) => (on.has(pos) ? 1 : 0) - (on.has(neg) ? 1 : 0);
     return {

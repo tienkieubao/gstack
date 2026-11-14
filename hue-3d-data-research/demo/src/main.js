@@ -320,7 +320,7 @@ async function main() {
         $('hud-alert').hidden = uav.flash <= 0; if (uav.flash > 0) $('hud-alert').textContent = `Va chạm: ${uav.lastHit}`;
         if (mode === 'manual') {
           const c = input.read(), moving = c.forward || c.strafe || c.up || c.yaw;
-          $('hud-input').textContent = moving ? (input.left.x || input.left.y || input.right.x || input.right.y ? 'Cần điều khiển' : `Phím: ${input.last}`) : (input.lastAt ? 'Đang chờ lệnh' : 'Chưa nhận phím nào');
+          $('hud-input').textContent = moving ? (input.left.x || input.left.y || input.right.x || input.right.y ? 'Cần điều khiển' : `Phím: ${input.last}`) : (input.lastAt ? `Đang chờ lệnh (phím cuối: ${input.lastKey})` : 'Chưa nhận phím nào');
           $('focus-hint').hidden = document.hasFocus();
         } else { $('focus-hint').hidden = true; $('hud-input').textContent = 'Bay tự động'; }
       }

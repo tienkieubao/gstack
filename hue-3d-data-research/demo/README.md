@@ -68,7 +68,7 @@ Hệ tọa độ cảnh: mét, gốc tại tâm pilot trong EPSG:32648 (E 775352
 ## Nếu không điều khiển được
 
 - Bấm một lần vào cảnh 3D. Nếu tiêu điểm đang ở ngoài khung demo, giữa màn hình sẽ hiện nút "Bấm vào đây để bàn phím điều khiển được UAV".
-- Bộ gõ tiếng Việt (Unikey, EVKey, Telex/VNI) có thể đổi phím W thành "ư". Trang đã nhận cả hai, nhưng phím mũi tên luôn an toàn hơn; hoặc tắt bộ gõ khi lái.
+- Bộ gõ tiếng Việt (Unikey, EVKey, Telex/VNI) có thể đổi phím W thành "ư" và gửi lại mỗi phím dưới dạng "nhấn rồi nhả ngay", không có trạng thái giữ phím. Trang xử lý cả hai trường hợp: mỗi lần nhấn như vậy đẩy UAV một nhịp ~0,6 s và các lần lặp nối liền nhau. Nếu vẫn giật, tắt bộ gõ khi lái hoặc dùng phím mũi tên.
 - Dùng hai cần tròn ở giữa đáy màn hình bằng chuột nếu bàn phím vẫn không ăn.
 
 ## Giới hạn đã biết
