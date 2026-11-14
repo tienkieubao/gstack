@@ -631,10 +631,35 @@
     "sha256": "60ccde7f111cf594d7b3fc501429345e116214f5779169f92e52953a6916ed8c"
    }
   },
-  "generated_at": "2026-11-14T04:18:45Z"
+  "generated_at": "2026-11-14T05:03:09Z"
  },
  "note": "One record per raw or normalized artefact. retrieved_at is when this project fetched the bytes; it is NOT the data's capture date.",
  "records": {
+  "demo/data/": {
+   "assumptions": {
+    "bridge_deck": "Deck elevation = constrained model: ground level at both ends, smooth ramps, flat plateau at max(end ground, water + clearance). Clearance 6.5 m for bridges >= 150 m, 2.2 m for shorter ones, 1.5 m for free-standing footbridges; sidewalks follow the road bridge beside them — assumed values, not surveyed.",
+    "building_height": "Height = OSM height tag, else floors x 3.3 m, else Google Open Buildings 2.5D estimate (ML, 2023), else 4.5 m default. Roofs are flat.",
+    "ground": "GLO-30 is a 30 m surface model. 'Ground' here = 15th percentile of land cells in a 120 m window + 60 m Gaussian smoothing, clamped to >= 2.0 m. It is a smooth stand-in, not a terrain survey.",
+    "landmarks": "Ngọ Môn, Kỳ Đài, Điện Thái Hòa are parametric sketches from published dimensions; proportions of tiers and roofs are assumed.",
+    "road_width": "Road widths come from the OSM class (and lanes x 3.3 m when tagged) — inferred, not measured.",
+    "simulation": "UAV physics, collisions and water spray are arcade-style. Not for flight planning.",
+    "trees": "Trees are scattered at random (fixed seed) inside ESA WorldCover tree-cover cells, away from buildings/roads/water. Positions and heights are not real.",
+    "truong_tien": "Cầu Trường Tiền: 6 equal spans along OSM way 174759688 (published: 6 spans of ~67 m, 402.6 m). Arch rise 9 m, girder depth 1.2 m, pier size are assumptions for illustration.",
+    "walls": "Citadel rampart extruded 6.6 m and Imperial City walls 4 m (published figures, not measured). Gates are cut wherever a mapped road crosses.",
+    "water_level": "River network drawn at 0.5 m (the flattened GLO-30 value). Isolated ponds/lakes: lowest bank ground minus 0.7 m. River bed depth is invented (0.6-3.5 m)."
+   },
+   "derived_from": [
+    "samples/raw/osm/tiles/",
+    "samples/raw/overture/2026-10-21.0/",
+    "samples/raw/dem/",
+    "samples/raw/landcover/",
+    "samples/normalized/buildings_height/overture_buildings_height_estimate.csv.gz"
+   ],
+   "generated_at": "2026-11-14T04:39:05Z",
+   "kind": "derived (scene data for the browser demo)",
+   "licence": "ODbL 1.0 (OSM/Overture/Microsoft rows) + CC BY 4.0 (Google Open Buildings, ESA WorldCover) + Copernicus DEM licence",
+   "script": "scripts/11_build_demo_data.py"
+  },
   "samples/normalized/": {
    "attribution": "© OpenStreetMap contributors; Overture Maps Foundation; Google Open Buildings; Microsoft ML Building Footprints",
    "derived_from": [
@@ -1377,5 +1402,5 @@
   }
  },
  "schema": "hue3d-provenance/1",
- "updated_at": "2026-11-14T04:18:45Z"
+ "updated_at": "2026-11-14T05:03:09Z"
 }

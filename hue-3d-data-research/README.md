@@ -4,6 +4,10 @@
 
 ![Tổng quan các lớp mẫu vùng pilot](samples/normalized/reference/pilot_overview.png)
 
+## Bản demo 3D trên trình duyệt
+
+`demo/` chứa bản xem 3D minh họa của vùng pilot dựng từ chính các mẫu dữ liệu trong thư mục này: chế độ khám phá (bấm vào đối tượng để xem nguồn dữ liệu), lái UAV, và đoạn bay tự động luồn dưới cầu Trường Tiền có nước bắn. Chạy cục bộ: `cd demo && python3 serve.py`. Danh sách giả định và giới hạn: [`demo/README.md`](demo/README.md).
+
 ## Kết luận ngắn
 
 1. **Dựng Huế 3D để xem (LoD1) làm được ngay bằng dữ liệu mở đã kiểm chứng**: mạng đường, mặt nước, dấu chân công trình và nền địa hình đều tải được, giấy phép cho phép dùng thương mại. Chiều cao nhà chỉ là ước lượng học máy (phủ 84% dấu chân pilot, lệch cỡ ±3 m theo một chỉ báo nhỏ).

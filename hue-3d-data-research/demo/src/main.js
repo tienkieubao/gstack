@@ -1,0 +1,342 @@
+// Huế 3D pilot — browser demo. Explore mode (map controls), manual UAV flight, scripted pass under Cầu Trường Tiền.
+import * as THREE from 'three';
+import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
+import {
+  Terrain, Solids, buildTerrainMesh, buildWater, buildRoads, buildBridges, buildBuildings,
+  buildWalls, buildLandmarks, buildTrees, buildSky, SRC_NAME, HS_NAME,
+} from './world.js';
+import { WaterFx } from './fx.js';
+import { Uav, Input, truongTienPath } from './uav.js';
+
+const $ = (id) => document.getElementById(id);
+const fmt = (v, d = 1) => (Number.isFinite(v) ? v.toLocaleString('vi-VN', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function status(msg) { const el = $('loading-step'); if (el) el.textContent = msg; }
+
+async function loadJson(name, label) {
+  status(`Đang tải ${label}…`);
+  const r = await fetch(`data/${name}.json`);
+  if (!r.ok) throw new Error(`Không tải được data/${name}.json (HTTP ${r.status})`);
+  return r.json();
+}
+
+async function main() {
+  const meta = await loadJson('meta', 'thông tin cảnh');
+  const [terrainD, waterD, roadsD, bridgesD, buildingsD, wallsD, treesD] = [
+    await loadJson('terrain', 'địa hình'), await loadJson('water', 'mặt nước'), await loadJson('roads', 'đường'),
+    await loadJson('bridges', 'cầu'), await loadJson('buildings', 'công trình'), await loadJson('walls', 'tường thành'), await loadJson('trees', 'cây'),
+  ];
+  status('Đang dựng cảnh 3D…');
+  await new Promise((r) => setTimeout(r, 30));
+
+  // ------------------------------------------------------------------ renderer, scene
+  const canvas = $('view');
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  } catch (e) {
+    throw new Error('Trình duyệt này không bật được WebGL. Hãy thử Chrome, Edge, Firefox hoặc Safari bản mới.');
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 700 ? 1.5 : 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+  const scene = new THREE.Scene();
+  const env = { skyColor: new THREE.Color('#a9c8e2'), fogColor: new THREE.Color('#cfdbe0'), sunDir: new THREE.Vector3(-0.45, 0.62, -0.64).normalize(), fogNear: 1400, fogFar: 7800 };
+  scene.background = env.fogColor;
+  scene.fog = new THREE.Fog(env.fogColor, env.fogNear, env.fogFar);
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.3, 14000);
+  scene.add(new THREE.HemisphereLight('#dfeaf2', '#7b6f5a', 1.25));
+  const sun = new THREE.DirectionalLight('#fff3dc', 2.1); sun.position.copy(env.sunDir).multiplyScalar(1000); scene.add(sun);
+
+  const T = new Terrain(terrainD);
+  const bounds = { xmin: meta.frame.xmin, xmax: meta.frame.xmax, zmin: meta.frame.zmin, zmax: meta.frame.zmax };
+  const solids = new Solids(32);
+  const sky = buildSky(env); scene.add(sky);
+  const terrainMesh = buildTerrainMesh(T); scene.add(terrainMesh);
+  const water = buildWater(waterD, env); scene.add(water);
+  const roads = buildRoads(roadsD); scene.add(roads);
+  const bridges = buildBridges(bridgesD, T, meta); scene.add(bridges.group);
+  const buildings = buildBuildings(buildingsD, solids, 6, bounds); scene.add(buildings.group);
+  const walls = buildWalls(wallsD, solids); scene.add(walls);
+  const landmarks = buildLandmarks(meta, solids); scene.add(landmarks);
+  const trees = buildTrees(treesD); scene.add(trees);
+  const fx = new WaterFx(scene);
+
+  const world = { terrain: T, solids, bridgeCol: { decks: bridges.decks, piers: bridges.piers } };
+  const uav = new Uav(world, fx); uav.model.visible = false; scene.add(uav.model);
+  const input = new Input();
+
+  // ------------------------------------------------------------------ explore controls
+  const controls = new MapControls(camera, canvas);
+  controls.enableDamping = true; controls.dampingFactor = 0.08; controls.screenSpacePanning = false;
+  controls.minDistance = 25; controls.maxDistance = 6500; controls.maxPolarAngle = Math.PI * 0.47;
+  const P = meta.places;
+  const home = () => {
+    const tt = P.truong_tien, nm = P.ngo_mon;
+    controls.target.set((tt.x + nm.x) / 2, 6, (tt.z + nm.z) / 2);
+    camera.position.set(controls.target.x + 820, 520, controls.target.z + 980);
+  };
+  home(); controls.update();
+
+  let fly = null;   // camera tween
+  function flyTo(tx, ty, tz, dist, azimuth, elev) {
+    const to = new THREE.Vector3(tx, ty, tz);
+    const pos = new THREE.Vector3(tx + Math.sin(azimuth) * Math.cos(elev) * dist, ty + Math.sin(elev) * dist, tz + Math.cos(azimuth) * Math.cos(elev) * dist);
+    fly = { t: 0, dur: reduceMotion ? 0.01 : 1.6, p0: camera.position.clone(), p1: pos, q0: controls.target.clone(), q1: to };
+  }
+
+  // ------------------------------------------------------------------ labels
+  const labelDefs = [
+    ['truong_tien', 'Cầu Trường Tiền'], ['phu_xuan', 'Cầu Phú Xuân'], ['da_vien', 'Cầu Dã Viên'],
+    ['ngo_mon', 'Ngọ Môn'], ['ky_dai', 'Kỳ Đài'], ['thai_hoa', 'Điện Thái Hòa'],
+  ];
+  const labels = [];
+  const labelLayer = $('labels');
+  for (const [k, text] of labelDefs) {
+    if (!P[k]) continue;
+    const el = document.createElement('div'); el.className = 'label'; el.textContent = text; labelLayer.appendChild(el);
+    const h = k === 'ky_dai' ? 58 : k === 'ngo_mon' ? 20 : k.endsWith('hoa') ? 17 : 16;
+    labels.push({ el, p: new THREE.Vector3(P[k].x, (P[k].ground || 0) + h, P[k].z) });
+  }
+  if (P.truong_tien && P.phu_xuan) {
+    const el = document.createElement('div'); el.className = 'label label-river'; el.textContent = 'Sông Hương'; labelLayer.appendChild(el);
+    labels.push({ el, p: new THREE.Vector3((P.truong_tien.x + P.phu_xuan.x) / 2 + 120, 3, (P.truong_tien.z + P.phu_xuan.z) / 2 + 60) });
+  }
+  const v3 = new THREE.Vector3();
+  function updateLabels() {
+    const show = $('opt-labels').checked;
+    const w = renderer.domElement.clientWidth, h = renderer.domElement.clientHeight;
+    for (const L of labels) {
+      v3.copy(L.p).project(camera);
+      const d = camera.position.distanceTo(L.p);
+      const vis = show && v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 && d < 4200;
+      L.el.hidden = !vis;
+      if (vis) L.el.style.transform = `translate(${(v3.x * 0.5 + 0.5) * w}px, ${(-v3.y * 0.5 + 0.5) * h}px) translate(-50%, -100%)`;
+    }
+  }
+
+  // ------------------------------------------------------------------ modes
+  let mode = 'explore', view = 'chase';
+  const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
+  const tt = bridges.ttInfo;
+
+  function setMode(m) {
+    mode = m;
+    document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+    const flying = m !== 'explore';
+    controls.enabled = !flying; uav.model.visible = flying;
+    $('hud').hidden = !flying; $('places').hidden = flying; $('keys').hidden = !flying || m === 'auto';
+    document.body.classList.toggle('flying', flying);
+    $('sticks').hidden = !(flying && m === 'manual' && matchMedia('(pointer: coarse)').matches);
+    if (m === 'explore') {
+      const p = uav.pos; if (uav.model.visible || p.lengthSq() > 0) flyTo(p.x, Math.max(p.y, 4), p.z, 260, 0.6, 0.55);
+      return;
+    }
+    if (m === 'manual' && !uav.auto && (uav.pos.lengthSq() === 0 || mode === 'manual')) {
+      if (!uav.started && tt) {
+        const s = 1, x = tt.ax + tt.ux * tt.S * 2.5 + tt.vx * s * 210, z = tt.az + tt.uz * tt.S * 2.5 + tt.vz * s * 210;
+        uav.place(x, tt.water + 22, z, Math.atan2(tt.vx * s, tt.vz * s));
+        uav.started = true;
+      }
+      uav.auto = null;
+    }
+    if (m === 'auto' && tt) {
+      const path = truongTienPath(tt, T);
+      uav.startAuto(path, 17); uav.started = true;
+      const d = path[1].clone().sub(path[0]); uav.yaw = Math.atan2(-d.x, -d.z);
+      uav.onAutoEnd = () => { setMode('manual'); toast('Hết đoạn bay tự động — bạn đang cầm lái.'); };
+    }
+    camPos.copy(uav.pos).add(new THREE.Vector3(Math.sin(uav.yaw) * 14, 5, Math.cos(uav.yaw) * 14));
+    camera.position.copy(camPos);
+  }
+  document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $('btn-view').addEventListener('click', () => { view = view === 'chase' ? 'fpv' : 'chase'; $('btn-view').textContent = view === 'chase' ? 'Góc nhìn: bám sau' : 'Góc nhìn: buồng lái'; });
+  $('btn-reset').addEventListener('click', () => { uav.started = false; uav.crashes = 0; uav.touches = 0; setMode('manual'); });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyC' && mode !== 'explore') $('btn-view').click();
+    if (e.code === 'Escape' && mode !== 'explore') setMode('explore');
+  });
+
+  // places
+  const placeBtns = [['ngo_mon', 'Đại Nội', 420, 2.6, 0.5], ['ky_dai', 'Kỳ Đài', 220, 2.2, 0.38], ['truong_tien', 'Cầu Trường Tiền', 380, 0.9, 0.32], ['phu_xuan', 'Cầu Phú Xuân', 360, 2.3, 0.35], ['da_vien', 'Cầu Dã Viên', 420, 1.2, 0.4]];
+  for (const [k, text, dist, az, el] of placeBtns) {
+    if (!P[k]) continue;
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = text;
+    b.addEventListener('click', () => flyTo(P[k].x, (P[k].ground || 0) + 4, P[k].z, dist, az, el));
+    $('place-list').appendChild(b);
+  }
+  $('btn-home').addEventListener('click', () => { const p0 = camera.position.clone(), q0 = controls.target.clone(); home(); const p1 = camera.position.clone(), q1 = controls.target.clone(); camera.position.copy(p0); controls.target.copy(q0); fly = { t: 0, dur: 1.6, p0, p1, q0, q1 }; });
+
+  // layers
+  document.querySelectorAll('input[name="bcolor"]').forEach((r) => r.addEventListener('change', () => {
+    buildings.recolor(r.value);
+    $('legend-source').hidden = r.value !== 'source'; $('legend-height').hidden = r.value !== 'height';
+  }));
+  $('opt-trees').addEventListener('change', (e) => { trees.visible = e.target.checked; });
+  $('opt-buildings').addEventListener('change', (e) => { buildings.group.visible = e.target.checked; });
+  $('btn-layers').addEventListener('click', () => { const p = $('layers'); p.classList.toggle('open'); $('btn-layers').setAttribute('aria-expanded', String(p.classList.contains('open'))); });
+
+  // ------------------------------------------------------------------ picking
+  const ray = new THREE.Raycaster();
+  const pickables = [buildings.group, landmarks, bridges.group, walls, terrainMesh, water];
+  let downAt = null;
+  canvas.addEventListener('pointerdown', (e) => { downAt = [e.clientX, e.clientY]; });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || mode !== 'explore') return;
+    const r = canvas.getBoundingClientRect();
+    ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+    const hits = ray.intersectObjects(pickables, true);
+    if (!hits.length) return;
+    showInfo(hits[0]);
+  });
+  $('info-close').addEventListener('click', () => { $('info').hidden = true; });
+
+  function rows(list) { return list.map(([k, v]) => `<div class="kv"><dt>${k}</dt><dd>${v}</dd></div>`).join(''); }
+  function areaOf(i) {
+    const n = buildingsD.n[i]; let off = 0; for (let k = 0; k < i; k++) off += buildingsD.n[k] * 2;
+    let a = 0; for (let k = 0; k < n; k++) { const p = off + k * 2, q = off + ((k + 1) % n) * 2; a += buildingsD.xz[p] * buildingsD.xz[q + 1] - buildingsD.xz[q] * buildingsD.xz[p + 1]; }
+    return Math.abs(a) / 200;
+  }
+  function showInfo(hit) {
+    const p = hit.point.clone();
+    if (hit.face) p.addScaledVector(hit.face.normal, -0.3);
+    let obj = hit.object; while (obj.parent && obj.parent !== scene) obj = obj.parent;
+    let title = '', body = '';
+    const solid = solids.pick(p.x, p.z);
+    if ((obj === buildings.group || obj === landmarks || obj === walls) && solid) {
+      const it = solid.info;
+      if (it.type === 'building') {
+        const i = it.index, name = buildingsD.names[i];
+        title = name || 'Công trình';
+        body = rows([
+          ['Dấu chân', SRC_NAME[buildingsD.src[i]]], ['Chiều cao dựng', `${fmt(buildingsD.h[i] / 10 - 0.3)} m`],
+          ['Nguồn chiều cao', HS_NAME[buildingsD.hs[i]]], ['Diện tích nền', `${fmt(areaOf(i), 0)} m²`],
+        ]) + '<p class="note">Mái phẳng là giả định. Chiều cao học máy lệch khoảng ±3 m trên mẫu đối chiếu nhỏ.</p>';
+      } else if (it.type === 'wall') {
+        title = it.kind === 'rampart' ? 'Tường thành Kinh thành' : 'Tường Hoàng thành / tường trong';
+        body = rows([['Chiều cao dựng', it.kind === 'rampart' ? '6,6 m' : '4,0 m'], ['Nguồn', 'Tim tường OSM; chiều cao theo số liệu công bố']]) + '<p class="note">Cổng thành được khoét ở nơi có đường đi qua. Kích thước cổng chưa đo.</p>';
+      } else if (it.type === 'landmark') {
+        title = it.name;
+        const extra = { ky_dai: 'Ba tầng đài tổng ~17,5 m, cột cờ 37 m (số liệu công bố, chưa đo kiểm).', ngo_mon: 'Nền đài chữ U cao ~5 m (công bố); lầu Ngũ Phụng phác thảo, tỷ lệ là giả định.', thai_hoa: 'Mái chồng hai tầng phác thảo; chiều cao là giả định.' };
+        body = rows([['Dấu chân', 'OpenStreetMap'], ['Hình khối', 'Phác thảo tham số']]) + `<p class="note">${extra[it.key] || ''}</p>`;
+      }
+    } else if (obj === bridges.group) {
+      let best = null, bd = Infinity;
+      for (const d of bridges.decks) {
+        const dx = d.bx - d.ax, dz = d.bz - d.az, l2 = dx * dx + dz * dz || 1; let t = ((p.x - d.ax) * dx + (p.z - d.az) * dz) / l2; t = Math.max(0, Math.min(1, t));
+        const q = Math.hypot(d.ax + dx * t - p.x, d.az + dz * t - p.z); if (q < bd) { bd = q; best = d; }
+      }
+      title = (best && best.name) || 'Cầu';
+      body = rows([['Chiều dài (OSM)', `${fmt(best ? best.len : NaN, 0)} m`], ['Cao độ mặt cầu', 'Mô hình ràng buộc (giả định)']]);
+      body += best && best.special === 'truong_tien'
+        ? '<p class="note">6 nhịp, 402,6 m theo Wikidata. Vòm thép, trụ và độ cao gầm cầu là phác thảo minh họa. Đường chính của cầu trong OpenStreetMap thiếu thẻ <code>bridge</code>; demo nhận ra cầu bằng kiểm tra hình học.</p>'
+        : '<p class="note">Không cầu nào trong dữ liệu mở có cao độ hay tĩnh không đo đạc.</p>';
+    } else {
+      const wl = T.waterLevel(p.x, p.z);
+      title = Number.isNaN(wl) ? 'Mặt đất' : 'Mặt nước';
+      body = Number.isNaN(wl)
+        ? rows([['Cao độ', `≈ ${fmt(T.height(p.x, p.z))} m`], ['Nguồn', 'Copernicus GLO-30, đã làm mượt']]) + '<p class="note">DEM 30 m là mặt phủ; độ cao ở đây chỉ để đặt mô hình, không phải số đo.</p>'
+        : rows([['Mực nước dựng', `${fmt(wl)} m`], ['Nguồn', 'Đa giác nước OSM; mực nước quy ước']]) + '<p class="note">Độ sâu đáy sông là giả định để hiển thị.</p>';
+    }
+    $('info-title').textContent = title; $('info-body').innerHTML = body; $('info').hidden = false;
+  }
+
+  // ------------------------------------------------------------------ touch sticks
+  for (const side of ['left', 'right']) {
+    const pad = $(`stick-${side}`), knob = pad.querySelector('.knob');
+    let id = null;
+    const set = (e) => {
+      const r = pad.getBoundingClientRect(), R = r.width / 2;
+      let x = (e.clientX - r.left - R) / R, y = (e.clientY - r.top - R) / R; const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; }
+      input[side] = { x, y }; knob.style.transform = `translate(${x * R * 0.6}px, ${y * R * 0.6}px)`;
+    };
+    pad.addEventListener('pointerdown', (e) => { id = e.pointerId; pad.setPointerCapture(id); set(e); });
+    pad.addEventListener('pointermove', (e) => { if (e.pointerId === id) set(e); });
+    const end = () => { id = null; input[side] = { x: 0, y: 0 }; knob.style.transform = ''; };
+    pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end);
+  }
+
+  // ------------------------------------------------------------------ toast
+  let toastTimer = 0;
+  function toast(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3200); }
+
+  // ------------------------------------------------------------------ resize + loop
+  function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+    fx.points.material.uniforms.uScale.value = h * 0.9;
+  }
+  window.addEventListener('resize', resize); resize();
+
+  const clock = new THREE.Clock();
+  const fwd = new THREE.Vector3();
+  let hudTimer = 0;
+  let simTime = 0;
+  function tick(fixedDt, skipRender) {
+    const dt = typeof fixedDt === 'number' ? fixedDt : Math.min(clock.getDelta(), 0.05);
+    simTime += dt; const t = simTime;
+    water.material.uniforms.uTime.value = t;
+    if (landmarks.userData.flag && !reduceMotion) landmarks.userData.flag.rotation.y = Math.sin(t * 1.7) * 0.25;
+    sky.position.copy(camera.position);
+    if (mode === 'explore') {
+      if (fly) {
+        fly.t = Math.min(1, fly.t + dt / fly.dur); const e = fly.t < 0.5 ? 4 * fly.t ** 3 : 1 - (-2 * fly.t + 2) ** 3 / 2;
+        camera.position.lerpVectors(fly.p0, fly.p1, e); controls.target.lerpVectors(fly.q0, fly.q1, e);
+        if (fly.t >= 1) fly = null;
+      }
+      controls.target.x = THREE.MathUtils.clamp(controls.target.x, bounds.xmin, bounds.xmax);
+      controls.target.z = THREE.MathUtils.clamp(controls.target.z, bounds.zmin, bounds.zmax);
+      controls.update();
+      const minY = T.surface(camera.position.x, camera.position.z) + 3; if (camera.position.y < minY) camera.position.y = minY;
+    } else {
+      uav.update(dt, mode === 'manual' ? input.read() : { forward: 0, strafe: 0, up: 0, yaw: 0 }, bounds);
+      fwd.set(-Math.sin(uav.yaw), 0, -Math.cos(uav.yaw));
+      if (view === 'fpv') {
+        camera.position.copy(uav.pos).addScaledVector(fwd, 1.3).add(new THREE.Vector3(0, 0.35, 0));
+        camLook.copy(camera.position).addScaledVector(fwd, 30); camLook.y += Math.sin(-uav.tilt.pitch) * 8;
+      } else {
+        camPos.copy(uav.pos).addScaledVector(fwd, -13).add(new THREE.Vector3(0, 4.2, 0));
+        const k = 1 - Math.exp(-dt * 4);
+        camera.position.lerp(camPos, k);
+        const floor = T.surface(camera.position.x, camera.position.z) + 1.2; if (camera.position.y < floor) camera.position.y = floor;
+        camLook.copy(uav.pos).addScaledVector(fwd, 7).add(new THREE.Vector3(0, 1.2, 0));
+      }
+      camera.lookAt(camLook);
+      hudTimer -= dt;
+      if (hudTimer <= 0) {
+        hudTimer = 0.1;
+        const s = uav.status;
+        $('hud-agl-label').textContent = s.overWater ? 'Trên mặt nước' : 'Trên mặt đất';
+        $('hud-agl').textContent = `${fmt(s.agl)} m`;
+        $('hud-speed').textContent = `${fmt(s.speed * 3.6, 0)} km/h`;
+        $('hud-gap').textContent = Number.isFinite(s.clearanceUp) ? `${fmt(s.clearanceUp)} m` : '—';
+        $('hud-gap-row').classList.toggle('active', Number.isFinite(s.clearanceUp));
+        $('hud-touch').textContent = uav.touches; $('hud-crash').textContent = uav.crashes;
+        $('hud-alert').hidden = uav.flash <= 0; if (uav.flash > 0) $('hud-alert').textContent = `Va chạm: ${uav.lastHit}`;
+      }
+    }
+    fx.update(dt);
+    if (skipRender === true) return;
+    updateLabels();
+    renderer.render(scene, camera);
+  }
+  renderer.setAnimationLoop(tick);
+  // console/test hook: __hue.tick(dt) advances one frame deterministically when the loop is paused
+  window.__hue = { scene, camera, uav, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(tick) };
+
+  // stats in the about panel
+  const c = meta.counts;
+  $('stat-buildings').textContent = c.buildings.toLocaleString('vi-VN');
+  $('stat-roads').textContent = c.roads.toLocaleString('vi-VN');
+  $('stat-bridges').textContent = c.bridges.toLocaleString('vi-VN');
+  $('stat-trees').textContent = c.trees.toLocaleString('vi-VN');
+  $('stat-hml').textContent = `${Math.round(100 * c.height_status.ml_estimate / c.buildings)}%`;
+  $('loading').hidden = true;
+  document.body.classList.add('ready');
+}
+
+main().catch((e) => {
+  console.error(e);
+  status(e.message || String(e));
+  $('loading').classList.add('error');
+});

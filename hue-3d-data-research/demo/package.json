@@ -1,0 +1,16 @@
+{
+  "name": "hue-3d-pilot-demo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Browser demo of the Hu\u1ebf 3D pilot area with an illustrative UAV flight mode",
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --minify --format=iife --target=es2020 --outfile=app.js && node wrap.mjs",
+    "serve": "python3 serve.py"
+  },
+  "dependencies": {
+    "three": "0.169.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0"
+  }
+}

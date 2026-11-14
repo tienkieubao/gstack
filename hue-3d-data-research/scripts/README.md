@@ -32,6 +32,7 @@ python3 scripts/verify_checksums.py   # đối chiếu tệp trong samples/ và 
 | 08 | `08_fetch_reference_and_probes.py [commons wikidata sketchfab panoramax]` | Ảnh tham chiếu + thăm dò nền tảng khác | Wikimedia, Wikidata, Sketchfab, Panoramax | vài phút (Wikimedia giới hạn tốc độ) |
 | 09 | `09_fetch_building_heights.py` | Chiều cao Open Buildings 2.5D + ước lượng theo dấu chân | GCS | ~1 phút |
 | 10 | `10_render_overview.py` | Ảnh tổng quan PNG | không | ~30 s |
+| 11 | `11_build_demo_data.py` | Dữ liệu cảnh cho bản demo trình duyệt → `demo/data/*.json` | không | ~20 s |
 | — | `build_source_catalog.py` | Sinh `source_catalog.csv` từ danh sách trong mã | không | tức thì |
 | — | `verify_checksums.py [--write]` | Ghi/đối chiếu SHA-256 của mọi tệp mẫu | không | tức thì |
 
