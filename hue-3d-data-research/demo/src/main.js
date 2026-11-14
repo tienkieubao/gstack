@@ -8,6 +8,7 @@ import {
 import { WaterFx } from './fx.js';
 import { Uav, Input, truongTienPath, ACTION_NAME } from './uav.js';
 import { RotorSound } from './audio.js';
+import { routeDefs, planRoute, underBridgeRoute, routeMesh } from './routes.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (v, d = 1) => (Number.isFinite(v) ? v.toLocaleString('vi-VN', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—');
@@ -66,10 +67,17 @@ async function main() {
   const world = { terrain: T, solids, bridgeCol: { decks: bridges.decks, piers: bridges.piers } };
   const uav = new Uav(world, fx); scene.add(uav.model);
   // compile every shader now (UAV, spray, ripples included) so entering flight mode does not stall on first use
+  status('Đang lập lộ trình bay…');
+  await new Promise((r) => setTimeout(r, 20));
+  const routes = [];
+  for (const def of routeDefs(meta)) routes.push(planRoute(def, { ...world, tt: bridges.ttInfo }, meta));
+  if (bridges.ttInfo) routes.push(underBridgeRoute(bridges.ttInfo, T));
+  for (const r of routes) { r.mesh = routeMesh(r); scene.add(r.mesh); }
   fx.rings.forEach((r) => { r.mesh.visible = true; });
   status('Đang chuẩn bị đồ họa…');
   renderer.compile(scene, camera);
   fx.rings.forEach((r) => { r.mesh.visible = false; });
+  routes.forEach((r) => { r.mesh.visible = false; });
   uav.model.visible = false;
   const input = new Input();
   const sound = new RotorSound();
@@ -104,11 +112,11 @@ async function main() {
     if (!P[k]) continue;
     const el = document.createElement('div'); el.className = 'label'; el.textContent = text; labelLayer.appendChild(el);
     const h = k === 'ky_dai' ? 58 : k === 'ngo_mon' ? 20 : k.endsWith('hoa') ? 17 : 16;
-    labels.push({ el, p: new THREE.Vector3(P[k].x, (P[k].ground || 0) + h, P[k].z) });
+    labels.push({ el, p: new THREE.Vector3(P[k].x, (P[k].ground || 0) + h, P[k].z), when: () => mode === 'explore' || mode === 'manual' });
   }
   if (P.truong_tien && P.phu_xuan) {
     const el = document.createElement('div'); el.className = 'label label-river'; el.textContent = 'Sông Hương'; labelLayer.appendChild(el);
-    labels.push({ el, p: new THREE.Vector3((P.truong_tien.x + P.phu_xuan.x) / 2 + 120, 3, (P.truong_tien.z + P.phu_xuan.z) / 2 + 60) });
+    labels.push({ el, p: new THREE.Vector3((P.truong_tien.x + P.phu_xuan.x) / 2 + 120, 3, (P.truong_tien.z + P.phu_xuan.z) / 2 + 60), when: () => mode !== 'auto' });
   }
   const v3 = new THREE.Vector3();
   function updateLabels() {
@@ -117,7 +125,7 @@ async function main() {
     for (const L of labels) {
       v3.copy(L.p).project(camera);
       const d = camera.position.distanceTo(L.p);
-      const vis = show && v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 && d < 4200;
+      const vis = show && (!L.when || L.when()) && v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 && d < (L.far || 4200);
       L.el.hidden = !vis;
       if (vis) L.el.style.transform = `translate(${(v3.x * 0.5 + 0.5) * w}px, ${(-v3.y * 0.5 + 0.5) * h}px) translate(-50%, -100%)`;
     }
@@ -125,24 +133,55 @@ async function main() {
 
   // ------------------------------------------------------------------ modes
   let mode = 'explore', view = 'chase';
+  const isFlying = () => mode === 'manual' || mode === 'auto';   // 'explore' and 'routes' use the map camera
   const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
   const tt = bridges.ttInfo;
 
+  let current = null;      // route being flown or previewed
+  function showRoutes() {
+    for (const r of routes) {
+      const on = mode === 'routes' || (mode === 'auto' && r === current);
+      const u = r.mesh.userData, dim = mode === 'routes' && current && r !== current;
+      r.mesh.visible = on;
+      u.tube.visible = mode === 'routes';                 // in flight the tube would fill the camera: keep only the waypoint beads
+      u.line.visible = mode === 'routes';
+      u.tube.material.opacity = dim ? 0.22 : 0.85; u.line.material.opacity = dim ? 0.25 : 0.95;
+      u.beads.visible = !dim;
+    }
+    document.querySelectorAll('.route-card').forEach((c) => c.classList.toggle('selected', !!current && c.dataset.route === current.id));
+  }
+  function fitRoute(r) {
+    const pts = r ? r.curve.getSpacedPoints(60) : routes.flatMap((x) => x.curve.getSpacedPoints(30));
+    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+    for (const p of pts) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.z); z1 = Math.max(z1, p.z); }
+    const span = Math.max(x1 - x0, z1 - z0), az = 0.5;
+    // the route list covers the left of the screen on wide layouts: aim a bit to the left so the path sits right of centre
+    const shift = window.innerWidth > 720 ? -0.28 * span : 0;
+    flyTo((x0 + x1) / 2 + Math.cos(az) * shift, 8, (z0 + z1) / 2 - Math.sin(az) * shift, span * 1.3 + 300, az, 0.95);
+  }
+  function startRoute(r) {
+    current = r;
+    setMode('auto');
+  }
+
   function setMode(m) {
     mode = m;
-    document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
-    const flying = m !== 'explore';
+    document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m || (b.dataset.mode === 'routes' && m === 'auto'))));
+    const flying = m === 'manual' || m === 'auto';
     controls.enabled = !flying; uav.model.visible = flying; input.active = m === 'manual';
-    $('hud').hidden = !flying; $('places').hidden = flying; $('keys').hidden = !flying || m === 'auto';
+    $('hud').hidden = !flying; $('places').hidden = m !== 'explore'; $('routes').hidden = m !== 'routes'; $('keys').hidden = m !== 'manual';
+    $('route-progress').hidden = m !== 'auto'; $('yaw-row').hidden = m !== 'manual';
+    showRoutes();
     document.body.classList.toggle('flying', flying);
     $('sticks').hidden = m !== 'manual';
     if (flying) { $('layers').classList.remove('open'); $('btn-layers').setAttribute('aria-expanded', 'false'); }
     // keyboard focus must be on the scene, not on the button just clicked or a layer radio
     if (flying) { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); canvas.focus({ preventScroll: true }); }
     if (m === 'explore') {
-      const p = uav.pos; if (uav.model.visible || p.lengthSq() > 0) flyTo(p.x, Math.max(p.y, 4), p.z, 260, 0.6, 0.55);
+      const p = uav.pos; if (p.lengthSq() > 0) flyTo(p.x, Math.max(p.y, 4), p.z, 260, 0.6, 0.55);
       return;
     }
+    if (m === 'routes') { uav.auto = null; if (!current) current = routes[0]; showRoutes(); fitRoute(current); return; }
     if (m === 'manual' && !uav.auto && (uav.pos.lengthSq() === 0 || mode === 'manual')) {
       if (!uav.started && tt) {
         const s = 1, x = tt.ax + tt.ux * tt.S * 2.5 + tt.vx * s * 210, z = tt.az + tt.uz * tt.S * 2.5 + tt.vz * s * 210;
@@ -151,11 +190,14 @@ async function main() {
       }
       uav.auto = null;
     }
-    if (m === 'auto' && tt) {
-      const path = truongTienPath(tt, T);
-      uav.startAuto(path, 17); uav.started = true;
-      const d = path[1].clone().sub(path[0]); uav.yaw = Math.atan2(-d.x, -d.z);
-      uav.onAutoEnd = () => { setMode('manual'); toast('Hết đoạn bay tự động — bạn đang cầm lái.'); };
+    if (m === 'auto') {
+      if (!current) current = routes[0];
+      const r = current;
+      uav.startAuto(r.points, r.speed); uav.started = true; uav.yawRate = 0;
+      const d = r.points[1].clone().sub(r.points[0]); uav.yaw = Math.atan2(-d.x, -d.z);
+      $('rp-name').textContent = r.name; $('rp-name').style.setProperty('--route', r.color);
+      uav.onAutoEnd = () => { setMode('manual'); toast(`Hoàn thành lộ trình “${r.name}”. Bạn đang cầm lái; bấm “Lộ trình bay” để chọn lộ trình khác.`); };
+      showRoutes();
     }
     camPos.copy(uav.pos).add(new THREE.Vector3(Math.sin(uav.yaw) * 14, 5, Math.cos(uav.yaw) * 14));
     camera.position.copy(camPos);
@@ -169,11 +211,35 @@ async function main() {
   $('focus-hint').addEventListener('click', () => canvas.focus({ preventScroll: true }));
   $('btn-view').addEventListener('click', () => { view = view === 'chase' ? 'fpv' : 'chase'; $('btn-view').textContent = view === 'chase' ? 'Góc nhìn: bám sau' : 'Góc nhìn: buồng lái'; });
   $('btn-reset').addEventListener('click', () => { uav.started = false; uav.crashes = 0; uav.touches = 0; setMode('manual'); });
+  $('rp-stop').addEventListener('click', () => { uav.auto = null; setMode('manual'); toast('Đã dừng lộ trình — bạn đang cầm lái tại chỗ.'); });
+
+  const fmtTime = (sec) => { const m = Math.floor(sec / 60), s = Math.round(sec % 60); return m ? `${m} phút ${s.toString().padStart(2, '0')} giây` : `${s} giây`; };
+  for (const r of routes) {
+    const card = document.createElement('div'); card.className = 'route-card'; card.dataset.route = r.id; card.style.setProperty('--route', r.color);
+    card.innerHTML = `<button type="button" class="rc-main"><span class="rc-name"></span><span class="rc-desc"></span><span class="rc-meta"></span></button><button type="button" class="rc-fly">Bay ▶</button>`;
+    card.querySelector('.rc-name').textContent = r.name;
+    card.querySelector('.rc-desc').textContent = r.desc;
+    card.querySelector('.rc-meta').textContent = `${fmt(r.length / 1000, 1)} km · khoảng ${fmtTime(r.seconds)} · ${r.labels.length} điểm · cao ${Math.round(r.minY)}–${Math.round(r.maxY)} m`;
+    card.querySelector('.rc-main').addEventListener('click', () => { current = r; showRoutes(); fitRoute(r); });
+    card.querySelector('.rc-fly').addEventListener('click', () => { sound.ensure(); startRoute(r); });
+    $('route-list').appendChild(card);
+    // waypoint labels, shown while this route is previewed or flown
+    for (const l of r.labels) {
+      const el = document.createElement('div'); el.className = 'label label-route'; el.style.setProperty('--route', r.color); el.textContent = l.name; labelLayer.appendChild(el);
+      labels.push({ el, p: new THREE.Vector3(l.x, l.y + 9, l.z), when: () => (mode === 'routes' || mode === 'auto') && current === r, far: 6000 });
+    }
+  }
+
+  const YAW_KEY = 'hue3d.yawMax';
+  try { const v = parseFloat(window.localStorage.getItem(YAW_KEY)); if (v >= 0.2 && v <= 1.4) uav.yawMax = v; } catch (e) { /* storage blocked */ }
+  const yawLabel = () => { $('yaw-sens').value = String(uav.yawMax); $('yaw-val').textContent = `${Math.round(uav.yawMax * 180 / Math.PI)}°/s`; };
+  $('yaw-sens').addEventListener('input', (e) => { uav.yawMax = parseFloat(e.target.value); yawLabel(); try { window.localStorage.setItem(YAW_KEY, String(uav.yawMax)); } catch (err) { /* storage blocked */ } });
+  yawLabel();
   window.addEventListener('keydown', (e) => {
-    if ((e.code === 'KeyC' || e.key === 'c') && mode !== 'explore' && !e.repeat) { e.preventDefault(); $('btn-view').click(); }
-    if ((e.code === 'KeyM' || e.key === 'm') && mode !== 'explore' && !e.repeat) { e.preventDefault(); $('btn-sound').click(); }
-    if (mode !== 'explore') sound.ensure();          // a key press is also a gesture that may start audio
-    if (e.code === 'Escape' && mode !== 'explore') setMode('explore');
+    if ((e.code === 'KeyC' || e.key === 'c') && isFlying() && !e.repeat) { e.preventDefault(); $('btn-view').click(); }
+    if ((e.code === 'KeyM' || e.key === 'm') && isFlying() && !e.repeat) { e.preventDefault(); $('btn-sound').click(); }
+    if (isFlying()) sound.ensure();          // a key press is also a gesture that may start audio
+    if (e.code === 'Escape' && mode !== 'explore') setMode(mode === 'auto' ? 'routes' : 'explore');
   });
 
   // places
@@ -201,7 +267,7 @@ async function main() {
   let downAt = null;
   canvas.addEventListener('pointerdown', (e) => { downAt = [e.clientX, e.clientY]; });
   canvas.addEventListener('pointerup', (e) => {
-    if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || mode !== 'explore') return;
+    if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || isFlying()) return;
     const r = canvas.getBoundingClientRect();
     ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
     const hits = ray.intersectObjects(pickables, true);
@@ -300,7 +366,7 @@ async function main() {
     water.material.uniforms.uTime.value = t;
     if (landmarks.userData.flag && !reduceMotion) landmarks.userData.flag.rotation.y = Math.sin(t * 1.7) * 0.25;
     sky.position.copy(camera.position);
-    if (mode === 'explore') {
+    if (!isFlying()) {
       if (fly) {
         fly.t = Math.min(1, fly.t + dt / fly.dur); const e = fly.t < 0.5 ? 4 * fly.t ** 3 : 1 - (-2 * fly.t + 2) ** 3 / 2;
         camera.position.lerpVectors(fly.p0, fly.p1, e); controls.target.lerpVectors(fly.q0, fly.q1, e);
@@ -313,7 +379,7 @@ async function main() {
     } else {
       const cmd = mode === 'manual' ? input.read() : { forward: 0, strafe: 0, up: 0, yaw: 0 };
       const n = Math.max(1, Math.ceil(dt * 30));
-      for (let i = 0; i < n && mode !== 'explore'; i++) uav.update(dt / n, cmd, bounds);
+      for (let i = 0; i < n && isFlying(); i++) uav.update(dt / n, cmd, bounds);
       // rotor load for the engine sound: hover ~0.45; climbing, pushing forward and yawing spin the props up
       let loadTarget;
       if (mode === 'manual') loadTarget = 0.45 + 0.35 * Math.max(0, cmd.up) - 0.2 * Math.max(0, -cmd.up) + 0.2 * Math.min(1, Math.hypot(cmd.forward, cmd.strafe)) + 0.08 * Math.abs(cmd.yaw);
@@ -347,10 +413,20 @@ async function main() {
           const c = input.read(), moving = c.forward || c.strafe || c.up || c.yaw;
           $('hud-input').textContent = moving ? (input.left.x || input.left.y || input.right.x || input.right.y ? 'Cần điều khiển' : `Phím: ${input.last}`) : (input.lastAt ? `Đang chờ lệnh (phím cuối: ${input.lastKey})` : 'Chưa nhận phím nào');
           $('focus-hint').hidden = document.hasFocus();
-        } else { $('focus-hint').hidden = true; $('hud-input').textContent = 'Bay tự động'; }
+        } else {
+          $('focus-hint').hidden = true; $('hud-input').textContent = 'Bay tự động';
+          if (uav.auto && current) {
+            const u = Math.min(1, uav.auto.s / uav.auto.length), left = Math.max(0, uav.auto.length - uav.auto.s);
+            const next = current.labels.find((l) => l.u > u + 0.003), prev = [...current.labels].reverse().find((l) => l.u <= u + 0.003);
+            $('rp-next').textContent = next ? `Tiếp theo: ${next.name} · còn ${fmt((next.u - u) * uav.auto.length, 0)} m` : 'Sắp kết thúc lộ trình';
+            $('rp-prev').textContent = prev ? `Vừa qua: ${prev.name}` : 'Xuất phát';
+            $('rp-bar').style.width = `${(u * 100).toFixed(1)}%`;
+            $('rp-left').textContent = `${fmt(left / 1000, 2)} km còn lại`;
+          }
+        }
       }
     }
-    if (mode === 'explore') sound.update(dt, { active: false, loadTarget: 0.45, wash: 0, camDist: 100, touches: uav.touches, crashes: uav.crashes });
+    if (!isFlying()) sound.update(dt, { active: false, loadTarget: 0.45, wash: 0, camDist: 100, touches: uav.touches, crashes: uav.crashes });
     fx.update(dt);
     if (skipRender === true) return;
     updateLabels();
@@ -367,7 +443,7 @@ async function main() {
   };
   renderer.setAnimationLoop(frame);
   // console/test hook: __hue.tick(dt) advances one frame deterministically when the loop is paused
-  window.__hue = { scene, camera, uav, input, sound, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(frame) };
+  window.__hue = { scene, camera, uav, input, sound, routes, startRoute, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(frame) };
 
   // stats in the about panel
   const c = meta.counts;

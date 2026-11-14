@@ -23,8 +23,19 @@ npm install && npm run build               # src/*.js -> app.js, page.html -> in
 | Chế độ | Điều khiển |
 |---|---|
 | Khám phá | Chuột trái kéo, chuột phải xoay, cuộn để phóng to; trên điện thoại dùng một ngón kéo, hai ngón xoay/phóng. Bấm vào công trình, cầu, tường thành, mặt đất hoặc mặt nước để xem nguồn dữ liệu và mức tin cậy |
-| Lái UAV | `↑/↓` hoặc `W/S` tiến lùi · `←/→` hoặc `Q/E` xoay · `A/D` sang ngang · `Space/Shift` hoặc `R/F` lên xuống · `C` đổi góc nhìn · `Esc` thoát. Hai cần điều khiển trên màn hình dùng được bằng chuột (máy tính) hoặc ngón tay (điện thoại). Dòng "Điều khiển" trong bảng thông số cho biết trang đang nhận lệnh nào |
-| Bay dưới cầu Trường Tiền | Bay tự động ~55 giây: hạ thấp trên mặt sông, chạm nước, luồn qua nhịp 3, vòng lại qua nhịp 4, rồi trả quyền lái |
+| Lái UAV | `↑/↓` hoặc `W/S` tiến lùi · `←/→` hoặc `Q/E` xoay · `A/D` sang ngang · `Space/Shift` hoặc `R/F` lên xuống · `C` đổi góc nhìn · `Esc` thoát. Hai cần điều khiển trên màn hình dùng được bằng chuột (máy tính) hoặc ngón tay (điện thoại). Dòng "Điều khiển" trong bảng thông số cho biết trang đang nhận lệnh nào. Xoay tăng dần (tối đa mặc định 34°/giây); thanh trượt "Độ nhạy xoay" chỉnh từ 11 đến 80°/giây, trang nhớ lựa chọn |
+| Lộ trình bay | Chọn một trong bốn lộ trình bay tự động; bấm vào thẻ để xem đường bay trên bản đồ, bấm **Bay ▶** để bay. Khi bay có thanh tiến độ, điểm sắp tới và nút "Dừng lộ trình, tự lái". Hết lộ trình, UAV dừng lại và bạn cầm lái tiếp |
+
+### Các lộ trình
+
+| Lộ trình | Đi qua | Dài · thời gian | Độ cao |
+|---|---|---|---|
+| Dọc sông Hương | Cầu Dã Viên → lướt sát mặt sông → Cầu Phú Xuân → Cầu Trường Tiền → Cồn Hến | 4,2 km · ~2,5 phút | 4–114 m (lướt ~3 m trên mặt nước, vượt lên trên các cầu) |
+| Kinh thành – Đại Nội | Nghênh Lương Đình → Phu Văn Lâu → bay vòng quanh Kỳ Đài → Ngọ Môn → Điện Thái Hòa → Tử Cấm Thành → Điện Kiến Trung → Duyệt Thị Đường → Cửa Hiển Nhơn → Cửa Đông Ba | 3,4 km · ~2,6 phút | 11–121 m |
+| Phố hai bờ | Ga Huế → Trường Quốc Học → Nhà thờ Phủ Cam → Vincom Plaza Huế → Công viên 3 Tháng 2 → Chợ Đông Ba → Cầu Gia Hội | 5,0 km · ~2,8 phút | 21–173 m |
+| Luồn dưới cầu Trường Tiền | Hạ sát mặt sông, chạm nước, luồn qua nhịp 3, vòng lại qua nhịp 4 | 0,9 km · ~55 giây | 1–47 m |
+
+Các điểm dừng là đối tượng OpenStreetMap thật (tọa độ lấy từ dữ liệu mẫu, xem `meta.json` → `route_points`). Độ cao do máy lập: đường bay được làm mượt rồi **tự nâng** ở mọi chỗ cách mái nhà, tường thành, mặt cầu, vòm cầu Trường Tiền hoặc cột cờ Kỳ Đài dưới 8 m, cách mặt đất trống dưới 15 m hoặc mặt nước dưới 3 m; độ dốc lên/xuống tối đa 32%. Kiểm tra dọc từng 2 m của cả bốn lộ trình: không điểm nào chạm vào mô hình. Lộ trình "Luồn dưới cầu Trường Tiền" giữ đường bay vẽ tay vì nó cố ý đi dưới mặt cầu.
 
 Bảng thông số khi bay: độ cao trên mặt nước/mặt đất, tốc độ, khoảng trống tới đáy cầu (khi đang ở dưới mặt cầu), số lần chạm nước, số lần va chạm.
 
@@ -67,6 +78,7 @@ Hai chi tiết đến thẳng từ đợt kiểm định dữ liệu:
 | `src/uav.js` | Mô hình UAV, điều khiển, quỹ đạo bay dưới cầu Trường Tiền |
 | `src/fx.js` | Bụi nước dưới cánh quạt, nước bắn khi chạm, vòng sóng |
 | `src/audio.js` | Âm thanh động cơ tổng hợp (Web Audio) |
+| `src/routes.js` | Định nghĩa 3 lộ trình, bộ lập đường bay tránh vật cản, đường bay xem trước |
 | `app.js` | Bản đóng gói (three.js 0.169.0 + mã trên) |
 | `data/*.json` | Dữ liệu cảnh sinh bởi `../scripts/11_build_demo_data.py` |
 

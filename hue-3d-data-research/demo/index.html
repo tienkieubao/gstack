@@ -41,7 +41,7 @@ code { font-family: var(--f-num); font-size: 0.92em; color: var(--gold); }
 #brand h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.01em; text-wrap: balance; display: flex; align-items: baseline; gap: 8px; }
 #brand h1 .seal { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 5px; background: var(--vermilion); color: #fff7e8; font-size: 13px; font-weight: 700; transform: translateY(4px); }
 #brand .sub { margin: 0; color: var(--muted); font-size: 12.5px; }
-.modes { display: grid; grid-template-columns: 1fr 1fr 1.35fr; gap: 6px; }
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .modes button { background: var(--ink-2); border: 1px solid var(--line); border-radius: 7px; padding: 7px 6px; font-size: 12.5px; font-weight: 600; line-height: 1.2; }
 .modes button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1d1606; }
 .modes button:hover:not([aria-pressed="true"]) { border-color: var(--gold); }
@@ -52,7 +52,7 @@ code { font-family: var(--f-num); font-size: 0.92em; color: var(--gold); }
 #btn-layers { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); padding: 8px 12px; font-weight: 600; font-size: 13px; }
 #layers { top: calc(56px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); width: 268px; padding: 12px 14px; display: none; gap: 10px; }
 #layers.open { display: grid; }
-#layers h2, #info h2, #places h2 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
+#layers h2, #info h2, #places h2, #routes h2 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
 fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 5px; }
 legend { padding: 0; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
 label.opt { display: flex; gap: 8px; align-items: center; font-size: 13px; }
@@ -82,6 +82,30 @@ label.opt input { accent-color: var(--gold); width: 15px; height: 15px; margin: 
 .counts b { font: 500 13px var(--f-num); color: var(--ivory); }
 .hud-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 #btn-sound[aria-pressed="false"] { color: var(--muted); }
+.yaw-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.yaw-row input { flex: 1; min-width: 0; accent-color: var(--gold); }
+.yaw-row b { font: 500 12px var(--f-num); color: var(--ivory); min-width: 44px; text-align: right; }
+#route-progress { display: grid; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+#rp-name { margin: 0; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 7px; }
+#rp-name::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--route, var(--gold)); }
+.rp-track { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+#rp-bar { height: 100%; width: 0; background: var(--gold); }
+#rp-next { margin: 0; font-size: 12.5px; color: var(--ivory); }
+.rp-sub { margin: 0; font-size: 11.5px; color: var(--muted); }
+#rp-stop { justify-self: start; margin-top: 2px; }
+
+#routes { left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); width: min(380px, calc(100vw - 24px)); max-height: calc(100vh - 300px); overflow: auto; padding: 12px; display: grid; gap: 8px; align-content: start; }
+#routes .hint { margin: 0; font-size: 12px; color: var(--muted); }
+#route-list { display: grid; gap: 8px; }
+.route-card { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: stretch; border: 1px solid var(--line); border-left: 4px solid var(--route); border-radius: 8px; background: var(--ink-2); }
+.route-card.selected { border-color: var(--route); box-shadow: 0 0 0 1px var(--route) inset; }
+.rc-main { display: grid; gap: 3px; text-align: left; background: none; border: 0; padding: 9px 4px 9px 10px; min-width: 0; }
+.rc-name { font-weight: 700; font-size: 13.5px; }
+.rc-desc { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.rc-meta { font: 500 11px var(--f-num); color: var(--ivory); opacity: 0.85; }
+.rc-fly { align-self: center; margin-right: 9px; padding: 8px 12px; border-radius: 7px; border: 0; background: var(--route); color: #121814; font-weight: 700; font-size: 12.5px; white-space: nowrap; }
+.rc-fly:hover { filter: brightness(1.08); }
+.label-route { border-left-color: var(--route); font-weight: 500; }
 #hud-alert { margin: 0; padding: 5px 9px; border-radius: 6px; background: var(--vermilion); color: #fff6ee; font-weight: 600; font-size: 12.5px; }
 
 #keys { right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); padding: 10px 12px; font-size: 12px; color: var(--muted); display: grid; grid-template-columns: auto auto; gap: 3px 12px; }
@@ -143,6 +167,8 @@ body.flying #info { display: none; }
   #btn-layers { top: auto; bottom: calc(40px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); }
   #layers { top: auto; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); max-height: 60vh; overflow: auto; }
   #places { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); }
+  #routes { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); width: auto; max-height: 46vh; }
+  #routes .hint, .rc-desc { display: none; }
   #places .hint { display: none; }
   #info { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
   #keys { display: none; }
@@ -167,7 +193,7 @@ body.flying #info { display: none; }
   <div class="modes" role="group" aria-label="Chế độ">
     <button type="button" data-mode="explore" aria-pressed="true">Khám phá</button>
     <button type="button" data-mode="manual" aria-pressed="false">Lái UAV</button>
-    <button type="button" data-mode="auto" aria-pressed="false">Bay dưới cầu Trường Tiền</button>
+    <button type="button" data-mode="routes" aria-pressed="false">Lộ trình bay</button>
   </div>
   <span class="badge">Mô phỏng minh họa — không dùng để lập kế hoạch bay</span>
 </section>
@@ -212,7 +238,20 @@ body.flying #info { display: none; }
   <p class="hint">Chuột trái: kéo · chuột phải: xoay · cuộn: phóng to</p>
 </section>
 
+<section id="routes" class="panel" aria-label="Lộ trình bay" hidden>
+  <h2>Lộ trình bay</h2>
+  <p class="hint">Bấm vào một lộ trình để xem đường bay trên bản đồ, rồi bấm “Bay”. Độ cao được tự nâng khi đi qua nhà, cầu và cột cờ.</p>
+  <div id="route-list"></div>
+</section>
+
 <section id="hud" class="panel" aria-label="Thông số UAV" hidden>
+  <div id="route-progress" hidden>
+    <p id="rp-name"></p>
+    <div class="rp-track"><div id="rp-bar"></div></div>
+    <p id="rp-next"></p>
+    <p class="rp-sub"><span id="rp-prev"></span> · <span id="rp-left"></span></p>
+    <button type="button" class="ghost" id="rp-stop">Dừng lộ trình, tự lái</button>
+  </div>
   <dl class="gauges">
     <div class="gauge water"><dt id="hud-agl-label">Trên mặt nước</dt><dd id="hud-agl">—</dd></div>
     <div class="gauge"><dt>Tốc độ</dt><dd id="hud-speed">—</dd></div>
@@ -220,6 +259,7 @@ body.flying #info { display: none; }
   </dl>
   <div class="counts"><span>Chạm nước <b id="hud-touch">0</b></span><span>Va chạm <b id="hud-crash">0</b></span></div>
   <p class="input-state">Điều khiển: <b id="hud-input">Chưa nhận phím nào</b></p>
+  <label class="yaw-row" id="yaw-row" for="yaw-sens">Độ nhạy xoay <input type="range" id="yaw-sens" min="0.2" max="1.4" step="0.05" value="0.6"> <b id="yaw-val">34°/s</b></label>
   <p id="hud-alert" hidden></p>
   <div class="hud-btns">
     <button type="button" class="ghost" id="btn-view">Góc nhìn: bám sau</button>

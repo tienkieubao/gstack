@@ -338,7 +338,13 @@ def main():
             ways.append({"w": int(w), "kind": kind, "width": round(width_of(row[w]), 1), "pts": flat, "beside_truss": near_tt})
             bridge_way_ids.add(w)
         names = sorted({row[w].name for w in wids if isinstance(row[w].name, str)})
-        bridges_out.append({"id": int(gid), "name": names[0] if names else None, "len": round(diag, 1), "over_water_m": round(float(over.length), 1),
+        mid_water = None
+        if over.length > 0:
+            parts = [over] if isinstance(over, LineString) else [g_ for g_ in getattr(over, "geoms", []) if isinstance(g_, LineString)]
+            if parts:
+                m_ = max(parts, key=lambda g_: g_.length).interpolate(0.5, normalized=True)
+                mid_water = [round(m_.x, 1), round(-m_.y, 1)]
+        bridges_out.append({"id": int(gid), "name": names[0] if names else None, "len": round(diag, 1), "over_water_m": round(float(over.length), 1), "mid_water": mid_water,
                             "deck_y": dm(plateau), "water_y": dm(wl_under), "clearance_assumed_m": clearance, "ways": ways,
                             "special": "truong_tien" if TRUONG_TIEN_WAY in wids else None})
     json.dump(bridges_out, open(OUT / "bridges.json", "w"), separators=(",", ":"), ensure_ascii=False)
@@ -485,11 +491,46 @@ def main():
         tt = {"ax": round(float(a_[0]), 2), "az": round(float(-a_[1]), 2), "bx": round(float(b_[0]), 2), "bz": round(float(-b_[1]), 2),
               "length_osm_m": round(float(tt_axis.length), 1), "length_published_m": 402.6, "spans": 6,
               "deck_y": tt_b["deck_y"] / 10, "water_y": tt_b["water_y"] / 10}
+    # named waypoints for the scripted flight routes (OSM objects; centroid in local metres)
+    ROUTE_POINTS = [
+        ("ga_hue", "Ga Huế", "way", 175063593), ("phu_cam", "Nhà thờ Phủ Cam", "way", 118792054),
+        ("quoc_hoc", "Trường Quốc Học", "way", 695775622), ("vincom", "Vincom Plaza Huế", "way", 749331141),
+        ("cong_vien_3_2", "Công viên 3 Tháng 2", "way", 35926965), ("cho_dong_ba", "Chợ Đông Ba", "way", 161714451),
+        ("cau_gia_hoi", "Cầu Gia Hội", "way", 1431132258), ("gia_hoi", "Phố cổ Gia Hội", "node", 7270994492),
+        ("con_hen", "Cồn Hến", "way", 52656963), ("con_da_vien", "Cồn Dã Viên", "way", 174746316),
+        ("nha_hat_song_huong", "Nhà hát Sông Hương", "way", 1033684220),
+        ("phu_van_lau", "Phu Văn Lâu", "way", 531031520), ("nghenh_luong", "Nghênh Lương Đình", "way", 239568224),
+        ("cua_ngan", "Cửa Ngăn", "way", 619851622), ("tu_cam_thanh", "Tử Cấm Thành", "node", 2899189013),
+        ("kien_trung", "Điện Kiến Trung", "way", 285990348), ("duyet_thi", "Duyệt Thị Đường", "way", 172657563),
+        ("cua_hien_nhon", "Cửa Hiển Nhơn", "way", 264099611), ("cua_dong_ba", "Cửa Đông Ba", "way", 695810694),
+        ("cua_thuong_tu", "Cửa Thượng Tứ", "way", 173614468), ("hien_lam_cac", "Hiển Lâm Các", "way", 172657564),
+    ]
+    route_points = {}
+    for key, label, kind, oid in ROUTE_POINTS:
+        if kind == "node" and oid in d.nodes:
+            g = Point(d.nodes[oid])
+        elif kind == "way" and d.way_coords(oid):
+            pts = d.way_coords(oid)
+            g = Polygon(pts).centroid if len(pts) >= 4 and pts[0] == pts[-1] else LineString(pts).centroid
+        else:
+            log.warning("route point %s (%s %s) not in the OSM sample", key, kind, oid); continue
+        c = F.to_local(g)
+        if not F.box.contains(c):
+            continue
+        route_points[key] = {"x": round(c.x, 1), "z": round(-c.y, 1), "name": label, "osm": f"{kind}/{oid}",
+                             "ground": round(float(F.sample(ground, c.x, c.y)), 1)}
+    for b in bridges_out:
+        if b["mid_water"] and b["name"] in ("Cầu Dã Viên", "Cầu Phú Xuân", "Cầu Trường Tiền", "Cầu Nguyễn Hoàng") and b["len"] > 200:
+            key = "mid_" + {"Cầu Dã Viên": "da_vien", "Cầu Phú Xuân": "phu_xuan", "Cầu Trường Tiền": "truong_tien", "Cầu Nguyễn Hoàng": "nguyen_hoang"}[b["name"]]
+            if key not in route_points:
+                route_points[key] = {"x": b["mid_water"][0], "z": b["mid_water"][1], "name": b["name"], "bridge": True, "deck_y": b["deck_y"] / 10}
+    log.info("route points: %d (%s)", len(route_points), ", ".join(sorted(route_points)))
+
     meta = {
         "generated_at": C.utcnow(), "title": "Huế 3D — pilot demo",
         "frame": {"crs": "EPSG:32648", "origin_easting": F.e0, "origin_northing": F.n0, "x": "east (m)", "z": "south (m)", "y": "up (m, EGM2008-based)",
                   "xmin": round(F.xmin, 1), "xmax": round(F.xmax, 1), "zmin": round(-F.ymax, 1), "zmax": round(-F.ymin, 1)},
-        "river_level_m": RIVER_LEVEL, "places": places, "truong_tien": tt, "landmarks": landmarks,
+        "river_level_m": RIVER_LEVEL, "places": places, "truong_tien": tt, "landmarks": landmarks, "route_points": route_points,
         "counts": {"buildings": len(n_arr), "roads": len(roads_out), "bridges": len(bridges_out), "trees": int(len(tx)), "walls": len(walls_out), "water_polygons": len(water_out),
                    "buildings_dropped": dict(dropped),
                    "height_status": {"tag": int(sum(1 for v in hs_arr if v == 0)), "ml_estimate": int(sum(1 for v in hs_arr if v == 1)), "default": int(sum(1 for v in hs_arr if v == 2))}},

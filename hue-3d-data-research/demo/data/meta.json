@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-14T04:39:05Z",
+ "generated_at": "2026-11-14T05:45:16Z",
  "title": "Huế 3D — pilot demo",
  "frame": {
   "crs": "EPSG:32648",
@@ -128,6 +128,183 @@
    "base": 49,
    "name": "Điện Thái Hòa",
    "osm": "w531031566@12"
+  }
+ },
+ "route_points": {
+  "ga_hue": {
+   "x": -79.0,
+   "z": 1833.0,
+   "name": "Ga Huế",
+   "osm": "way/175063593",
+   "ground": 7.3
+  },
+  "phu_cam": {
+   "x": 969.4,
+   "z": 2246.5,
+   "name": "Nhà thờ Phủ Cam",
+   "osm": "way/118792054",
+   "ground": 13.3
+  },
+  "quoc_hoc": {
+   "x": 532.7,
+   "z": 1484.0,
+   "name": "Trường Quốc Học",
+   "osm": "way/695775622",
+   "ground": 7.5
+  },
+  "vincom": {
+   "x": 1641.4,
+   "z": 1085.1,
+   "name": "Vincom Plaza Huế",
+   "osm": "way/749331141",
+   "ground": 4.8
+  },
+  "cong_vien_3_2": {
+   "x": 1340.7,
+   "z": 456.7,
+   "name": "Công viên 3 Tháng 2",
+   "osm": "way/35926965",
+   "ground": 7.0
+  },
+  "cho_dong_ba": {
+   "x": 1035.0,
+   "z": 38.5,
+   "name": "Chợ Đông Ba",
+   "osm": "way/161714451",
+   "ground": 6.2
+  },
+  "cau_gia_hoi": {
+   "x": 1067.5,
+   "z": -124.7,
+   "name": "Cầu Gia Hội",
+   "osm": "way/1431132258",
+   "ground": 6.4
+  },
+  "gia_hoi": {
+   "x": 846.9,
+   "z": -1096.2,
+   "name": "Phố cổ Gia Hội",
+   "osm": "node/7270994492",
+   "ground": 5.5
+  },
+  "con_hen": {
+   "x": 1502.4,
+   "z": -923.4,
+   "name": "Cồn Hến",
+   "osm": "way/52656963",
+   "ground": 5.2
+  },
+  "con_da_vien": {
+   "x": -620.0,
+   "z": 1602.5,
+   "name": "Cồn Dã Viên",
+   "osm": "way/174746316",
+   "ground": 7.1
+  },
+  "nha_hat_song_huong": {
+   "x": -161.7,
+   "z": 1546.9,
+   "name": "Nhà hát Sông Hương",
+   "osm": "way/1033684220",
+   "ground": 6.4
+  },
+  "phu_van_lau": {
+   "x": 212.1,
+   "z": 827.2,
+   "name": "Phu Văn Lâu",
+   "osm": "way/531031520",
+   "ground": 6.6
+  },
+  "nghenh_luong": {
+   "x": 267.1,
+   "z": 904.5,
+   "name": "Nghênh Lương Đình",
+   "osm": "way/239568224",
+   "ground": 7.5
+  },
+  "cua_ngan": {
+   "x": 260.8,
+   "z": 595.4,
+   "name": "Cửa Ngăn",
+   "osm": "way/619851622",
+   "ground": 6.1
+  },
+  "tu_cam_thanh": {
+   "x": -128.7,
+   "z": 389.9,
+   "name": "Tử Cấm Thành",
+   "osm": "node/2899189013",
+   "ground": 4.9
+  },
+  "kien_trung": {
+   "x": -263.4,
+   "z": 213.1,
+   "name": "Điện Kiến Trung",
+   "osm": "way/285990348",
+   "ground": 5.5
+  },
+  "duyet_thi": {
+   "x": -52.0,
+   "z": 299.0,
+   "name": "Duyệt Thị Đường",
+   "osm": "way/172657563",
+   "ground": 6.1
+  },
+  "cua_hien_nhon": {
+   "x": 168.9,
+   "z": 245.4,
+   "name": "Cửa Hiển Nhơn",
+   "osm": "way/264099611",
+   "ground": 7.4
+  },
+  "cua_dong_ba": {
+   "x": 500.0,
+   "z": -504.7,
+   "name": "Cửa Đông Ba",
+   "osm": "way/695810694",
+   "ground": 7.3
+  },
+  "cua_thuong_tu": {
+   "x": 558.7,
+   "z": 346.1,
+   "name": "Cửa Thượng Tứ",
+   "osm": "way/173614468",
+   "ground": 7.8
+  },
+  "hien_lam_cac": {
+   "x": -198.8,
+   "z": 695.7,
+   "name": "Hiển Lâm Các",
+   "osm": "way/172657564",
+   "ground": 5.8
+  },
+  "mid_nguyen_hoang": {
+   "x": -2037.3,
+   "z": 1986.4,
+   "name": "Cầu Nguyễn Hoàng",
+   "bridge": true,
+   "deck_y": 7.0
+  },
+  "mid_da_vien": {
+   "x": -823.4,
+   "z": 1482.9,
+   "name": "Cầu Dã Viên",
+   "bridge": true,
+   "deck_y": 7.0
+  },
+  "mid_phu_xuan": {
+   "x": 680.2,
+   "z": 830.1,
+   "name": "Cầu Phú Xuân",
+   "bridge": true,
+   "deck_y": 7.5
+  },
+  "mid_truong_tien": {
+   "x": 1058.7,
+   "z": 441.2,
+   "name": "Cầu Trường Tiền",
+   "bridge": true,
+   "deck_y": 8.0
   }
  },
  "counts": {
