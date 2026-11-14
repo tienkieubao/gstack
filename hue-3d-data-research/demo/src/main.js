@@ -211,6 +211,11 @@ async function main() {
   $('focus-hint').addEventListener('click', () => canvas.focus({ preventScroll: true }));
   $('btn-view').addEventListener('click', () => { view = view === 'chase' ? 'fpv' : 'chase'; $('btn-view').textContent = view === 'chase' ? 'Góc nhìn: bám sau' : 'Góc nhìn: buồng lái'; });
   $('btn-reset').addEventListener('click', () => { uav.started = false; uav.crashes = 0; uav.touches = 0; setMode('manual'); });
+  $('hud-more').addEventListener('click', () => {
+    const open = !$('hud').classList.contains('expanded');
+    $('hud').classList.toggle('expanded', open); $('hud-more').setAttribute('aria-expanded', String(open));
+    $('hud-more').textContent = open ? 'Thu gọn ▴' : 'Tùy chọn ▾';
+  });
   $('rp-stop').addEventListener('click', () => { uav.auto = null; setMode('manual'); toast('Đã dừng lộ trình — bạn đang cầm lái tại chỗ.'); });
 
   const fmtTime = (sec) => { const m = Math.floor(sec / 60), s = Math.round(sec % 60); return m ? `${m} phút ${s.toString().padStart(2, '0')} giây` : `${s} giây`; };
@@ -402,7 +407,8 @@ async function main() {
       if (hudTimer <= 0) {
         hudTimer = 0.1;
         const s = uav.status;
-        $('hud-agl-label').textContent = s.overWater ? 'Trên mặt nước' : 'Trên mặt đất';
+        $('hud-agl-label').textContent = window.innerWidth <= 720 ? 'Độ cao' : (s.overWater ? 'Trên mặt nước' : 'Trên mặt đất');
+        $('hud-agl').parentElement.classList.toggle('water', s.overWater);   // jade = above water, ivory = above ground
         $('hud-agl').textContent = `${fmt(s.agl)} m`;
         $('hud-speed').textContent = `${fmt(s.speed * 3.6, 0)} km/h`;
         $('hud-gap').textContent = Number.isFinite(s.clearanceUp) ? `${fmt(s.clearanceUp)} m` : '—';
