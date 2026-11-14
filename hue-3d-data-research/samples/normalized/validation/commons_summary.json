@@ -1,25 +1,28 @@
 {
- "files_found": 215,
+ "checked_at": "2026-11-14T04:18:31Z",
+ "files_found": 208,
  "by_landmark": {
-  "ngo_mon": 66,
+  "ngo_mon": 50,
   "ky_dai": 13,
   "dien_thai_hoa": 100,
   "cau_truong_tien": 36,
-  "cau_phu_xuan": 0
+  "cau_phu_xuan": 9
  },
- "open_licence_files": 149,
+ "api_errors": {},
+ "open_licence_files": 158,
  "licences": {
-  "": 66,
-  "CC BY 2.0": 53,
-  "CC BY 3.0": 8,
-  "CC BY 4.0": 26,
+  "": 50,
+  "CC BY 2.0": 56,
+  "CC BY 3.0": 12,
+  "CC BY 4.0": 27,
   "CC BY-SA 2.0": 3,
-  "CC BY-SA 3.0": 12,
-  "CC BY-SA 4.0": 25,
-  "CC0": 12,
-  "Public domain": 10
+  "CC BY-SA 3.0": 15,
+  "CC BY-SA 4.0": 22,
+  "CC0": 11,
+  "Public domain": 12
  },
  "downloaded": 0,
+ "image_host_rate_limited": true,
  "category_counts": {
   "Category:Meridian Gate (Huế)": {
    "missing": true

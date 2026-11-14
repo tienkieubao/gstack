@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-14T03:41:51Z",
+ "generated_at": "2026-11-14T04:17:52Z",
  "crs": "EPSG:4326",
  "metric_crs_for_measurements": "EPSG:32648",
  "geopackage": "samples/normalized/hue_pilot_normalized.gpkg",

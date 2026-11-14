@@ -1,4 +1,638 @@
 {
+ "file_manifest": {
+  "algorithm": "sha256",
+  "files": {
+   "aoi/wards_osm.geojson": {
+    "bytes": 245389,
+    "sha256": "483a992775cd3523d7dc0d461479c4ec9937b4f12d4e51551cd8c4a0ee352b0d"
+   },
+   "aoi/zone_a_pilot.geojson": {
+    "bytes": 678,
+    "sha256": "184a1695e37c25bc19eb133b3af9b10aa823b50cd119dd554b6eea304e7e7f7e"
+   },
+   "aoi/zone_b_central_urban.geojson": {
+    "bytes": 88843,
+    "sha256": "5782580c80e012b7c131460fbde467d22ea66e68d1ef707a934741726281cb29"
+   },
+   "aoi/zone_c_hue_city_admin.geojson": {
+    "bytes": 202068,
+    "sha256": "1ca67147914c7d26c6faec662ee6dd1234500a4777acddbc18d0290f4175bd85"
+   },
+   "aoi/zone_c_hue_city_land.geojson": {
+    "bytes": 198314,
+    "sha256": "0d60446b1ed388c3779672186164d1b76ef3794faca7c4fcefcf03e4be56e170"
+   },
+   "samples/normalized/buildings_height/open_buildings_25d_2023_pilot_4m_uint16.tif": {
+    "bytes": 2499609,
+    "sha256": "50586d9518de415c5527be18634fff676477c95de2e2c49a1d154ec1f4b1b999"
+   },
+   "samples/normalized/buildings_height/overture_buildings_height_estimate.csv.gz": {
+    "bytes": 2138556,
+    "sha256": "34051a0f4acbf972ff023c408e813d2de653c69afe489677e93586ef8c461fd7"
+   },
+   "samples/normalized/geojson/osm_buildings.geojson.gz": {
+    "bytes": 284307,
+    "sha256": "7a6332a9033be4ecab3b9efa41baef69c9620980e09683b85e9dce365578567e"
+   },
+   "samples/normalized/geojson/osm_landcover.geojson": {
+    "bytes": 315593,
+    "sha256": "4310101b7d60ee13773ac4973bcc1a0cb8777ce14efd636d9584beb7299f3816"
+   },
+   "samples/normalized/geojson/osm_point_features.geojson": {
+    "bytes": 279627,
+    "sha256": "16afc0d3c82d7c8fab246b85d5f06ced60073372e97ac3f212dcc99aa6aaa430"
+   },
+   "samples/normalized/geojson/osm_roads.geojson.gz": {
+    "bytes": 332825,
+    "sha256": "d365bb8dabbcc5e68698d9bb2e80e8c3df149b7187c86d063b7aa00da669dae8"
+   },
+   "samples/normalized/geojson/osm_turn_restrictions.geojson": {
+    "bytes": 7564,
+    "sha256": "dc00a813a292f5f35a4b92f93c90154ffcfe378646c2b0aa98caaa30650db936"
+   },
+   "samples/normalized/geojson/overture_buildings.geojson.gz": {
+    "bytes": 4430954,
+    "sha256": "facc1413561cd0d13b67655da8c3c2b32fa0b37326f6e9221d13b7bc1157bec1"
+   },
+   "samples/normalized/geojson/overture_infrastructure.geojson": {
+    "bytes": 332122,
+    "sha256": "eb50730286896daa4ca7976ca5af836fa9bb2a333ee05d6b7e7b1fe6c0c0c5c1"
+   },
+   "samples/normalized/geojson/overture_land_use.geojson": {
+    "bytes": 241596,
+    "sha256": "377ff0040638164ddf5f0a1b26656ff54b0a17470ac33e5c5accbb7ee4ad668f"
+   },
+   "samples/normalized/geojson/overture_segments.geojson.gz": {
+    "bytes": 389481,
+    "sha256": "418bf6283a8a5c85474bdd70619b6e05dd0e356cd9ce31534efe8552ab734023"
+   },
+   "samples/normalized/geojson/overture_water.geojson": {
+    "bytes": 147947,
+    "sha256": "eaefbf26b0bc73b8f376235d9d306fc0941b3baa37ddcbc35063082809f9cc7b"
+   },
+   "samples/normalized/normalize_summary.json": {
+    "bytes": 1946,
+    "sha256": "48aa390b0210ab55b5183731fa4bb0a809991031db27d9b9f1f5af207dba8996"
+   },
+   "samples/normalized/reference/S2B_48QYD_20260330_0_L2A_TCI_pilot_quicklook.png": {
+    "bytes": 546553,
+    "sha256": "84218469d64e3d4604f999780046e78d8022677cd3dd55c6ba13702881eeb742"
+   },
+   "samples/normalized/reference/pilot_overview.png": {
+    "bytes": 3089635,
+    "sha256": "6ad921cf95f53250fe34a17ef9766934df3bda0f4f3823e49601cfa5941b9b1a"
+   },
+   "samples/normalized/validation/bridges.csv": {
+    "bytes": 14351,
+    "sha256": "22bfcfed83e90aa4df9719e989a14305c695e51347791acbf98d3c998d1ea612"
+   },
+   "samples/normalized/validation/building_height_check.json": {
+    "bytes": 5104,
+    "sha256": "b0e0cd7dbffae831bd81ffaef9e939853818b8884bd73a330832d53f3b9465bf"
+   },
+   "samples/normalized/validation/commons_reference_photos.csv": {
+    "bytes": 53656,
+    "sha256": "47a2e7c039612e4cfbc19eed9298915deecf63fe11f2cd72da1029c1f6a1847a"
+   },
+   "samples/normalized/validation/commons_summary.json": {
+    "bytes": 1460,
+    "sha256": "cc120ee369169ed201f560437901b719fae29f09b2fba88cc01116f654695bbf"
+   },
+   "samples/normalized/validation/coverage_stats.json": {
+    "bytes": 3283,
+    "sha256": "2b00c92cd0c1c74d3433131f9dd078474b6a0d871c70de1439bcd5812964194e"
+   },
+   "samples/normalized/validation/crossings.csv": {
+    "bytes": 4476,
+    "sha256": "8df153a5b585b7209a5395223fdd474555b8ba979036f4496e798c740fbde2bd"
+   },
+   "samples/normalized/validation/landmarks.csv": {
+    "bytes": 3805,
+    "sha256": "3b2bbbb800595ecab754b352c7ef6952ceb3f0f6213c97a59814acfea2093377"
+   },
+   "samples/normalized/validation/panoramax_probe.json": {
+    "bytes": 101,
+    "sha256": "cf2dc0ef7aec126f48dd5709d9743661e83e44464a0e8924410b58bcdca97464"
+   },
+   "samples/normalized/validation/pilot_validation.json": {
+    "bytes": 18059,
+    "sha256": "950e78b59227f487120a90e663e70e1f76caf0ec2c0557759afc1e1d9c8fecd3"
+   },
+   "samples/normalized/validation/road_attribute_completeness.csv": {
+    "bytes": 476,
+    "sha256": "467291435ea2348901faf8c653eb10ac6077542b9270938934d258a73dc8fcce"
+   },
+   "samples/normalized/validation/roads_over_water_without_bridge_tag.csv": {
+    "bytes": 205,
+    "sha256": "3b8c8668effb8f730f0ce22ebaf491294d7b7f7e7be84fbc2d85035a2a3bfc5e"
+   },
+   "samples/normalized/validation/sketchfab_models.csv": {
+    "bytes": 13190,
+    "sha256": "a41a5d9c2855f6aa2b2290576ff0e4325f12b340c447836badeea9595b42cf33"
+   },
+   "samples/normalized/validation/wikidata_landmarks.json": {
+    "bytes": 2248,
+    "sha256": "4e843b476cb7af90445d1c115ba2441c24ea665bb8e6be36cf21a5acb8e44446"
+   },
+   "samples/raw/dem/copernicus_glo30_N16E107_pilot_window.tif": {
+    "bytes": 78786,
+    "sha256": "659b713319acfd14b57077ebc8da43b8ef1bf9754c3bcc5b50a6fc46e40144ce"
+   },
+   "samples/raw/dem/tilezen_skadi_N16E107_pilot_window.tif": {
+    "bytes": 11510,
+    "sha256": "ea5acdb093a0c61ee9b87c94f71cf2c3c590347789caf3729996a9e00a6efa2a"
+   },
+   "samples/raw/landcover/esa_worldcover_2021_v200_pilot_window.tif": {
+    "bytes": 30924,
+    "sha256": "22cfd57fd00dc4f0e509819c75c5cd1b61bede7fd051b3727afcd2da20a74bac"
+   },
+   "samples/raw/osm/boundaries/relation_1891483_full.osm.gz": {
+    "bytes": 134226,
+    "sha256": "b7b0d89506684efda9479e725cb9991470d5d4a68802ea569c7d667001a0cdb2"
+   },
+   "samples/raw/osm/boundaries/relation_1891483_full.osm.gz.meta.json": {
+    "bytes": 390,
+    "sha256": "ad852d9f5683082e3d22fb2f938389550a9cfc81bcb71256ae6476ef51d51cc8"
+   },
+   "samples/raw/osm/boundaries/relation_19324109_full.osm.gz": {
+    "bytes": 25743,
+    "sha256": "4108d01a247f0378bb9e27e3409710582fd42f07dc0656cc46740acdf9962399"
+   },
+   "samples/raw/osm/boundaries/relation_19324109_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "e3c472ad4ce991f43e1e0793bc564998ef9339fe319bd73d9e59ee0918ab2afe"
+   },
+   "samples/raw/osm/boundaries/relation_19324110_full.osm.gz": {
+    "bytes": 40352,
+    "sha256": "c3fb40d83868eba4f2e49e641775fefeb96fca843462c57686d468b8d14306e6"
+   },
+   "samples/raw/osm/boundaries/relation_19324110_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "d5a234a6dc165e78c9c5cf802b291eceff846c4624f3130627f1a197d63e0152"
+   },
+   "samples/raw/osm/boundaries/relation_19324111_full.osm.gz": {
+    "bytes": 21291,
+    "sha256": "d3ef4d598d5f4fdf8faa39098b8e8973fd1b501309afc873f22ca3a120c28319"
+   },
+   "samples/raw/osm/boundaries/relation_19324111_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "c2d8e0772f78e8db5b2fdb262091efac05e84749f1f5e0e7d19f4db9b8838beb"
+   },
+   "samples/raw/osm/boundaries/relation_19324112_full.osm.gz": {
+    "bytes": 21049,
+    "sha256": "d0aea032f3436f2073592f1607a0d7e26c85338008993b8f3730493d075298cf"
+   },
+   "samples/raw/osm/boundaries/relation_19324112_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "a083470547a46670ca1badfb90e2c5434be0dc216c3b5e7f86f7ec31f3f81a07"
+   },
+   "samples/raw/osm/boundaries/relation_19324113_full.osm.gz": {
+    "bytes": 9188,
+    "sha256": "227f8cc4b5d9e15a6a77cf73f2ac75588b189b2d4d0035ce51e2903c52f630ba"
+   },
+   "samples/raw/osm/boundaries/relation_19324113_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "079cc759b781024fa3bc9b4f3119951f4d131c9af0b51607e6c9e6e903bbc5ef"
+   },
+   "samples/raw/osm/boundaries/relation_19324114_full.osm.gz": {
+    "bytes": 13018,
+    "sha256": "2e20ea6144b25a6fb83d3444734c59b2ab5b8ef957bc7059d2a76fde98b3838d"
+   },
+   "samples/raw/osm/boundaries/relation_19324114_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "cea5d2019c86fe68c489b573dd27502ed7eb1948b6c136c35084d13b8a8da7ae"
+   },
+   "samples/raw/osm/boundaries/relation_19324115_full.osm.gz": {
+    "bytes": 6255,
+    "sha256": "362578335bacf1ca812824a2f3f287dd5bae07ce363a72272949118401095cf5"
+   },
+   "samples/raw/osm/boundaries/relation_19324115_full.osm.gz.meta.json": {
+    "bytes": 390,
+    "sha256": "b57d3f136468590415b513f10c9433c853ca9b945b3fce775664e5bbd0506e84"
+   },
+   "samples/raw/osm/boundaries/relation_19325227_full.osm.gz": {
+    "bytes": 11234,
+    "sha256": "57fb607def2c82f3387bd2c47e0689ccf2d99ab10c96517a2c51a0da400c6431"
+   },
+   "samples/raw/osm/boundaries/relation_19325227_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "de4d2ff66a61c0ba3480535055efb088aa01be0194dfc40630101e4319137ceb"
+   },
+   "samples/raw/osm/boundaries/relation_19325235_full.osm.gz": {
+    "bytes": 13351,
+    "sha256": "29e27403cb7800a1a7a3d21ba5a48285baf58c601b3dd36c62bce833afbd5621"
+   },
+   "samples/raw/osm/boundaries/relation_19325235_full.osm.gz.meta.json": {
+    "bytes": 391,
+    "sha256": "d8f2b022f55d77dd02f535e94f0a1af414b9805ab3d3c5fe3cadb8ad24083b4c"
+   },
+   "samples/raw/osm/manifest.json": {
+    "bytes": 8542,
+    "sha256": "f55f25c2d8543adfe191116afa216cf1bd561508c62c46f32ca8c72128c2009b"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.45200_107.56750_16.46250.osm.gz": {
+    "bytes": 79047,
+    "sha256": "23b0e38f41e0d07a64c91af6c0cbbca02a8e4b19f17f8784a7796924bc6578da"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.45200_107.56750_16.46250.osm.gz.meta.json": {
+    "bytes": 498,
+    "sha256": "cb5520f84ece2a98a92479e335776ec67a14d1ac740863dccd08ef1cdab11ee7"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.46250_107.56750_16.47300.osm.gz": {
+    "bytes": 96086,
+    "sha256": "37f2f084201cb662b3cbb184ef9076a2b65085a1e35edf726f8f1c8462369aea"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.46250_107.56750_16.47300.osm.gz.meta.json": {
+    "bytes": 498,
+    "sha256": "d6897421f6b046c8145c8968dddf61ddaaa028ada333e328f84047514e56b5c9"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.47300_107.56750_16.48350.osm.gz": {
+    "bytes": 105156,
+    "sha256": "9c1cf8623fc344b03a3b68eff0857c10451a152015f5dc09bc1a50a19d0b32e7"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.47300_107.56750_16.48350.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "926169b3c901fd470184c417f8cc83ca02cd85df7b1102dd3888b2f959acd173"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.48350_107.56750_16.49400.osm.gz": {
+    "bytes": 47496,
+    "sha256": "af5887f1798096a80e9bc787c2768d5e02944fdab36cef0591413f98a03b9c5d"
+   },
+   "samples/raw/osm/tiles/map_107.55600_16.48350_107.56750_16.49400.osm.gz.meta.json": {
+    "bytes": 498,
+    "sha256": "5be0bcd3123ffdc76612693cfcbb75b2d61eefb73fe0d356490fb45e89c4d62f"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.45200_107.57900_16.46250.osm.gz": {
+    "bytes": 118569,
+    "sha256": "b4062000db3ac91cb5d12bd2e190ec219d272825e0ad5d34f754c798a0aff249"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.45200_107.57900_16.46250.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "9d55fd442d1780094f1c5db7386d1cc83aaeef807a1fc1130df50ff4b5adfe1e"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.46250_107.57900_16.47300.osm.gz": {
+    "bytes": 159267,
+    "sha256": "2ca3dc54f3f739008efddc4600d4f53605537ccc658ac45e9d47ca398e92d36f"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.46250_107.57900_16.47300.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "28f1c716068724f87a177af65c562db24f843fbf85904048a73b796bed9f8f02"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.47300_107.57900_16.48350.osm.gz": {
+    "bytes": 115921,
+    "sha256": "6113dde2465d3f332952775e7e83c9825956dddd508bd7c5f646bb5965487fe6"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.47300_107.57900_16.48350.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "79be4da76ec4a41a17faccb36af8d5c97f73cf31a4e8b4e5552bda14e8c60a4c"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.48350_107.57900_16.49400.osm.gz": {
+    "bytes": 90094,
+    "sha256": "4dff6d4c3e1257e0c853c538b1023a4a4d3d129d235b0591ee974c65a5d59036"
+   },
+   "samples/raw/osm/tiles/map_107.56750_16.48350_107.57900_16.49400.osm.gz.meta.json": {
+    "bytes": 498,
+    "sha256": "25fbc8bae1d66a529f200b4a49212f5dab3b61a331713afe5f52c79a52816da6"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.45200_107.59050_16.46250.osm.gz": {
+    "bytes": 161657,
+    "sha256": "19b6c74c689a0d5ccc00dbb46bdc3d86b36fc97043144a1e0b793a926f11b742"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.45200_107.59050_16.46250.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "1169997705d8821f1c258d6bedec5d3c7a2bd2d8e19d459bf4a7985c0cf39735"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.46250_107.59050_16.47300.osm.gz": {
+    "bytes": 143172,
+    "sha256": "501084e8a17fecba0696a229162c87ce5eb9b30586e8a7c13bb9e6277afb3b80"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.46250_107.59050_16.47300.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "182263820ac8ef9f97bcbffaca4474911406ffe26dc4a5b6c98752c928402c7a"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.47300_107.59050_16.48350.osm.gz": {
+    "bytes": 101473,
+    "sha256": "3e520a40496117ee0473bfe8b6aa7ba9f04b650cd807c3a14b107a408500b61a"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.47300_107.59050_16.48350.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "12d4bb974188a00ffbf902882507100538a2c59a7abb83a73d6b4a798b96ea49"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.48350_107.59050_16.49400.osm.gz": {
+    "bytes": 62107,
+    "sha256": "230f2da203dfce1ea538d1b4f252ed3fef032864b1de0308e1d7d2b0f92abd39"
+   },
+   "samples/raw/osm/tiles/map_107.57900_16.48350_107.59050_16.49400.osm.gz.meta.json": {
+    "bytes": 498,
+    "sha256": "f45e2e4c352c75e8f1c1acd38e5f0cd8b597cb7f9b050004a1f43e7f33f0bc2f"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.45200_107.60200_16.46250.osm.gz": {
+    "bytes": 207207,
+    "sha256": "8077299ce98cdbc7a642a799815e411860ced5d4851333dde344931c5a1d3050"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.45200_107.60200_16.46250.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "5eda749a0e40f19f272e633917dc70174ec7492026ce7407f0771a58ecde7262"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.46250_107.60200_16.47300.osm.gz": {
+    "bytes": 212854,
+    "sha256": "9ac1c032fdfa0ed0e63ed4569d5327b5b12616b0b53e9b3172dd60e9fb0e32de"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.46250_107.60200_16.47300.osm.gz.meta.json": {
+    "bytes": 499,
+    "sha256": "c1f0ffabb5b4cfe059e2c646b819f536a49b379c8ce72095dd3c5df78a0c071d"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.47300_107.60200_16.48350.osm.gz": {
+    "bytes": 87078,
+    "sha256": "be2dda307b5965a71c257aa1b9e3947b4b582a5e1342053b46a892694bf54e69"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.47300_107.60200_16.48350.osm.gz.meta.json": {
+    "bytes": 498,
+    "sha256": "8b10afc5f67f52e96a22593ba827ce12457f43f505be2fc764040f0c5cf1ec69"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.48350_107.60200_16.49400.osm.gz": {
+    "bytes": 68989,
+    "sha256": "51bd9b4075904079e8855d4fdeddd684e7992c20d50e70b2fd7e30c5396f1c02"
+   },
+   "samples/raw/osm/tiles/map_107.59050_16.48350_107.60200_16.49400.osm.gz.meta.json": {
+    "bytes": 498,
+    "sha256": "a26b9bfa50b02207aed04de93c0b0eb0a8ed980756ecae7801178cbbfaa72a03"
+   },
+   "samples/raw/overture/2026-10-21.0/building.parquet": {
+    "bytes": 5856655,
+    "sha256": "0be9d0154c692043602ab2fdefc43171b4dd75cdedf3e4cb4e82dabe44e9d35e"
+   },
+   "samples/raw/overture/2026-10-21.0/building_part.parquet": {
+    "bytes": 16343,
+    "sha256": "5eb91b6969e7bf5525649a37513cd6c46a72359c42a6fd816ef913cdb9d5b75a"
+   },
+   "samples/raw/overture/2026-10-21.0/connector.parquet": {
+    "bytes": 367115,
+    "sha256": "9e58336a9850452ab6293fdecadf2dff50f745e06e55c86870db737abc24ee4e"
+   },
+   "samples/raw/overture/2026-10-21.0/division_area_hue.parquet": {
+    "bytes": 131143,
+    "sha256": "9a571c0d11e9a52c0d0fdbcce518e6f0f8d6f355f81923ba572f4b7905448d27"
+   },
+   "samples/raw/overture/2026-10-21.0/infrastructure.parquet": {
+    "bytes": 102851,
+    "sha256": "e246b5e8e81cd227d5f995cec0b5f65d4b1c3b150223a571fdc88afd2abab46b"
+   },
+   "samples/raw/overture/2026-10-21.0/land.parquet": {
+    "bytes": 50941,
+    "sha256": "986672d9ee2d24da283cd8dac63636b1ae3803a753278ce72fcb52f3a6f560c1"
+   },
+   "samples/raw/overture/2026-10-21.0/land_cover.parquet": {
+    "bytes": 738984,
+    "sha256": "fca44adbc440555946d00b8ab59924cdeee0e3855ff7c60ce6f6c2432592ca04"
+   },
+   "samples/raw/overture/2026-10-21.0/land_use.parquet": {
+    "bytes": 211295,
+    "sha256": "9792637dad67ca4870d60b26f3966eda1511a6294a0de01c8124b46f5f875116"
+   },
+   "samples/raw/overture/2026-10-21.0/segment.parquet": {
+    "bytes": 782307,
+    "sha256": "880023e1413aad1ea4af9c17ae278d3df173d9d7278f3f720851c5ef2b8c349f"
+   },
+   "samples/raw/overture/2026-10-21.0/water.parquet": {
+    "bytes": 111922,
+    "sha256": "1bb795f7153f4d3ecf150140e0c6dec84244791582c44f9c5f0367ff3c5bf050"
+   },
+   "samples/raw/probes/panoramax/search_city_bbox.json": {
+    "bytes": 26,
+    "sha256": "0dd64954908904afec56dbab0752c22e79a6cb5c34a7e7aab12c50976c7a1da7"
+   },
+   "samples/raw/probes/panoramax/search_city_bbox.json.fetchmeta.json": {
+    "bytes": 248,
+    "sha256": "f9a9b261570f07099c2fa56e9da6605f73586f9cd90bd879cb7100ad01a8161e"
+   },
+   "samples/raw/probes/panoramax/search_pilot.json": {
+    "bytes": 26,
+    "sha256": "0dd64954908904afec56dbab0752c22e79a6cb5c34a7e7aab12c50976c7a1da7"
+   },
+   "samples/raw/probes/panoramax/search_pilot.json.fetchmeta.json": {
+    "bytes": 254,
+    "sha256": "e552c5f051a2eb2d132cafeaf5c6bb7b932443e8d92c10510a9eac09800c4dc8"
+   },
+   "samples/raw/probes/sketchfab/model_113687d51c5c4ec18f914bf5bc34f467.json": {
+    "bytes": 5893,
+    "sha256": "a24ab614e6abfaa3a8a17881bbec3bf447182bc8f0cc4393eb5f48460e85659b"
+   },
+   "samples/raw/probes/sketchfab/model_113687d51c5c4ec18f914bf5bc34f467.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "c3ee6975cbc7746f9c4b003c35bdbe9079b24ebb3d2232e8bc42a1b41a733cc3"
+   },
+   "samples/raw/probes/sketchfab/model_16758b5def3f42bdb6d9619a4217e8a6.json": {
+    "bytes": 4671,
+    "sha256": "a9822804149355bbf73b6832690a1cda135f5c341c47e80afc304d928050691c"
+   },
+   "samples/raw/probes/sketchfab/model_16758b5def3f42bdb6d9619a4217e8a6.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "d9608744c8a268220614095847229a9a6a04158a75310077f20a3573594cc234"
+   },
+   "samples/raw/probes/sketchfab/model_1e07806a73ba42febc746a0c58142576.json": {
+    "bytes": 4597,
+    "sha256": "c8659fb81817c646a2430ffdd81e876395f7e906485f6dc5f4d4e86230c3aa23"
+   },
+   "samples/raw/probes/sketchfab/model_1e07806a73ba42febc746a0c58142576.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "950b049234f2f8b72979e6f172fa9c0fa6e36b9d3bb56f0d1384062a06919f6c"
+   },
+   "samples/raw/probes/sketchfab/model_4a1866001d034611a47b9116695da1d2.json": {
+    "bytes": 6559,
+    "sha256": "1019e9a7050b59953a608a47a06b4b919ebeb821537e9200f952b903859f3747"
+   },
+   "samples/raw/probes/sketchfab/model_4a1866001d034611a47b9116695da1d2.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "a0cb6c145e1dd62ba78ec5e365e06a8d686d66ec887f33beedc63833dec00171"
+   },
+   "samples/raw/probes/sketchfab/model_6acf4f949d5247f3afa6afdaa7c188bd.json": {
+    "bytes": 5101,
+    "sha256": "f6ac1394065add0ad7aab7246f85f1758b7c3710b87a2eb0098ffdd7c060619d"
+   },
+   "samples/raw/probes/sketchfab/model_6acf4f949d5247f3afa6afdaa7c188bd.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "e162028932652a748062a869d1d86a46b5af2072bec8dde16f152368d9cd02d1"
+   },
+   "samples/raw/probes/sketchfab/model_a567dbe70045482eba5902e29778d6f2.json": {
+    "bytes": 3941,
+    "sha256": "38f1a03305f923cf3942741f0c10fcd3a5d50756c9e5a1c68ccf45b8cd166c39"
+   },
+   "samples/raw/probes/sketchfab/model_a567dbe70045482eba5902e29778d6f2.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "989bfe3d2bff5d73da5f6934877f1af07a54a5ad1572161601e6b0594c0ca7d5"
+   },
+   "samples/raw/probes/sketchfab/model_b0232236c2df44aa8c7e55c1362b18a3.json": {
+    "bytes": 4586,
+    "sha256": "4e0c3438b92ded43b11647df8b4a2ba30b5f0a01a0618f617d6291ba52cf1043"
+   },
+   "samples/raw/probes/sketchfab/model_b0232236c2df44aa8c7e55c1362b18a3.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "ceb99cdf5d39d25521dcc9d99429161e436c7dcb425836c734899b0d77485177"
+   },
+   "samples/raw/probes/sketchfab/model_b5d78ecd5e62483192d7ccd193bc063b.json": {
+    "bytes": 5104,
+    "sha256": "cc3448cf1a4e544fae208bff39626fb5bd32ca4bd6a340a1e92ed81653868838"
+   },
+   "samples/raw/probes/sketchfab/model_b5d78ecd5e62483192d7ccd193bc063b.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "1da1d782871c52adbc74d687e8be6d2c9378debf4a28f7313716f1ccffcf1894"
+   },
+   "samples/raw/probes/sketchfab/model_c8c6304d8ff846f89f972164b2eda9ac.json": {
+    "bytes": 5933,
+    "sha256": "0aba1d7b480657bf80cf052671c7bf96d5babae5d476938c1e5a580825f94ab1"
+   },
+   "samples/raw/probes/sketchfab/model_c8c6304d8ff846f89f972164b2eda9ac.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "d83d01868dfe72a481a6a33b8b32cc0a5e6fadbb10fcbbe0252c27d0e950fbd1"
+   },
+   "samples/raw/probes/sketchfab/model_dca05e147d79420eb3696eefcf8e1f19.json": {
+    "bytes": 6085,
+    "sha256": "3b942906b5806ffac1d2e63c7353c2291ac06ef98e5567381cd812419499b631"
+   },
+   "samples/raw/probes/sketchfab/model_dca05e147d79420eb3696eefcf8e1f19.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "c76df0f74b0d2a0f57dbd8d04e56deb858e4c2e54f2bcd6d2465c8149d9c7a54"
+   },
+   "samples/raw/probes/sketchfab/model_ed319997b5354c1eb9b8dbf810044295.json": {
+    "bytes": 5898,
+    "sha256": "aad5b54d0ec9b858c5ebd594e80be07ab498580de90f883142117420471791d7"
+   },
+   "samples/raw/probes/sketchfab/model_ed319997b5354c1eb9b8dbf810044295.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "1f223a19cf6d4dda90e28e75bc6f364b62135e871593d6a932c722c814771776"
+   },
+   "samples/raw/probes/sketchfab/model_fd6df65eae404a7dbf006f68e7857a2e.json": {
+    "bytes": 5226,
+    "sha256": "681762d94a67334873e3ffec815a47a9c86e13fdcbe79ecf95b852de1a30b7b9"
+   },
+   "samples/raw/probes/sketchfab/model_fd6df65eae404a7dbf006f68e7857a2e.json.fetchmeta.json": {
+    "bytes": 239,
+    "sha256": "1e8f70e153b93ea485608a5b2644c059bb0c1a000e2f1ddb3554c8abf14d7fd3"
+   },
+   "samples/raw/probes/sketchfab/search_dai_noi_hue.json": {
+    "bytes": 78155,
+    "sha256": "8429e37593a737b1f8a559ec359369d8e27563081d5c61d903b2ce001b9519c0"
+   },
+   "samples/raw/probes/sketchfab/search_dai_noi_hue.json.fetchmeta.json": {
+    "bytes": 242,
+    "sha256": "e6e2a5c90da30954b3076ff2fbe7cc66680b5affcca4c2aaf58a800e1af628ca"
+   },
+   "samples/raw/probes/sketchfab/search_hue_citadel.json": {
+    "bytes": 85982,
+    "sha256": "cfcd6956619ea47eab04642d88500d2c85eb99c98a91caf4f4cf1a9de2751339"
+   },
+   "samples/raw/probes/sketchfab/search_hue_citadel.json.fetchmeta.json": {
+    "bytes": 242,
+    "sha256": "424a71a4941bf68e7715e5bf3812a44ae0c8e512308b6a1a78a36955d5d432ac"
+   },
+   "samples/raw/probes/sketchfab/search_hue_imperial_city.json": {
+    "bytes": 66884,
+    "sha256": "b2050e778ee236b1799533a30d0d8d368c0b8bf03114baa0901a77ea29edd40a"
+   },
+   "samples/raw/probes/sketchfab/search_hue_imperial_city.json.fetchmeta.json": {
+    "bytes": 248,
+    "sha256": "f8e9703268f5d24b6f271867bdecc639181dbce8ce7d3575d188ccd786ccb1dd"
+   },
+   "samples/raw/probes/sketchfab/search_hue_vietnam.json": {
+    "bytes": 106830,
+    "sha256": "c1d7a9b8856c196200c1c682ccfd72540634663f583df11f25847acc234bfa48"
+   },
+   "samples/raw/probes/sketchfab/search_hue_vietnam.json.fetchmeta.json": {
+    "bytes": 243,
+    "sha256": "dc0633736ca27a736f955fa7242a7036e164b22b1ac071ff20d173bdfc229954"
+   },
+   "samples/raw/probes/sketchfab/search_ngo_mon.json": {
+    "bytes": 48243,
+    "sha256": "d3a3f5e352e8c72cc3e01f1cd551040545c5584c00860055b645312c5eabec60"
+   },
+   "samples/raw/probes/sketchfab/search_ngo_mon.json.fetchmeta.json": {
+    "bytes": 238,
+    "sha256": "eecc63237cf9f15f0039cbe4bb49466a2becaeaa8b60814458afa67aaa1a9eef"
+   },
+   "samples/raw/probes/sketchfab/search_thien_mu_pagoda.json": {
+    "bytes": 11469,
+    "sha256": "4c8361ed20692cb03ad94e7ec0a6c502840a61a440899d9d3489f837261120c2"
+   },
+   "samples/raw/probes/sketchfab/search_thien_mu_pagoda.json.fetchmeta.json": {
+    "bytes": 246,
+    "sha256": "4e9aa34781f292734cf3f8240843c2451b8932a5f5a3e65a93832c96027e90f2"
+   },
+   "samples/raw/probes/sketchfab/search_truong_tien_bridge.json": {
+    "bytes": 82,
+    "sha256": "9bc956b4753bbd9cbfd51837ba1d5db4e3c337c71817b58a4627466220c62af3"
+   },
+   "samples/raw/probes/sketchfab/search_truong_tien_bridge.json.fetchmeta.json": {
+    "bytes": 272,
+    "sha256": "716329275e79cf5e928d8cf0f74cbd13fc5171789fc908443e173cd854c39d8d"
+   },
+   "samples/raw/probes/wikidata_entities.json": {
+    "bytes": 79973,
+    "sha256": "58092e917a8f4cc7da58f881a66215205bb9fec9acfd592c55aea735abc41544"
+   },
+   "samples/raw/probes/wikidata_entities.json.fetchmeta.json": {
+    "bytes": 371,
+    "sha256": "bb41739e6bc51f709e6120dbd404a0ca5b25ea3d8803c42972009abe59f89d9c"
+   },
+   "samples/raw/reference_photos/api/categoryinfo.json": {
+    "bytes": 1324,
+    "sha256": "5a3fc3cb38565a3219c5fa617bcf4f84c4e8b92cfd33216c70f39d8ce779eb82"
+   },
+   "samples/raw/reference_photos/api/categoryinfo.json.fetchmeta.json": {
+    "bytes": 703,
+    "sha256": "d0f5d5886bbb87f2e8f5c415ae803012f6076386c219031d97c6a7e9b2039ba4"
+   },
+   "samples/raw/reference_photos/api/geosearch_cau_phu_xuan.json": {
+    "bytes": 22397,
+    "sha256": "40f534b3d7e92f749fb9dada09c20779605c29098850bb98472bab6e6b8fd71f"
+   },
+   "samples/raw/reference_photos/api/geosearch_cau_phu_xuan.json.fetchmeta.json": {
+    "bytes": 587,
+    "sha256": "422ccb880f3bb0130f0cae99960bdc576c191ae1c73b35c559212df0661cb12b"
+   },
+   "samples/raw/reference_photos/api/geosearch_cau_truong_tien.json": {
+    "bytes": 99268,
+    "sha256": "8511ec49b76ba280808bfadc50d2fb63805d786dd40abd3e64fd8ce64660cc5e"
+   },
+   "samples/raw/reference_photos/api/geosearch_cau_truong_tien.json.fetchmeta.json": {
+    "bytes": 588,
+    "sha256": "80ab9d2a1cd2f4ccd98d089c14485cca48830a00373f749492493f358887e97e"
+   },
+   "samples/raw/reference_photos/api/geosearch_dien_thai_hoa.json": {
+    "bytes": 120256,
+    "sha256": "750005f6df110d73e65264a285dcf4806bb75040b73623030705091f4f04080e"
+   },
+   "samples/raw/reference_photos/api/geosearch_dien_thai_hoa.json.fetchmeta.json": {
+    "bytes": 590,
+    "sha256": "e8b9f1a9ea5ba987d75b1b6abaa2fddeecfddadb892497b522400a02dac43dd9"
+   },
+   "samples/raw/reference_photos/api/geosearch_ky_dai.json": {
+    "bytes": 35048,
+    "sha256": "d559a157c2baf3d2af46597484d79f97281f55b8e8b525f580171edfdab64252"
+   },
+   "samples/raw/reference_photos/api/geosearch_ky_dai.json.fetchmeta.json": {
+    "bytes": 589,
+    "sha256": "21364066a8b29493346d0524bb850939c45fe9182ebc52e19ba2c20b5ccec087"
+   },
+   "samples/raw/reference_photos/api/geosearch_ngo_mon.json": {
+    "bytes": 136641,
+    "sha256": "d12d92c8c4ba15c72571157462a286f7d817f26a3fa17f1d09be2e8bb2d46ac5"
+   },
+   "samples/raw/reference_photos/api/geosearch_ngo_mon.json.fetchmeta.json": {
+    "bytes": 590,
+    "sha256": "550dd06b9d31ae93779244967a3f7667587a621472709f1863fea9ad1f2613ff"
+   },
+   "samples/raw/sentinel2/S2B_48QYD_20260330_0_L2A_TCI_pilot_window.tif": {
+    "bytes": 637802,
+    "sha256": "b27c80b76d95948c1fe5af516827fcd0c7d1f4cc736deaa6178298972d48e7c3"
+   },
+   "samples/raw/sentinel2/stac_search_low_cloud.json": {
+    "bytes": 282334,
+    "sha256": "60ccde7f111cf594d7b3fc501429345e116214f5779169f92e52953a6916ed8c"
+   }
+  },
+  "generated_at": "2026-11-14T04:18:45Z"
+ },
  "note": "One record per raw or normalized artefact. retrieved_at is when this project fetched the bytes; it is NOT the data's capture date.",
  "records": {
   "samples/normalized/": {
@@ -59,37 +693,10 @@
      "sha256_file": "377ff0040638164ddf5f0a1b26656ff54b0a17470ac33e5c5accbb7ee4ad668f"
     }
    ],
-   "generated_at": "2026-11-14T03:41:51Z",
+   "generated_at": "2026-11-14T04:17:52Z",
    "kind": "derived",
    "licence": "ODbL 1.0 (produced work/derivative database of OSM + Overture rows; Google Open Buildings rows CC BY 4.0, Microsoft rows ODbL)",
    "script": "scripts/05_normalize.py"
-  },
-  "samples/normalized/buildings_height/open_buildings_25d_2023_pilot_2m.tif": {
-   "attribution": "Google Research Open Buildings 2.5D Temporal Dataset",
-   "bytes": 26183959,
-   "crs": "EPSG:32648; heights in metres above ground",
-   "data_date_note": "Model inference for mid-2023 from Sentinel-2 time series; not a survey.",
-   "data_url": "https://storage.googleapis.com/open-buildings-temporal-data/v1/geotiffs/3141c_2023_06_30/tile_F73tKZs3AmI.tif",
-   "derived": [
-    "samples/normalized/buildings_height/overture_buildings_height_estimate.csv.gz",
-    "samples/normalized/validation/building_height_check.json"
-   ],
-   "kind": "derived (window + 4x mean decimation of the source grid)",
-   "landing_url": "https://sites.research.google/gr/open-buildings/temporal/",
-   "licence": "CC BY 4.0 or ODbL 1.0 (user's choice)",
-   "provider": "Google Research",
-   "retrieved_at": "2026-11-14T03:57:29Z",
-   "script": "scripts/09_fetch_building_heights.py",
-   "sha256_file": "2eb626bdefadac9abdef9d51901b5cc7ded8b3bcd18b7071ee6b7b7cadd225c3",
-   "source": "Google Open Buildings 2.5D Temporal v1 (epoch 2023-06-30)",
-   "source_object": {
-    "generation": "1730367846642016",
-    "md5Hash": "JJcjKR95HJJ5HAUYTmpcKg==",
-    "name": "v1/geotiffs/3141c_2023_06_30/tile_F73tKZs3AmI.tif",
-    "size": "865166604",
-    "timeCreated": "2024-10-31T09:44:06.899Z",
-    "updated": "2024-10-31T09:44:06.899Z"
-   }
   },
   "samples/normalized/buildings_height/open_buildings_25d_2023_pilot_4m_uint16.tif": {
    "attribution": "Google Research Open Buildings 2.5D Temporal Dataset",
@@ -105,7 +712,7 @@
    "landing_url": "https://sites.research.google/gr/open-buildings/temporal/",
    "licence": "CC BY 4.0 or ODbL 1.0 (user's choice)",
    "provider": "Google Research",
-   "retrieved_at": "2026-11-14T03:57:49Z",
+   "retrieved_at": "2026-11-14T04:18:37Z",
    "script": "scripts/09_fetch_building_heights.py",
    "sha256_file": "50586d9518de415c5527be18634fff676477c95de2e2c49a1d154ec1f4b1b999",
    "source": "Google Open Buildings 2.5D Temporal v1 (epoch 2023-06-30)",
@@ -125,7 +732,7 @@
     "samples/raw/dem/",
     "samples/raw/landcover/"
    ],
-   "generated_at": "2026-11-14T03:44:52Z",
+   "generated_at": "2026-11-14T04:18:02Z",
    "kind": "derived",
    "licence": "ODbL 1.0 (statistics derived from OSM/Overture) + Copernicus DEM / ESA WorldCover attribution",
    "script": "scripts/06_validate_pilot.py"
@@ -135,7 +742,7 @@
     "s3://overturemaps-us-west-2/release/2026-10-21.0/ (segment, building; Zone C bbox; cached locally, not stored in repo)",
     "aoi/"
    ],
-   "generated_at": "2026-11-14T03:45:17Z",
+   "generated_at": "2026-11-14T04:18:07Z",
    "kind": "derived",
    "licence": "statistics derived from ODbL / CC BY 4.0 sources",
    "script": "scripts/07_coverage_stats.py"
@@ -169,7 +776,7 @@
     },
     "width": 166
    },
-   "retrieved_at": "2026-11-14T03:38:35Z",
+   "retrieved_at": "2026-11-14T04:17:45Z",
    "script": "scripts/04_fetch_rasters.py dem",
    "selection": "lossless window of the source grid covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
    "sha256_file": "659b713319acfd14b57077ebc8da43b8ef1bf9754c3bcc5b50a6fc46e40144ce",
@@ -189,7 +796,7 @@
    "licence": "Composite of open sources (for this area SRTM, public domain); attribution required per Tilezen terrain attribution doc",
    "licence_url": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
    "provider": "Mapzen/Tilezen via AWS Open Data",
-   "retrieved_at": "2026-11-14T03:38:36Z",
+   "retrieved_at": "2026-11-14T04:17:46Z",
    "script": "scripts/04_fetch_rasters.py skadi",
    "selection": "window covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
    "sha256_file": "ea5acdb093a0c61ee9b87c94f71cf2c3c590347789caf3729996a9e00a6efa2a",
@@ -245,7 +852,7 @@
     },
     "width": 552
    },
-   "retrieved_at": "2026-11-14T03:38:39Z",
+   "retrieved_at": "2026-11-14T04:17:46Z",
    "script": "scripts/04_fetch_rasters.py worldcover",
    "selection": "lossless window covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
    "sha256_file": "22cfd57fd00dc4f0e509819c75c5cd1b61bede7fd051b3727afcd2da20a74bac",
@@ -663,7 +1270,7 @@
    "licence": "Per source dataset (see `sources` column): ODbL 1.0 for OSM- and Microsoft-derived rows; CC BY 4.0 for Google Open Buildings / Esri; CDLA-Permissive-2.0 for some themes",
    "licence_url": "https://docs.overturemaps.org/attribution/",
    "provider": "Overture Maps Foundation",
-   "retrieved_at": "2026-11-14T03:37:12Z",
+   "retrieved_at": "2026-11-14T04:17:43Z",
    "script": "scripts/03_fetch_overture.py pilot",
    "selection": "rows whose bbox intersects pilot rectangle (107.556, 16.452, 107.602, 16.494)",
    "source": "Overture Maps Foundation release 2026-10-21.0"
@@ -675,7 +1282,7 @@
    "landing_url": "https://docs.overturemaps.org/guides/divisions/",
    "licence": "ODbL 1.0 (OSM-derived divisions) — see `sources` column",
    "provider": "Overture Maps Foundation",
-   "retrieved_at": "2026-11-14T03:37:19Z",
+   "retrieved_at": "2026-11-14T04:17:44Z",
    "script": "scripts/03_fetch_overture.py divisions",
    "selection": "country=VN, region=VN-26, subtype=region",
    "sha256_file": "9a571c0d11e9a52c0d0fdbcce518e6f0f8d6f355f81923ba572f4b7905448d27",
@@ -689,7 +1296,7 @@
     "city_bbox": 0,
     "pilot": 0
    },
-   "retrieved_at": "2026-11-14T03:50:35Z",
+   "retrieved_at": "2026-11-14T04:18:07Z",
    "script": "scripts/08_fetch_reference_and_probes.py panoramax",
    "source": "Panoramax meta-catalogue STAC search"
   },
@@ -697,7 +1304,7 @@
    "data_url": "https://api.sketchfab.com/v3/",
    "licence": "metadata; each model has its own licence (see samples/normalized/validation/sketchfab_models.csv)",
    "provider": "Sketchfab (Epic Games); individual authors per model",
-   "retrieved_at": "2026-11-14T03:50:34Z",
+   "retrieved_at": "2026-11-14T04:18:07Z",
    "script": "scripts/08_fetch_reference_and_probes.py sketchfab",
    "source": "Sketchfab Data API v3 (model metadata only; no 3D files downloaded)"
   },
@@ -705,7 +1312,7 @@
    "data_url": "https://www.wikidata.org/w/api.php",
    "licence": "CC0 1.0",
    "provider": "Wikimedia Foundation",
-   "retrieved_at": "2026-11-14T03:50:06Z",
+   "retrieved_at": "2026-11-14T04:18:07Z",
    "script": "scripts/08_fetch_reference_and_probes.py wikidata",
    "sha256_file": "58092e917a8f4cc7da58f881a66215205bb9fec9acfd592c55aea735abc41544",
    "source": "Wikidata wbgetentities"
@@ -718,7 +1325,7 @@
    "landing_url": "https://commons.wikimedia.org/",
    "licence": "per file — see `images` list (only CC0/PD/CC BY/CC BY-SA files were downloaded)",
    "provider": "Wikimedia Foundation; individual authors per file",
-   "retrieved_at": "2026-11-14T03:50:05Z",
+   "retrieved_at": "2026-11-14T04:18:31Z",
    "script": "scripts/08_fetch_reference_and_probes.py commons",
    "source": "Wikimedia Commons (MediaWiki API geosearch + imageinfo)"
   },
@@ -751,7 +1358,7 @@
     ],
     "width": 497
    },
-   "retrieved_at": "2026-11-14T03:38:41Z",
+   "retrieved_at": "2026-11-14T04:17:46Z",
    "scene_cloud_cover_pct": 0.007392,
    "script": "scripts/04_fetch_rasters.py sentinel2",
    "selection": "lossless window covering pilot bbox (107.556, 16.452, 107.602, 16.494)",
@@ -763,12 +1370,12 @@
    "data_url": "https://earth-search.aws.element84.com/v1/search",
    "licence": "metadata",
    "provider": "Element 84",
-   "retrieved_at": "2026-11-14T03:38:41Z",
+   "retrieved_at": "2026-11-14T04:17:46Z",
    "script": "scripts/04_fetch_rasters.py sentinel2",
    "sha256_file": "60ccde7f111cf594d7b3fc501429345e116214f5779169f92e52953a6916ed8c",
    "source": "Earth Search STAC API search result (sentinel-2-l2a, cloud < 10 %, 2025-11-01..2026-11-13, pilot bbox)"
   }
  },
  "schema": "hue3d-provenance/1",
- "updated_at": "2026-11-14T03:57:49Z"
+ "updated_at": "2026-11-14T04:18:45Z"
 }

@@ -52,7 +52,12 @@ SKETCHFAB_RELEVANT = re.compile(r"hu[eế]\b|ngo.?mon|ngọ môn|truong.?tien|tr
 
 def jget(url, dest, params, refresh):
     path, _ = C.fetch(url, dest, params=params, refresh=refresh, logger=log)
-    return json.loads(path.read_text(encoding="utf-8"))
+    d = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(d, dict) and "error" in d:   # MediaWiki returns HTTP 200 with an error body (e.g. "too busy")
+        path.unlink()                          # never keep an error payload in the cache
+        Path(str(path) + ".fetchmeta.json").unlink(missing_ok=True)
+        raise RuntimeError(f"API error from {url}: {d['error'].get('code')}")
+    return d
 
 
 def strip_html(s):
@@ -60,14 +65,20 @@ def strip_html(s):
 
 
 def do_commons(refresh):
+    _commons_report(*_commons_collect(refresh), refresh)
+
+
+def _commons_collect(refresh):
     rows, picked = [], []
+    rate_limited = False
+    api_errors: dict[str, str] = {}
     for key, (lat, lon, radius) in LANDMARKS.items():
-        gs = jget(COMMONS, REF / "api" / f"geosearch_{key}.json", {
-            "action": "query", "format": "json", "generator": "geosearch", "ggscoord": f"{lat}|{lon}",
-            "ggsradius": radius, "ggsnamespace": 6, "ggslimit": 50, "prop": "imageinfo|coordinates",
-            "iiprop": "url|size|mime|extmetadata|timestamp", "iiurlwidth": 1280,
-            "iiextmetadatafilter": "LicenseShortName|LicenseUrl|Artist|DateTimeOriginal|Credit|UsageTerms|AttributionRequired|GPSLatitude|GPSLongitude",
-        }, refresh)
+        try:
+            gs = _geosearch(key, lat, lon, radius, refresh)
+        except RuntimeError as e:   # e.g. cirrussearch-too-busy-error or HTTP 429: record it, never report it as "0 files"
+            log.warning("geosearch %s failed: %s", key, e)
+            api_errors[key] = str(e)[:120]
+            continue
         pages = list((gs.get("query") or {}).get("pages", {}).values())
         cands = []
         for p in pages:
@@ -89,26 +100,50 @@ def do_commons(refresh):
             dest = REF / "images" / f"{key}__{name}"
             # the API now returns renditions on thumb.wikimedia.org; the same path is served by upload.wikimedia.org
             thumb = thumb.split("?")[0].replace("//thumb.wikimedia.org/", "//upload.wikimedia.org/")
+            if rate_limited and not dest.exists():   # cached images need no network
+                continue
             try:
                 C.fetch(thumb, dest, refresh=refresh, logger=log)
             except RuntimeError as e:
                 log.warning("skip %s: %s", row["title"], e)
+                if "429" in str(e):   # the image host is throttling this client: stop asking
+                    rate_limited = True
                 continue
             row["downloaded_as"] = C.rel(dest)
             picked.append({"file": C.rel(dest), "sha256_file": C.sha256_file(dest), "bytes": dest.stat().st_size,
                            "source_page": row["page"], "rendition_url": thumb, "licence": row["licence"], "licence_url": row["licence_url"],
                            "author": row["author"], "date_taken": row["date_taken"], "landmark": key})
+    return rows, picked, rate_limited, api_errors
+
+
+def _geosearch(key, lat, lon, radius, refresh):
+    return jget(COMMONS, REF / "api" / f"geosearch_{key}.json", {
+        "action": "query", "format": "json", "generator": "geosearch", "ggscoord": f"{lat}|{lon}",
+        "ggsradius": radius, "ggsnamespace": 6, "ggslimit": 50, "prop": "imageinfo|coordinates",
+        "iiprop": "url|size|mime|extmetadata|timestamp", "iiurlwidth": 1280,
+        "iiextmetadatafilter": "LicenseShortName|LicenseUrl|Artist|DateTimeOriginal|Credit|UsageTerms|AttributionRequired|GPSLatitude|GPSLongitude",
+    }, refresh)
+
+
+def _commons_report(rows, picked, rate_limited, api_errors, refresh):
     VAL.mkdir(parents=True, exist_ok=True)
     with open(VAL / "commons_reference_photos.csv", "w", newline="", encoding="utf-8") as f:
-        wr = csv.DictWriter(f, fieldnames=list(rows[0]))
+        fields = ["landmark", "title", "page", "mime", "width", "height", "licence", "licence_url", "author", "date_taken",
+                  "upload_time", "lat", "lon", "open_licence", "downloaded_as"]
+        wr = csv.DictWriter(f, fieldnames=fields)
         wr.writeheader(); wr.writerows(rows)
-    cats = jget(COMMONS, REF / "api" / "categoryinfo.json", {
-        "action": "query", "format": "json", "prop": "categoryinfo", "titles": "|".join("Category:" + c for c in CATEGORIES)}, refresh)
-    cat_counts = {p["title"]: (p.get("categoryinfo") or {"missing": True}) for p in cats["query"]["pages"].values()}
-    summary = {"files_found": len(rows), "by_landmark": {k: sum(1 for r in rows if r["landmark"] == k) for k in LANDMARKS},
+    try:
+        cats = jget(COMMONS, REF / "api" / "categoryinfo.json", {
+            "action": "query", "format": "json", "prop": "categoryinfo", "titles": "|".join("Category:" + c for c in CATEGORIES)}, refresh)
+        cat_counts = {p["title"]: (p.get("categoryinfo") or {"missing": True}) for p in cats["query"]["pages"].values()}
+    except RuntimeError as e:
+        cat_counts = {"error": str(e)[:120]}
+    summary = {"checked_at": C.utcnow(), "files_found": len(rows),
+               "by_landmark": {k: ("api_error" if k in api_errors else sum(1 for r in rows if r["landmark"] == k)) for k in LANDMARKS},
+               "api_errors": api_errors,
                "open_licence_files": sum(1 for r in rows if r["open_licence"]),
                "licences": {l: sum(1 for r in rows if r["licence"] == l) for l in sorted({r["licence"] for r in rows})},
-               "downloaded": len(picked), "category_counts": cat_counts}
+               "downloaded": len(picked), "image_host_rate_limited": rate_limited, "category_counts": cat_counts}
     (VAL / "commons_summary.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     C.record_provenance("samples/raw/reference_photos/", source="Wikimedia Commons (MediaWiki API geosearch + imageinfo)",
                         provider="Wikimedia Foundation; individual authors per file", landing_url="https://commons.wikimedia.org/",
