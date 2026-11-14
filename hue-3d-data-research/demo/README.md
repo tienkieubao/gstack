@@ -14,7 +14,7 @@ Không cần cài gì thêm để xem: `app.js` (đã đóng gói) và `data/*.j
 Dựng lại từ mã nguồn:
 
 ```bash
-python3 ../scripts/11_build_demo_data.py   # samples/ -> demo/data/*.json
+python3 ../scripts/11_build_demo_data.py   # samples/ -> demo/data/*.json (gồm traffic.json: mạng đường cho xe mô phỏng)
 python3 ../scripts/12_build_demo_imagery.py  # Sentinel-2 -> demo/data/ground_s2.jpg
 npm install && npm run build               # src/*.js -> app.js, page.html -> index.html
 ```
@@ -45,6 +45,22 @@ Bảng thông số khi bay: độ cao trên mặt nước/mặt đất, tốc đ
 - 4 cánh quạt quay lệch nhau một chút, tạo tiếng "vo vo" có nhịp phách như máy thật; cao độ và độ to tăng theo lực đẩy (lên cao, tăng tốc, xoay), giảm khi hạ độ cao.
 - Tiếng gió cánh quạt; tiếng xì bụi nước khi bay thấp hơn ~3 m trên mặt sông; tiếng nước bắn khi chạm nước; tiếng va đập khi đâm vào công trình, trụ cầu.
 - Âm lượng giảm theo khoảng cách từ camera tới UAV; tự tắt khi về chế độ Khám phá.
+
+## Xe cộ và người đi bộ (mô phỏng)
+
+Đường phố có xe máy, xe đạp/xích lô, ô tô, xe buýt/xe khách và người đi bộ di chuyển theo thời gian thực. **Đây là mô phỏng, không phải dữ liệu giao thông thật**: không có nguồn mở thời gian thực nào cho giao thông Huế, và dự án không mua hay đăng ký dịch vụ trả phí.
+
+| Thành phần | Nguồn | Mức |
+|---|---|---|
+| Mạng đường, nút giao | OpenStreetMap: mỗi đường được cắt tại mọi nút dùng chung với đường khác (8.662 đoạn) | Dữ liệu |
+| Đường một chiều | Thẻ `oneway` của OSM (636 đoạn) | Dữ liệu; đường không gắn thẻ coi là hai chiều |
+| Cấm loại xe | Thẻ OSM `access`, `motorcar`, `motorcycle`, `hgv`, `maxweight`… (87 đoạn) và thẻ cấm theo giờ. Ví dụ cầu Trường Tiền: cấm ô tô 06:30–08:00, 11:00–13:30, 16:00–18:00, 21:00–05:00, cấm xích lô giờ cao điểm. Trình mô phỏng áp theo giờ Huế hiện tại | Dữ liệu OSM (chưa kiểm chứng ngoài thực địa) |
+| Tỷ lệ loại xe | Xe máy 76%, ô tô 15%, xe đạp/xích lô 5%, xe buýt/xe khách 4% | Giả định |
+| Tốc độ | Xe máy 27–40 km/h, ô tô 31–45 km/h trên đường chính; giảm trên đường nhỏ và khi tới nút giao | Giả định |
+| Mật độ theo giờ | Đường cong cao điểm sáng, trưa, chiều; vắng sau 22 giờ. Lấy giờ Huế (UTC+7) của máy người xem | Giả định |
+| Hành vi | Đi bên phải, giữ khoảng cách với xe phía trước cùng làn, chậm lại ở nút giao; không có đèn tín hiệu, xe không nhường nhau trong nút giao | Đơn giản hóa |
+
+Chỉ khu vực đang xem có xe: xe ra khỏi vùng nhìn sẽ xuất hiện lại trên một con đường gần tâm nhìn (máy tính tối đa 2.200 xe và 900 người, điện thoại 700 và 260). Bảng "Lớp dữ liệu" có công tắc bật/tắt và ô chọn mật độ (theo giờ Huế, thưa, vừa, đông); dòng trạng thái cho biết giờ Huế và số xe, người đang mô phỏng. Bấm vào một xe để xem loại xe và tốc độ. UAV bay thấp có thể va vào xe (tính là một lần va chạm). Khi bay thấp trên phố có tiếng xe cộ và còi (tổng hợp, không phải ghi âm).
 
 ## Hình ảnh
 
@@ -92,6 +108,7 @@ Hai chi tiết đến thẳng từ đợt kiểm định dữ liệu:
 | `src/fx.js` | Bụi nước dưới cánh quạt, nước bắn khi chạm, vòng sóng |
 | `src/audio.js` | Âm thanh động cơ tổng hợp (Web Audio) |
 | `src/routes.js` | Định nghĩa 3 lộ trình, bộ lập đường bay tránh vật cản, đường bay xem trước |
+| `src/traffic.js` | Giao thông mô phỏng: mạng đường, luật một chiều/cấm xe theo OSM, mật độ theo giờ, mô hình xe và người |
 | `app.js` | Bản đóng gói (three.js 0.169.0 + mã trên) |
 | `data/*.json` | Dữ liệu cảnh sinh bởi `../scripts/11_build_demo_data.py` |
 

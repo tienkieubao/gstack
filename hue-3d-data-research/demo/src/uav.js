@@ -126,6 +126,8 @@ export class Uav {
     if (s) return s.info.type === 'wall' ? 'tường thành' : (s.info.name || 'công trình');
     const b = hitBridges(this.world.bridgeCol, x, y, z, RADIUS);
     if (b) return b === 'pier' ? 'trụ cầu' : 'mặt cầu';
+    const tr = this.world.traffic && this.world.traffic.enabled ? this.world.traffic.hit(x, y, z, RADIUS) : null;
+    if (tr) return `${tr.spec.name.toLowerCase()} (mô phỏng)`;
     return null;
   }
 

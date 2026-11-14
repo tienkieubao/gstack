@@ -51,6 +51,16 @@ export function buildRotorGraph(ctx, destination) {
   const sprayGain = ctx.createGain(); sprayGain.gain.value = 0;
   spray.connect(sprayHp); sprayHp.connect(sprayGain); sprayGain.connect(master);
 
+  // street ambience (simulated traffic below the UAV): low engine rumble + tyre noise, and occasional horns.
+  // Connected after the master gain so it is heard even when the camera is far from the drone.
+  const street = loopNoise(), streetLp = ctx.createBiquadFilter(); streetLp.type = 'lowpass'; streetLp.frequency.value = 520;
+  const streetGain = ctx.createGain(); streetGain.gain.value = 0;
+  street.connect(streetLp); streetLp.connect(streetGain); streetGain.connect(out);
+  const hum = ctx.createOscillator(); hum.type = 'sawtooth'; hum.frequency.value = 62;
+  const humLp = ctx.createBiquadFilter(); humLp.type = 'lowpass'; humLp.frequency.value = 240;
+  const humGain = ctx.createGain(); humGain.gain.value = 0;
+  hum.connect(humLp); humLp.connect(humGain); humGain.connect(out); hum.start();
+
   const T = 0.06;   // smoothing time constant for parameter changes
   return {
     master,
@@ -66,6 +76,20 @@ export function buildRotorGraph(ctx, destination) {
       airGain.gain.setTargetAtTime(0.04 + 0.11 * load + 0.08 * wash, t, T);
       sprayGain.gain.setTargetAtTime(0.32 * wash, t, 0.08);
       master.gain.setTargetAtTime(level, t, 0.12);
+    },
+    street(level, t = ctx.currentTime) {
+      streetGain.gain.setTargetAtTime(0.11 * level, t, 0.4);
+      humGain.gain.setTargetAtTime(0.025 * level, t, 0.4);
+      hum.frequency.setTargetAtTime(55 + 25 * level + 6 * Math.random(), t, 0.5);
+    },
+    horn(level, t = ctx.currentTime) {   // motorbike/car horn: two detuned square tones, short
+      const base = 380 + Math.random() * 260, dur = 0.12 + Math.random() * 0.22, rep = Math.random() < 0.4 ? 2 : 1;
+      for (let r = 0; r < rep; r++) {
+        const t0 = t + r * (dur + 0.07);
+        const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.05 * level, t0 + 0.015); g.gain.setValueAtTime(0.05 * level, t0 + dur); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.05);
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200; lp.connect(g); g.connect(out);
+        for (const f of [base, base * 1.26]) { const o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = f; o.connect(lp); o.start(t0); o.stop(t0 + dur + 0.08); }
+      }
     },
     splash(energy = 0.6, t = ctx.currentTime) {
       const s = ctx.createBufferSource(); s.buffer = noise;
@@ -120,13 +144,15 @@ export class RotorSound {
    * active: UAV on screen; loadTarget 0..1; wash 0..1; camDist metres from camera to UAV;
    * touches/crashes: running counters from the simulation (one-shot sounds fire when they increase).
    */
-  update(dt, { active, loadTarget, wash, camDist, touches, crashes }) {
+  update(dt, { active, loadTarget, wash, camDist, touches, crashes, street = 0 }) {
     this.active = active;
     this.load += (loadTarget - this.load) * Math.min(1, dt * 6);
     if (!this.ctx || !this.enabled) { this.lastTouches = touches; this.lastCrashes = crashes; return; }
     if (active && this.ctx.state === 'suspended' && !document.hidden) this.ctx.resume();
     const level = active ? Math.max(0.05, Math.min(1.25, 14 / Math.max(camDist, 1))) : 0;
     this.graph.set(this.load, level, wash);
+    this.graph.street(active ? street : 0);
+    if (active && street > 0.05 && Math.random() < dt * 0.9 * street) this.graph.horn(Math.min(1, street * 1.4));
     if (active && touches > this.lastTouches) this.graph.splash(0.7);
     if (active && crashes > this.lastCrashes) this.graph.thud();
     this.lastTouches = touches; this.lastCrashes = crashes;

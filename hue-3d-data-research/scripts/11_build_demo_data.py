@@ -15,6 +15,7 @@ import collections
 import gzip
 import importlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -131,6 +132,109 @@ def polys(geom):
 def densify(line: LineString, step: float):
     n = max(1, int(np.ceil(line.length / step)))
     return [line.interpolate(k / n, normalized=True) for k in range(n + 1)]
+
+
+# access bits for the simulated traffic (set = NOT allowed): moto, bicycle/cyclo, car, bus/heavy, pedestrian
+A_MOTO, A_BIKE, A_CAR, A_BUS, A_FOOT = 1, 2, 4, 8, 16
+_COND_KEYS = {"motorcar:conditional": A_CAR | A_BUS, "motor_vehicle:conditional": A_MOTO | A_CAR | A_BUS,
+              "motorcycle:conditional": A_MOTO, "hgv:conditional": A_BUS, "bicycle:conditional": A_BIKE,
+              "cycle_rickshaw:conditional": A_BIKE}
+
+
+def access_rules(t):
+    """OSM access tags -> (static ban mask, [[mask, [[from_min, to_min], ...]], ...]). Only 'no @ (hh:mm-hh:mm, ...)'
+    conditions are parsed; anything else is ignored (recorded as allowed)."""
+    no = lambda k: t.get(k) in ("no", "private")                                       # noqa: E731
+    yes = lambda k: t.get(k) in ("yes", "designated", "destination", "permissive")       # noqa: E731
+    mask = 0
+    if no("access"):
+        mask |= A_MOTO | A_BIKE | A_CAR | A_BUS
+    if no("vehicle"):
+        mask |= A_MOTO | A_BIKE | A_CAR | A_BUS
+    if no("motor_vehicle"):
+        mask |= A_MOTO | A_CAR | A_BUS
+    for k, bit in (("motorcycle", A_MOTO), ("bicycle", A_BIKE), ("motorcar", A_CAR), ("foot", A_FOOT)):
+        if no(k):
+            mask |= bit
+        elif yes(k):
+            mask &= ~bit
+    if no("motorcar") or no("hgv") or no("bus"):
+        mask |= A_BUS
+    try:
+        if float(str(t.get("maxweight", "99")).split()[0]) < 10:
+            mask |= A_BUS
+    except ValueError:
+        pass
+    cond = []
+    for k, bit in _COND_KEYS.items():
+        v = t.get(k, "")
+        m = re.match(r"\s*no\s*@\s*\((.*)\)\s*$", v)
+        if not m:
+            continue
+        spans = []
+        for part in m.group(1).split(","):
+            mm = re.match(r"\s*(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})\s*$", part)
+            if mm:
+                a_, b_ = int(mm[1]) * 60 + int(mm[2]), int(mm[3]) * 60 + int(mm[4])
+                spans.append([a_, b_ + (1 if b_ % 60 == 59 else 0)])
+        if spans:
+            cond.append([bit, spans])
+    return mask, cond
+
+
+def write_traffic_graph(d, roads, row, bridges_out, carved, ground, F):
+    """Road graph for the simulated traffic: OSM ways split at every node shared with another way (junctions),
+    so vehicles can turn wherever OSM connects two roads. Heights: draped like the road ribbons, or taken from the
+    modelled bridge decks. `o` = one-way as tagged in OSM (1 along the way, -1 against, 0 two-way)."""
+    oneway = dict(zip(roads.osm_id, roads.oneway_effective))
+    deck_y = {}                                   # way id -> (geometry, y per densified point at 8 m)
+    for b in bridges_out:
+        for w in b["ways"]:
+            if w["kind"] != "rail":
+                deck_y[w["w"]] = np.array(w["pts"][2::3]) / 10.0
+    ids = [w for w, r in row.items() if r.highway != "rail" and r.highway in ROAD_CLASS and w in d.ways]
+    use = collections.Counter(n for w in ids for n in d.ways[w]["nodes"])
+    edges, dead = [], 0
+    for w in ids:
+        r, nodes = row[w], d.ways[w]["nodes"]
+        if any(n not in d.nodes for n in nodes):
+            continue
+        cuts = [0] + [i for i in range(1, len(nodes) - 1) if use[nodes[i]] > 1] + [len(nodes) - 1]
+        g = ROAD_CLASS[r.highway][0]
+        wdt = float(ROAD_CLASS[r.highway][1])
+        try:
+            wdt = max(wdt, float(r.lanes) * 3.3) if r.lanes is not None and str(r.lanes) != "nan" else wdt
+        except ValueError:
+            pass
+        ow = {"yes": 1, "1": 1, "true": 1, "-1": -1}.get(str(oneway.get(w, "no")), 0)
+        full = r.geom_l
+        acc = access_rules(d.ways[w]["tags"])
+        for a, b in zip(cuts[:-1], cuts[1:]):
+            piece = F.to_local(LineString([d.nodes[n] for n in nodes[a:b + 1]]))
+            if piece.length < 1 or not F.box.buffer(60).intersects(piece):
+                continue
+            pts = densify(piece, 10.0)
+            xs = np.array([q.x for q in pts]); ys = np.array([q.y for q in pts])
+            if w in deck_y:                       # on a bridge: follow the deck profile (sampled every 8 m from the way start)
+                along = np.array([full.project(q) for q in pts])
+                dy = deck_y[w]; t = np.linspace(0, full.length, len(dy))
+                yy = np.interp(along, t, dy)
+            else:
+                yy = np.maximum(F.sample(carved, xs, ys), F.sample(ground, xs, ys))
+            flat = []
+            for x_, y_n, y_up in zip(xs, ys, yy):
+                flat += [dm(x_), dm(-y_n), dm(y_up)]
+            e = {"g": g, "w": wdt, "o": ow, "b": int(w in deck_y), "p": flat}
+            if acc[0]:
+                e["a"] = acc[0]
+            if acc[1]:
+                e["c"] = acc[1]
+            edges.append(e)
+    json.dump({"note": "simulated-traffic graph: OSM ways split at shared nodes; one-way and access rules (incl. timed bans) from OSM tags; heights draped or from modelled bridge decks",
+               "access_bits": {"moto": A_MOTO, "bike": A_BIKE, "car": A_CAR, "bus": A_BUS, "ped": A_FOOT},
+               "edges": edges}, open(OUT / "traffic.json", "w"), separators=(",", ":"))
+    log.info("traffic graph: %d edges from %d ways (%d one-way pieces, %d with access bans, %d with timed bans)", len(edges), len(ids),
+             sum(1 for e in edges if e["o"]), sum(1 for e in edges if e.get("a")), sum(1 for e in edges if e.get("c")))
 
 
 def main():
@@ -367,6 +471,7 @@ def main():
             roads_out.append({"g": grp, "w": round(width_of(r), 1), "p": flat})
     json.dump(roads_out, open(OUT / "roads.json", "w"), separators=(",", ":"))
     log.info("roads: %d ribbons; bridges: %d groups (%d ways)", len(roads_out), len(bridges_out), len(bridge_way_ids))
+    write_traffic_graph(d, roads, row, bridges_out, carved, ground, F)
 
     # ------------------------------------------------------------------ buildings
     est = pd.read_csv(C.NORM / "buildings_height" / "overture_buildings_height_estimate.csv.gz").set_index("overture_id")

@@ -10,6 +10,7 @@ import { WaterFx } from './fx.js';
 import { Uav, Input, truongTienPath, ACTION_NAME } from './uav.js';
 import { RotorSound } from './audio.js';
 import { routeDefs, planRoute, underBridgeRoute, routeMesh } from './routes.js';
+import { Traffic, banText } from './traffic.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (v, d = 1) => (Number.isFinite(v) ? v.toLocaleString('vi-VN', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—');
@@ -26,9 +27,10 @@ async function loadJson(name, label) {
 
 async function main() {
   const meta = await loadJson('meta', 'thông tin cảnh');
-  const [terrainD, waterD, roadsD, bridgesD, buildingsD, wallsD, treesD] = [
+  const [terrainD, waterD, roadsD, bridgesD, buildingsD, wallsD, treesD, trafficD] = [
     await loadJson('terrain', 'địa hình'), await loadJson('water', 'mặt nước'), await loadJson('roads', 'đường'),
     await loadJson('bridges', 'cầu'), await loadJson('buildings', 'công trình'), await loadJson('walls', 'tường thành'), await loadJson('trees', 'cây'),
+    await loadJson('traffic', 'mạng đường cho xe mô phỏng'),
   ];
   status('Đang dựng cảnh 3D…');
   await new Promise((r) => setTimeout(r, 30));
@@ -91,9 +93,10 @@ async function main() {
   const landmarks = buildLandmarks(meta, solids); scene.add(landmarks);
   landmarks.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   const trees = buildTrees(treesD); scene.add(trees);
+  const traffic = new Traffic(trafficD, { phone }); scene.add(traffic.group);
   const fx = new WaterFx(scene);
 
-  const world = { terrain: T, solids, bridgeCol: { decks: bridges.decks, piers: bridges.piers } };
+  const world = { terrain: T, solids, bridgeCol: { decks: bridges.decks, piers: bridges.piers }, traffic };
   const uav = new Uav(world, fx); scene.add(uav.model);
   uav.model.traverse((o) => { if (o.isMesh) o.castShadow = true; });
   // compile every shader now (UAV, spray, ripples included) so entering flight mode does not stall on first use
@@ -301,17 +304,20 @@ async function main() {
     scene.traverse((o) => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { m.needsUpdate = true; }); });
   });
   $('opt-buildings').addEventListener('change', (e) => { buildings.group.visible = e.target.checked; });
+  $('opt-traffic').addEventListener('change', (e) => { traffic.setEnabled(e.target.checked); $('traffic-mode').disabled = !e.target.checked; });
+  $('traffic-mode').addEventListener('change', (e) => traffic.setMode(e.target.value));
   $('btn-layers').addEventListener('click', () => { const p = $('layers'); p.classList.toggle('open'); $('btn-layers').setAttribute('aria-expanded', String(p.classList.contains('open'))); });
 
   // ------------------------------------------------------------------ picking
   const ray = new THREE.Raycaster();
-  const pickables = [buildings.group, landmarks, bridges.group, walls, terrainMesh, water];
+  const pickables = [traffic.group, buildings.group, landmarks, bridges.group, walls, terrainMesh, water];
   let downAt = null;
   canvas.addEventListener('pointerdown', (e) => { downAt = [e.clientX, e.clientY]; });
   canvas.addEventListener('pointerup', (e) => {
     if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || isFlying()) return;
     const r = canvas.getBoundingClientRect();
     ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+    traffic.group.children.forEach((m) => { m.boundingSphere = null; m.boundingBox = null; });   // instances move every frame
     const hits = ray.intersectObjects(pickables, true);
     if (!hits.length) return;
     showInfo(hits[0]);
@@ -330,7 +336,12 @@ async function main() {
     let obj = hit.object; while (obj.parent && obj.parent !== scene) obj = obj.parent;
     let title = '', body = '';
     const solid = solids.pick(p.x, p.z);
-    if ((obj === buildings.group || obj === landmarks || obj === walls) && solid) {
+    const agent = hit.object.userData.kind && hit.instanceId !== undefined ? traffic.agentFor(hit.object, hit.instanceId) : null;
+    if (agent) {
+      title = `${agent.spec.name} (mô phỏng)`;
+      body = rows([['Tốc độ lúc bấm', `${fmt(agent.v * 3.6, 0)} km/h`], ['Đường', ['Đường chính', 'Đường nội bộ/kiệt', 'Đường dịch vụ', 'Đường đi bộ'][traffic.net.edges[agent.e].g]], ['Nguồn', 'Mô phỏng trên mạng đường OSM']])
+        + '<p class="note">Không phải dữ liệu giao thông thật: không có nguồn mở thời gian thực cho Huế. Tỷ lệ loại xe, tốc độ và mật độ theo giờ là giả định để minh họa.</p>';
+    } else if ((obj === buildings.group || obj === landmarks || obj === walls) && solid) {
       const it = solid.info;
       if (it.type === 'building') {
         const i = it.index, name = buildingsD.names[i];
@@ -355,6 +366,11 @@ async function main() {
       }
       title = (best && best.name) || 'Cầu';
       body = rows([['Chiều dài (OSM)', `${fmt(best ? best.len : NaN, 0)} m`], ['Cao độ mặt cầu', 'Mô hình ràng buộc (giả định)']]);
+      { // timed access bans tagged in OSM on this bridge's ways (the simulated traffic follows them)
+        let near = null, nd = Infinity;
+        for (const e of traffic.net.edges) if (e.cond) { const q = e.pts; const m = (q.length / 3) >> 1; const dd = Math.hypot(q[m * 3] - p.x, q[m * 3 + 2] - p.z); if (dd < nd) { nd = dd; near = e; } }
+        if (near && nd < 260) body += rows([['Hạn chế (thẻ OSM)', banText(near)]]);
+      }
       body += best && best.special === 'truong_tien'
         ? '<p class="note">6 nhịp, 402,6 m theo Wikidata. Vòm thép, trụ và độ cao gầm cầu là phác thảo minh họa. Đường chính của cầu trong OpenStreetMap thiếu thẻ <code>bridge</code>; demo nhận ra cầu bằng kiểm tra hình học.</p>'
         : '<p class="note">Không cầu nào trong dữ liệu mở có cao độ hay tĩnh không đo đạc.</p>';
@@ -399,6 +415,7 @@ async function main() {
   const fwd = new THREE.Vector3();
   let hudTimer = 0;
   let simTime = 0;
+  let trafficTimer = 0;
   // stepDt is only passed by the test/console hook. The animation loop calls frame() below, never tick()
   // directly: setAnimationLoop hands its callback a timestamp in ms, which must not be read as a time step.
   function tick(stepDt, skipRender) {
@@ -433,7 +450,8 @@ async function main() {
       if (mode === 'manual') loadTarget = 0.45 + 0.35 * Math.max(0, cmd.up) - 0.2 * Math.max(0, -cmd.up) + 0.2 * Math.min(1, Math.hypot(cmd.forward, cmd.strafe)) + 0.08 * Math.abs(cmd.yaw);
       else loadTarget = 0.45 + THREE.MathUtils.clamp(uav.vel.y * 0.06, -0.2, 0.35) + Math.min(1, uav.vel.length() / 40) * 0.2;
       const st = uav.status, wash = st.overWater && st.agl < 3.2 ? Math.min(1, 1 - (st.agl - 0.3) / 2.9) : 0;
-      sound.update(dt, { active: true, loadTarget: THREE.MathUtils.clamp(loadTarget, 0, 1), wash, camDist: view === 'fpv' ? 4 : camera.position.distanceTo(uav.pos), touches: uav.touches, crashes: uav.crashes });
+      sound.update(dt, { active: true, loadTarget: THREE.MathUtils.clamp(loadTarget, 0, 1), wash, camDist: view === 'fpv' ? 4 : camera.position.distanceTo(uav.pos), touches: uav.touches, crashes: uav.crashes,
+        street: traffic.enabled ? Math.min(1, traffic.nearby(uav.pos.x, uav.pos.z, 70) / 25) * THREE.MathUtils.clamp(1 - ((uav.status.agl || 0) - 10) / 90, 0, 1) : 0 });
       fwd.set(-Math.sin(uav.yaw), 0, -Math.cos(uav.yaw));
       if (view === 'fpv') {
         camera.position.copy(uav.pos).addScaledVector(fwd, 1.3).add(new THREE.Vector3(0, 0.35, 0));
@@ -476,6 +494,15 @@ async function main() {
       }
     }
     if (!isFlying()) sound.update(dt, { active: false, loadTarget: 0.45, wash: 0, camDist: 100, touches: uav.touches, crashes: uav.crashes });
+    if (isFlying()) traffic.update(dt, uav.pos, 300 + Math.max(0, uav.status.agl || 0) * 3, t);
+    else traffic.update(dt, controls.target, camera.position.distanceTo(controls.target), t);
+    trafficTimer -= dt;
+    if (trafficTimer <= 0) {
+      trafficTimer = 1;
+      $('traffic-status').textContent = traffic.enabled
+        ? `Giờ Huế ${traffic.clock.label} · mật độ ${Math.round(traffic.factor * 100)}% · ${traffic.stats.veh.toLocaleString('vi-VN')} xe, ${traffic.stats.ped.toLocaleString('vi-VN')} người quanh vùng đang xem`
+        : 'Đã tắt';
+    }
     fx.update(dt);
     if (skipRender === true) return;
     updateLabels();
@@ -492,7 +519,7 @@ async function main() {
   };
   renderer.setAnimationLoop(frame);
   // console/test hook: __hue.tick(dt) advances one frame deterministically when the loop is paused
-  window.__hue = { scene, camera, uav, input, sound, routes, startRoute, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(frame) };
+  window.__hue = { scene, camera, uav, input, sound, routes, startRoute, setMode, T, meta, bridges, renderer, tick, traffic, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(frame) };
 
   // stats in the about panel
   const c = meta.counts;
