@@ -63,7 +63,13 @@ async function main() {
   const fx = new WaterFx(scene);
 
   const world = { terrain: T, solids, bridgeCol: { decks: bridges.decks, piers: bridges.piers } };
-  const uav = new Uav(world, fx); uav.model.visible = false; scene.add(uav.model);
+  const uav = new Uav(world, fx); scene.add(uav.model);
+  // compile every shader now (UAV, spray, ripples included) so entering flight mode does not stall on first use
+  fx.rings.forEach((r) => { r.mesh.visible = true; });
+  status('Đang chuẩn bị đồ họa…');
+  renderer.compile(scene, camera);
+  fx.rings.forEach((r) => { r.mesh.visible = false; });
+  uav.model.visible = false;
   const input = new Input();
 
   // ------------------------------------------------------------------ explore controls
@@ -277,8 +283,11 @@ async function main() {
   const fwd = new THREE.Vector3();
   let hudTimer = 0;
   let simTime = 0;
-  function tick(fixedDt, skipRender) {
-    const dt = typeof fixedDt === 'number' ? fixedDt : Math.min(clock.getDelta(), 0.05);
+  // stepDt is only passed by the test/console hook. The animation loop calls frame() below, never tick()
+  // directly: setAnimationLoop hands its callback a timestamp in ms, which must not be read as a time step.
+  function tick(stepDt, skipRender) {
+    // up to 0.25 s per frame (slow devices); the UAV is integrated in sub-steps of <= 1/30 s so it keeps real speed
+    const dt = Math.min(typeof stepDt === 'number' ? stepDt : clock.getDelta(), 0.25);
     simTime += dt; const t = simTime;
     water.material.uniforms.uTime.value = t;
     if (landmarks.userData.flag && !reduceMotion) landmarks.userData.flag.rotation.y = Math.sin(t * 1.7) * 0.25;
@@ -294,7 +303,9 @@ async function main() {
       controls.update();
       const minY = T.surface(camera.position.x, camera.position.z) + 3; if (camera.position.y < minY) camera.position.y = minY;
     } else {
-      uav.update(dt, mode === 'manual' ? input.read() : { forward: 0, strafe: 0, up: 0, yaw: 0 }, bounds);
+      const cmd = mode === 'manual' ? input.read() : { forward: 0, strafe: 0, up: 0, yaw: 0 };
+      const n = Math.max(1, Math.ceil(dt * 30));
+      for (let i = 0; i < n && mode !== 'explore'; i++) uav.update(dt / n, cmd, bounds);
       fwd.set(-Math.sin(uav.yaw), 0, -Math.cos(uav.yaw));
       if (view === 'fpv') {
         camera.position.copy(uav.pos).addScaledVector(fwd, 1.3).add(new THREE.Vector3(0, 0.35, 0));
@@ -330,9 +341,18 @@ async function main() {
     updateLabels();
     renderer.render(scene, camera);
   }
-  renderer.setAnimationLoop(tick);
+  // a single exception inside a frame would stop three.js's loop for good: report it once and keep running
+  let frameErrors = 0;
+  const frame = () => {
+    try { tick(); } catch (e) {
+      frameErrors++;
+      if (frameErrors <= 3) console.error('[Huế 3D] lỗi trong khung hình', e);
+      if (frameErrors === 1) toast('Có lỗi khi vẽ cảnh — chi tiết trong console (F12).');
+    }
+  };
+  renderer.setAnimationLoop(frame);
   // console/test hook: __hue.tick(dt) advances one frame deterministically when the loop is paused
-  window.__hue = { scene, camera, uav, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(tick) };
+  window.__hue = { scene, camera, uav, input, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(frame) };
 
   // stats in the about panel
   const c = meta.counts;
