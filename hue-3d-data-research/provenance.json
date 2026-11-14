@@ -655,7 +655,7 @@
     "samples/raw/landcover/",
     "samples/normalized/buildings_height/overture_buildings_height_estimate.csv.gz"
    ],
-   "generated_at": "2026-11-14T04:39:05Z",
+   "generated_at": "2026-11-14T05:45:16Z",
    "kind": "derived (scene data for the browser demo)",
    "licence": "ODbL 1.0 (OSM/Overture/Microsoft rows) + CC BY 4.0 (Google Open Buildings, ESA WorldCover) + Copernicus DEM licence",
    "script": "scripts/11_build_demo_data.py"
@@ -1402,5 +1402,5 @@
   }
  },
  "schema": "hue3d-provenance/1",
- "updated_at": "2026-11-14T05:03:09Z"
+ "updated_at": "2026-11-14T05:45:16Z"
 }
