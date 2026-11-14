@@ -1,0 +1,11 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 1324,
+ "http_headers": {
+  "content-type": "application/json; charset=utf-8",
+  "content-length": "458"
+ },
+ "retrieved_at": "2026-11-14T03:50:05Z",
+ "final_url": "https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=categoryinfo&titles=Category%3AImperial+City%2C+Hu%E1%BA%BF%7CCategory%3ACitadel+of+Hu%E1%BA%BF%7CCategory%3AMeridian+Gate+%28Hu%E1%BA%BF%29%7CCategory%3AFlag+Tower+of+Hu%E1%BA%BF%7CCategory%3ATr%C6%B0%E1%BB%9Dng+Ti%E1%BB%81n+Bridge%7CCategory%3ATruong+Tien+Bridge%7CCategory%3APhu+Xuan+Bridge%7CCategory%3APagoda+of+the+Celestial+Lady%7CCategory%3AComplex+of+Hu%E1%BA%BF+Monuments%7CCategory%3ATh%C3%A1i+H%C3%B2a+Palace"
+}

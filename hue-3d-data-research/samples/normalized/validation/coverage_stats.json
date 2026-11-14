@@ -1,0 +1,126 @@
+{
+ "generated_at": "2026-11-14T03:45:13Z",
+ "overture_release": "2026-10-21.0",
+ "zone_area_km2": {
+  "A_pilot": 22.83,
+  "B_central_urban": 170.83,
+  "C_city_land": 4931.0
+ },
+ "zone_c_osm_relation_area_km2_incl_sea": 9718.5,
+ "zones": {
+  "A_pilot": {
+   "roads": {
+    "segments": 5511,
+    "km_total": 464.2,
+    "km_major": 93.8,
+    "km_local_service": 301.9,
+    "km_per_km2": 20.33,
+    "pct_km_named_major": 95.8,
+    "pct_km_named_local_service": 38.1,
+    "pct_km_speed_limit_all": 0.6,
+    "pct_km_speed_limit_major": 2.4,
+    "pct_km_surface_all": 25.9,
+    "pct_km_width_all": 0.4,
+    "segments_with_access_restrictions": 490,
+    "segments_with_prohibited_transitions": 5,
+    "bridge_segments": 101,
+    "km_bridge": 10.92,
+    "tunnel_segments": 17,
+    "km_tunnel": 0.28,
+    "segments_with_level_rules": 171,
+    "segments_with_non_osm_source": 9
+   },
+   "buildings": {
+    "footprints": 60851,
+    "per_km2": 2665.4,
+    "by_source": {
+     "Google Open Buildings": 34657,
+     "Microsoft ML Buildings": 21726,
+     "OpenStreetMap": 4468
+    },
+    "pct_osm_manual": 7.3,
+    "with_height": 2,
+    "with_num_floors": 36,
+    "with_roof_shape": 1,
+    "pct_with_height": 0.003,
+    "pct_with_num_floors": 0.059
+   }
+  },
+  "B_central_urban": {
+   "roads": {
+    "segments": 11394,
+    "km_total": 1246.2,
+    "km_major": 269.3,
+    "km_local_service": 833.4,
+    "km_per_km2": 7.29,
+    "pct_km_named_major": 91.6,
+    "pct_km_named_local_service": 25.0,
+    "pct_km_speed_limit_all": 3.4,
+    "pct_km_speed_limit_major": 14.5,
+    "pct_km_surface_all": 22.4,
+    "pct_km_width_all": 0.2,
+    "segments_with_access_restrictions": 1132,
+    "segments_with_prohibited_transitions": 8,
+    "bridge_segments": 194,
+    "km_bridge": 15.76,
+    "tunnel_segments": 33,
+    "km_tunnel": 0.55,
+    "segments_with_level_rules": 268,
+    "segments_with_non_osm_source": 17
+   },
+   "buildings": {
+    "footprints": 142446,
+    "per_km2": 833.8,
+    "by_source": {
+     "Google Open Buildings": 80204,
+     "Microsoft ML Buildings": 56117,
+     "OpenStreetMap": 6125
+    },
+    "pct_osm_manual": 4.3,
+    "with_height": 16,
+    "with_num_floors": 56,
+    "with_roof_shape": 4,
+    "pct_with_height": 0.011,
+    "pct_with_num_floors": 0.039
+   }
+  },
+  "C_city_land": {
+   "roads": {
+    "segments": 54022,
+    "km_total": 9054.5,
+    "km_major": 2193.8,
+    "km_local_service": 5692.5,
+    "km_per_km2": 1.84,
+    "pct_km_named_major": 83.5,
+    "pct_km_named_local_service": 8.6,
+    "pct_km_speed_limit_all": 4.0,
+    "pct_km_speed_limit_major": 16.4,
+    "pct_km_surface_all": 18.8,
+    "pct_km_width_all": 0.0,
+    "segments_with_access_restrictions": 3477,
+    "segments_with_prohibited_transitions": 8,
+    "bridge_segments": 1032,
+    "km_bridge": 74.41,
+    "tunnel_segments": 89,
+    "km_tunnel": 18.61,
+    "segments_with_level_rules": 1156,
+    "segments_with_non_osm_source": 91
+   },
+   "buildings": {
+    "footprints": 759332,
+    "per_km2": 154.0,
+    "by_source": {
+     "Google Open Buildings": 481125,
+     "Microsoft ML Buildings": 204507,
+     "OpenStreetMap": 73700
+    },
+    "pct_osm_manual": 9.7,
+    "with_height": 16,
+    "with_num_floors": 66,
+    "with_roof_shape": 5,
+    "pct_with_height": 0.002,
+    "pct_with_num_floors": 0.009
+   }
+  }
+ }
+}

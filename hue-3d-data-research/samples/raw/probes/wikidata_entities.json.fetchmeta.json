@@ -1,0 +1,10 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 79973,
+ "http_headers": {
+  "content-type": "application/json; charset=utf-8"
+ },
+ "retrieved_at": "2026-11-14T03:50:06Z",
+ "final_url": "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q10769129%7CQ877185%7CQ7023311%7CQ10752407%7CQ975568%7CQ6826745%7CQ36399&props=claims%7Clabels&languages=vi%7Cen"
+}

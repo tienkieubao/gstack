@@ -42,8 +42,8 @@ MAX_RETRIES = 3
 BACKOFF_S = (5, 15, 45)
 MIN_INTERVAL_S = {  # per-host politeness delay
     "www.openstreetmap.org": 2.0,
-    "commons.wikimedia.org": 1.0,
-    "upload.wikimedia.org": 1.0,
+    "commons.wikimedia.org": 8.0,
+    "upload.wikimedia.org": 8.0,
     "earth-search.aws.element84.com": 1.0,
     "api.panoramax.xyz": 1.0,
     "api.sketchfab.com": 1.5,
@@ -133,6 +133,9 @@ def fetch(url: str, dest: Path, *, params: dict | None = None, headers: dict | N
                 log.error("GET %s -> HTTP %s: %s", r.url, r.status_code, r.text[:200].replace("\n", " "))
                 raise RuntimeError(f"HTTP {r.status_code} for {r.url}: {r.text[:200]}")
             last_err = RuntimeError(f"HTTP {r.status_code}")
+        except requests.exceptions.ProxyError as e:  # egress policy denial (HTTP 403 on CONNECT): never retry
+            log.error("proxy refused %s: %s", host, str(e)[:160])
+            raise RuntimeError(f"host {host} is not reachable from this environment (proxy refused the connection)") from e
         except requests.RequestException as e:  # network error: retry
             last_err = e
         log.warning("attempt %d/%d failed for %s: %s", attempt + 1, MAX_RETRIES, url, last_err)

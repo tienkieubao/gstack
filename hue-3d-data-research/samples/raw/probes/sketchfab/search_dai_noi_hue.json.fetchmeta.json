@@ -1,0 +1,10 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 78155,
+ "http_headers": {
+  "Content-Type": "application/json"
+ },
+ "retrieved_at": "2026-11-14T03:50:32Z",
+ "final_url": "https://api.sketchfab.com/v3/search?type=models&q=dai+noi+hue&count=24"
+}

@@ -1,6 +1,145 @@
 {
  "note": "One record per raw or normalized artefact. retrieved_at is when this project fetched the bytes; it is NOT the data's capture date.",
  "records": {
+  "samples/normalized/": {
+   "attribution": "© OpenStreetMap contributors; Overture Maps Foundation; Google Open Buildings; Microsoft ML Building Footprints",
+   "derived_from": [
+    "samples/raw/osm/tiles/",
+    "samples/raw/overture/2026-10-21.0/"
+   ],
+   "files": [
+    {
+     "features": 4043,
+     "file": "samples/normalized/geojson/osm_roads.geojson.gz",
+     "sha256_file": "d365bb8dabbcc5e68698d9bb2e80e8c3df149b7187c86d063b7aa00da669dae8"
+    },
+    {
+     "features": 4550,
+     "file": "samples/normalized/geojson/osm_buildings.geojson.gz",
+     "sha256_file": "7a6332a9033be4ecab3b9efa41baef69c9620980e09683b85e9dce365578567e"
+    },
+    {
+     "features": 524,
+     "file": "samples/normalized/geojson/osm_point_features.geojson",
+     "sha256_file": "16afc0d3c82d7c8fab246b85d5f06ced60073372e97ac3f212dcc99aa6aaa430"
+    },
+    {
+     "features": 13,
+     "file": "samples/normalized/geojson/osm_turn_restrictions.geojson",
+     "sha256_file": "dc00a813a292f5f35a4b92f93c90154ffcfe378646c2b0aa98caaa30650db936"
+    },
+    {
+     "features": 313,
+     "file": "samples/normalized/geojson/osm_landcover.geojson",
+     "sha256_file": "4310101b7d60ee13773ac4973bcc1a0cb8777ce14efd636d9584beb7299f3816"
+    },
+    {
+     "features": 61115,
+     "file": "samples/normalized/geojson/overture_buildings.geojson.gz",
+     "sha256_file": "facc1413561cd0d13b67655da8c3c2b32fa0b37326f6e9221d13b7bc1157bec1"
+    },
+    {
+     "features": 5665,
+     "file": "samples/normalized/geojson/overture_segments.geojson.gz",
+     "sha256_file": "418bf6283a8a5c85474bdd70619b6e05dd0e356cd9ce31534efe8552ab734023"
+    },
+    {
+     "features": 125,
+     "file": "samples/normalized/geojson/overture_water.geojson",
+     "sha256_file": "eaefbf26b0bc73b8f376235d9d306fc0941b3baa37ddcbc35063082809f9cc7b"
+    },
+    {
+     "features": 807,
+     "file": "samples/normalized/geojson/overture_infrastructure.geojson",
+     "sha256_file": "eb50730286896daa4ca7976ca5af836fa9bb2a333ee05d6b7e7b1fe6c0c0c5c1"
+    },
+    {
+     "features": 303,
+     "file": "samples/normalized/geojson/overture_land_use.geojson",
+     "sha256_file": "377ff0040638164ddf5f0a1b26656ff54b0a17470ac33e5c5accbb7ee4ad668f"
+    }
+   ],
+   "generated_at": "2026-11-14T03:41:51Z",
+   "kind": "derived",
+   "licence": "ODbL 1.0 (produced work/derivative database of OSM + Overture rows; Google Open Buildings rows CC BY 4.0, Microsoft rows ODbL)",
+   "script": "scripts/05_normalize.py"
+  },
+  "samples/normalized/buildings_height/open_buildings_25d_2023_pilot_2m.tif": {
+   "attribution": "Google Research Open Buildings 2.5D Temporal Dataset",
+   "bytes": 26183959,
+   "crs": "EPSG:32648; heights in metres above ground",
+   "data_date_note": "Model inference for mid-2023 from Sentinel-2 time series; not a survey.",
+   "data_url": "https://storage.googleapis.com/open-buildings-temporal-data/v1/geotiffs/3141c_2023_06_30/tile_F73tKZs3AmI.tif",
+   "derived": [
+    "samples/normalized/buildings_height/overture_buildings_height_estimate.csv.gz",
+    "samples/normalized/validation/building_height_check.json"
+   ],
+   "kind": "derived (window + 4x mean decimation of the source grid)",
+   "landing_url": "https://sites.research.google/gr/open-buildings/temporal/",
+   "licence": "CC BY 4.0 or ODbL 1.0 (user's choice)",
+   "provider": "Google Research",
+   "retrieved_at": "2026-11-14T03:57:29Z",
+   "script": "scripts/09_fetch_building_heights.py",
+   "sha256_file": "2eb626bdefadac9abdef9d51901b5cc7ded8b3bcd18b7071ee6b7b7cadd225c3",
+   "source": "Google Open Buildings 2.5D Temporal v1 (epoch 2023-06-30)",
+   "source_object": {
+    "generation": "1730367846642016",
+    "md5Hash": "JJcjKR95HJJ5HAUYTmpcKg==",
+    "name": "v1/geotiffs/3141c_2023_06_30/tile_F73tKZs3AmI.tif",
+    "size": "865166604",
+    "timeCreated": "2024-10-31T09:44:06.899Z",
+    "updated": "2024-10-31T09:44:06.899Z"
+   }
+  },
+  "samples/normalized/buildings_height/open_buildings_25d_2023_pilot_4m_uint16.tif": {
+   "attribution": "Google Research Open Buildings 2.5D Temporal Dataset",
+   "bytes": 2499609,
+   "crs": "EPSG:32648; band 1 height in cm above ground, band 2 presence in %",
+   "data_date_note": "Model inference for mid-2023 from Sentinel-2 time series; not a survey.",
+   "data_url": "https://storage.googleapis.com/open-buildings-temporal-data/v1/geotiffs/3141c_2023_06_30/tile_F73tKZs3AmI.tif",
+   "derived": [
+    "samples/normalized/buildings_height/overture_buildings_height_estimate.csv.gz",
+    "samples/normalized/validation/building_height_check.json"
+   ],
+   "kind": "derived (pilot window, mean-resampled from 0.5 m to 4 m, scaled to uint16)",
+   "landing_url": "https://sites.research.google/gr/open-buildings/temporal/",
+   "licence": "CC BY 4.0 or ODbL 1.0 (user's choice)",
+   "provider": "Google Research",
+   "retrieved_at": "2026-11-14T03:57:49Z",
+   "script": "scripts/09_fetch_building_heights.py",
+   "sha256_file": "50586d9518de415c5527be18634fff676477c95de2e2c49a1d154ec1f4b1b999",
+   "source": "Google Open Buildings 2.5D Temporal v1 (epoch 2023-06-30)",
+   "source_object": {
+    "generation": "1730367846642016",
+    "md5Hash": "JJcjKR95HJJ5HAUYTmpcKg==",
+    "name": "v1/geotiffs/3141c_2023_06_30/tile_F73tKZs3AmI.tif",
+    "size": "865166604",
+    "timeCreated": "2024-10-31T09:44:06.899Z",
+    "updated": "2024-10-31T09:44:06.899Z"
+   }
+  },
+  "samples/normalized/validation/": {
+   "derived_from": [
+    "samples/raw/osm/tiles/",
+    "samples/raw/overture/",
+    "samples/raw/dem/",
+    "samples/raw/landcover/"
+   ],
+   "generated_at": "2026-11-14T03:44:52Z",
+   "kind": "derived",
+   "licence": "ODbL 1.0 (statistics derived from OSM/Overture) + Copernicus DEM / ESA WorldCover attribution",
+   "script": "scripts/06_validate_pilot.py"
+  },
+  "samples/normalized/validation/coverage_stats.json": {
+   "derived_from": [
+    "s3://overturemaps-us-west-2/release/2026-10-21.0/ (segment, building; Zone C bbox; cached locally, not stored in repo)",
+    "aoi/"
+   ],
+   "generated_at": "2026-11-14T03:45:17Z",
+   "kind": "derived",
+   "licence": "statistics derived from ODbL / CC BY 4.0 sources",
+   "script": "scripts/07_coverage_stats.py"
+  },
   "samples/raw/dem/copernicus_glo30_N16E107_pilot_window.tif": {
    "bytes": 78786,
    "crs": "EPSG:4326 horizontal; heights in metres above EGM2008 geoid (per product spec)",
@@ -542,6 +681,47 @@
    "sha256_file": "9a571c0d11e9a52c0d0fdbcce518e6f0f8d6f355f81923ba572f4b7905448d27",
    "source": "Overture Maps divisions/division_area, release 2026-10-21.0"
   },
+  "samples/raw/probes/panoramax/": {
+   "data_url": "https://api.panoramax.xyz/api/search",
+   "licence": "metadata",
+   "provider": "Panoramax (IGN France / OSM France federation)",
+   "result": {
+    "city_bbox": 0,
+    "pilot": 0
+   },
+   "retrieved_at": "2026-11-14T03:50:35Z",
+   "script": "scripts/08_fetch_reference_and_probes.py panoramax",
+   "source": "Panoramax meta-catalogue STAC search"
+  },
+  "samples/raw/probes/sketchfab/": {
+   "data_url": "https://api.sketchfab.com/v3/",
+   "licence": "metadata; each model has its own licence (see samples/normalized/validation/sketchfab_models.csv)",
+   "provider": "Sketchfab (Epic Games); individual authors per model",
+   "retrieved_at": "2026-11-14T03:50:34Z",
+   "script": "scripts/08_fetch_reference_and_probes.py sketchfab",
+   "source": "Sketchfab Data API v3 (model metadata only; no 3D files downloaded)"
+  },
+  "samples/raw/probes/wikidata_entities.json": {
+   "data_url": "https://www.wikidata.org/w/api.php",
+   "licence": "CC0 1.0",
+   "provider": "Wikimedia Foundation",
+   "retrieved_at": "2026-11-14T03:50:06Z",
+   "script": "scripts/08_fetch_reference_and_probes.py wikidata",
+   "sha256_file": "58092e917a8f4cc7da58f881a66215205bb9fec9acfd592c55aea735abc41544",
+   "source": "Wikidata wbgetentities"
+  },
+  "samples/raw/reference_photos/": {
+   "api_responses": "samples/raw/reference_photos/api/",
+   "data_date_note": "date_taken comes from each file's metadata (EXIF/description) and is not verified.",
+   "data_url": "https://commons.wikimedia.org/w/api.php",
+   "images": [],
+   "landing_url": "https://commons.wikimedia.org/",
+   "licence": "per file — see `images` list (only CC0/PD/CC BY/CC BY-SA files were downloaded)",
+   "provider": "Wikimedia Foundation; individual authors per file",
+   "retrieved_at": "2026-11-14T03:50:05Z",
+   "script": "scripts/08_fetch_reference_and_probes.py commons",
+   "source": "Wikimedia Commons (MediaWiki API geosearch + imageinfo)"
+  },
   "samples/raw/sentinel2/S2B_48QYD_20260330_0_L2A_TCI_pilot_window.tif": {
    "attribution": "Contains modified Copernicus Sentinel data 2026",
    "bytes": 637802,
@@ -590,5 +770,5 @@
   }
  },
  "schema": "hue3d-provenance/1",
- "updated_at": "2026-11-14T03:38:41Z"
+ "updated_at": "2026-11-14T03:57:49Z"
 }

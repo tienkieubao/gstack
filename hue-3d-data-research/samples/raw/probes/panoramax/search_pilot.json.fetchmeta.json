@@ -1,0 +1,10 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 26,
+ "http_headers": {
+  "Content-Type": "application/json"
+ },
+ "retrieved_at": "2026-11-14T03:50:35Z",
+ "final_url": "https://api.panoramax.xyz/api/search?bbox=107.556%2C16.452%2C107.602%2C16.494&limit=5"
+}

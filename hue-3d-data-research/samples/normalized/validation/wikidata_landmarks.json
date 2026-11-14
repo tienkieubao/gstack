@@ -1,0 +1,107 @@
+[
+ {
+  "qid": "Q10769129",
+  "label": "Hoàng thành Huế",
+  "coord_lat_lon": [
+   16.469444444444,
+   107.57777777778
+  ],
+  "height_P2048": null,
+  "length_P2043": null,
+  "width_P2049": null,
+  "area_P2046": null,
+  "inception_P571": true,
+  "commons_category_P373": "Imperial City, Huế",
+  "n_claims": 17
+ },
+ {
+  "qid": "Q877185",
+  "label": "Kinh thành Huế",
+  "coord_lat_lon": [
+   16.46972222,
+   107.57777778
+  ],
+  "height_P2048": null,
+  "length_P2043": null,
+  "width_P2049": null,
+  "area_P2046": "+159.71 Q35852",
+  "inception_P571": false,
+  "commons_category_P373": "Complex of Huế Monuments",
+  "n_claims": 15
+ },
+ {
+  "qid": "Q7023311",
+  "label": "Ngọ Môn (hoàng thành Huế)",
+  "coord_lat_lon": [
+   16.468,
+   107.576
+  ],
+  "height_P2048": null,
+  "length_P2043": null,
+  "width_P2049": null,
+  "area_P2046": null,
+  "inception_P571": false,
+  "commons_category_P373": "Meridian Gate (Citadel of Huế)",
+  "n_claims": 8
+ },
+ {
+  "qid": "Q10752407",
+  "label": "Cầu Trường Tiền",
+  "coord_lat_lon": [
+   16.468889,
+   107.588611
+  ],
+  "height_P2048": null,
+  "length_P2043": "+402.60 Q11573",
+  "width_P2049": null,
+  "area_P2046": null,
+  "inception_P571": false,
+  "commons_category_P373": "Truong Tien Bridge",
+  "n_claims": 9
+ },
+ {
+  "qid": "Q975568",
+  "label": "Chùa Thiên Mụ",
+  "coord_lat_lon": [
+   16.453599,
+   107.544812
+  ],
+  "height_P2048": null,
+  "length_P2043": null,
+  "width_P2049": null,
+  "area_P2046": "+4.24 Q35852",
+  "inception_P571": false,
+  "commons_category_P373": "Pagoda of the Celestial Lady",
+  "n_claims": 17
+ },
+ {
+  "qid": "Q6826745",
+  "label": "Điện Thái Hòa (hoàng thành Huế)",
+  "coord_lat_lon": [
+   16.468734,
+   107.578388
+  ],
+  "height_P2048": null,
+  "length_P2043": null,
+  "width_P2049": null,
+  "area_P2046": null,
+  "inception_P571": false,
+  "commons_category_P373": "Hall of Supreme Harmony (Citadel of Huế)",
+  "n_claims": 6
+ },
+ {
+  "qid": "Q36399",
+  "label": "Huế",
+  "coord_lat_lon": [
+   16.46388888888889,
+   107.58666666666667
+  ],
+  "height_P2048": null,
+  "length_P2043": null,
+  "width_P2049": null,
+  "area_P2046": "+4947.11 Q712226",
+  "inception_P571": false,
+  "commons_category_P373": "Huế",
+  "n_claims": 56
+ }
+]

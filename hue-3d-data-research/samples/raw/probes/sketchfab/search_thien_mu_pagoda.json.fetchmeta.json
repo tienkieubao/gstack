@@ -1,0 +1,10 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 11469,
+ "http_headers": {
+  "Content-Type": "application/json"
+ },
+ "retrieved_at": "2026-11-14T03:50:30Z",
+ "final_url": "https://api.sketchfab.com/v3/search?type=models&q=thien+mu+pagoda&count=24"
+}

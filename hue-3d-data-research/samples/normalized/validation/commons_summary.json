@@ -1,0 +1,79 @@
+{
+ "files_found": 215,
+ "by_landmark": {
+  "ngo_mon": 66,
+  "ky_dai": 13,
+  "dien_thai_hoa": 100,
+  "cau_truong_tien": 36,
+  "cau_phu_xuan": 0
+ },
+ "open_licence_files": 149,
+ "licences": {
+  "": 66,
+  "CC BY 2.0": 53,
+  "CC BY 3.0": 8,
+  "CC BY 4.0": 26,
+  "CC BY-SA 2.0": 3,
+  "CC BY-SA 3.0": 12,
+  "CC BY-SA 4.0": 25,
+  "CC0": 12,
+  "Public domain": 10
+ },
+ "downloaded": 0,
+ "category_counts": {
+  "Category:Meridian Gate (Huế)": {
+   "missing": true
+  },
+  "Category:Trường Tiền Bridge": {
+   "missing": true
+  },
+  "Category:Citadel of Huế": {
+   "size": 465,
+   "pages": 0,
+   "files": 456,
+   "subcats": 9
+  },
+  "Category:Complex of Huế Monuments": {
+   "size": 96,
+   "pages": 0,
+   "files": 82,
+   "subcats": 14
+  },
+  "Category:Flag Tower of Huế": {
+   "size": 55,
+   "pages": 0,
+   "files": 55,
+   "subcats": 0
+  },
+  "Category:Imperial City, Huế": {
+   "size": 213,
+   "pages": 1,
+   "files": 201,
+   "subcats": 11
+  },
+  "Category:Pagoda of the Celestial Lady": {
+   "size": 318,
+   "pages": 0,
+   "files": 314,
+   "subcats": 4
+  },
+  "Category:Phu Xuan Bridge": {
+   "size": 10,
+   "pages": 0,
+   "files": 10,
+   "subcats": 0
+  },
+  "Category:Thái Hòa Palace": {
+   "size": 0,
+   "pages": 0,
+   "files": 0,
+   "subcats": 0
+  },
+  "Category:Truong Tien Bridge": {
+   "size": 49,
+   "pages": 0,
+   "files": 49,
+   "subcats": 0
+  }
+ }
+}

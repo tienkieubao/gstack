@@ -1,0 +1,5 @@
+group,ways,km,name_pct_km,oneway_pct_km,lanes_pct_km,maxspeed_pct_km,surface_pct_km,width_pct_km,sidewalk_pct_km,lit_pct_km,turn_lanes_pct_km
+major (trunk..tertiary + links),305,111.2,96.4,35.4,28.6,2.0,60.0,0.0,0.7,0.9,0.0
+local (residential/unclassified/living_street),1379,245.9,53.2,3.1,6.4,0.5,19.7,0.0,0.2,2.3,0.0
+service,1504,95.2,6.4,0.7,0.1,0.2,3.1,0.1,0.0,0.0,0.0
+non-motor (footway/path/steps/pedestrian/cycleway),849,71.5,4.9,0.3,0.0,0.0,18.4,2.2,0.3,5.1,0.0

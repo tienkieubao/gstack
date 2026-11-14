@@ -1,0 +1,11 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 82,
+ "http_headers": {
+  "Content-Type": "application/json",
+  "Content-Length": "82"
+ },
+ "retrieved_at": "2026-11-14T03:50:29Z",
+ "final_url": "https://api.sketchfab.com/v3/search?type=models&q=truong+tien+bridge&count=24"
+}

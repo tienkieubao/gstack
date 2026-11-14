@@ -1,0 +1,87 @@
+{
+ "generated_at": "2026-11-14T03:41:51Z",
+ "crs": "EPSG:4326",
+ "metric_crs_for_measurements": "EPSG:32648",
+ "geopackage": "samples/normalized/hue_pilot_normalized.gpkg",
+ "layers": {
+  "osm_roads": {
+   "features": 4043,
+   "geojson": "samples/normalized/geojson/osm_roads.geojson.gz",
+   "geom_types": [
+    "LineString"
+   ]
+  },
+  "osm_buildings": {
+   "features": 4550,
+   "geojson": "samples/normalized/geojson/osm_buildings.geojson.gz",
+   "geom_types": [
+    "MultiPolygon",
+    "Polygon"
+   ]
+  },
+  "osm_point_features": {
+   "features": 524,
+   "geojson": "samples/normalized/geojson/osm_point_features.geojson",
+   "geom_types": [
+    "Point"
+   ]
+  },
+  "osm_turn_restrictions": {
+   "features": 13,
+   "geojson": "samples/normalized/geojson/osm_turn_restrictions.geojson",
+   "geom_types": [
+    "Point"
+   ]
+  },
+  "osm_landcover": {
+   "features": 313,
+   "geojson": "samples/normalized/geojson/osm_landcover.geojson",
+   "geom_types": [
+    "MultiPolygon",
+    "Polygon"
+   ]
+  },
+  "overture_buildings": {
+   "features": 61115,
+   "geojson": "samples/normalized/geojson/overture_buildings.geojson.gz",
+   "geom_types": [
+    "MultiPolygon",
+    "Polygon"
+   ]
+  },
+  "overture_segments": {
+   "features": 5665,
+   "geojson": "samples/normalized/geojson/overture_segments.geojson.gz",
+   "geom_types": [
+    "LineString"
+   ]
+  },
+  "overture_water": {
+   "features": 125,
+   "geojson": "samples/normalized/geojson/overture_water.geojson",
+   "geom_types": [
+    "LineString",
+    "MultiLineString",
+    "MultiPolygon",
+    "Polygon"
+   ]
+  },
+  "overture_infrastructure": {
+   "features": 807,
+   "geojson": "samples/normalized/geojson/overture_infrastructure.geojson",
+   "geom_types": [
+    "LineString",
+    "Point",
+    "Polygon"
+   ]
+  },
+  "overture_land_use": {
+   "features": 303,
+   "geojson": "samples/normalized/geojson/overture_land_use.geojson",
+   "geom_types": [
+    "MultiPolygon",
+    "Polygon"
+   ]
+  }
+ }
+}

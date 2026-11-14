@@ -1,0 +1,10 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 99268,
+ "http_headers": {
+  "content-type": "application/json; charset=utf-8"
+ },
+ "retrieved_at": "2026-11-14T03:49:02Z",
+ "final_url": "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=geosearch&ggscoord=16.4684%7C107.5887&ggsradius=250&ggsnamespace=6&ggslimit=100&prop=imageinfo%7Ccoordinates&iiprop=url%7Csize%7Cmime%7Cextmetadata%7Ctimestamp&iiurlwidth=1280&iiextmetadatafilter=LicenseShortName%7CLicenseUrl%7CArtist%7CDateTimeOriginal%7CCredit%7CUsageTerms%7CAttributionRequired%7CGPSLatitude%7CGPSLongitude"
+}

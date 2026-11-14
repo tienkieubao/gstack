@@ -1,0 +1,10 @@
+{
+ "cached": false,
+ "status": 200,
+ "bytes": 5226,
+ "http_headers": {
+  "Content-Type": "application/json"
+ },
+ "retrieved_at": "2026-11-14T03:50:08Z",
+ "final_url": "https://api.sketchfab.com/v3/models/fd6df65eae404a7dbf006f68e7857a2e"
+}
