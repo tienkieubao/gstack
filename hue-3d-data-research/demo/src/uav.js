@@ -54,7 +54,7 @@ export class Input {
     this.active = false;              // true while the UAV is being flown: game keys are captured
     this.last = ''; this.lastKey = ''; this.lastAt = 0;
     this.left = { x: 0, y: 0 }; this.right = { x: 0, y: 0 };   // virtual sticks, -1..1
-    const PULSE = 600, SHORT = 150;
+    const PULSE = 600, SHORT = 30;    // a human tap lasts > 50 ms; IME re-injected keys arrive < 5 ms apart
     window.addEventListener('keydown', (e) => {
       if (e.metaKey || e.ctrlKey || e.altKey || isTextEntry(e.target)) return;
       const action = BY_CODE[e.code] || BY_KEY[(e.key || '').toLowerCase()];
@@ -82,11 +82,12 @@ export class Input {
     for (const [k, v] of this.held) { if (v.expires <= now) this.held.delete(k); else on.add(v.action); }
     const clamp = (v) => Math.max(-1, Math.min(1, v));
     const ax = (neg, pos) => (on.has(pos) ? 1 : 0) - (on.has(neg) ? 1 : 0);
+    const stick = (v) => { const a = Math.abs(v); return a < 0.15 ? 0 : Math.sign(v) * ((a - 0.15) / 0.85) ** 2; };   // dead zone + fine control near centre
     return {
-      forward: clamp(ax('back', 'fwd') - this.right.y),
-      strafe: clamp(ax('left', 'right') + this.right.x),
-      up: clamp(ax('down', 'up') - this.left.y),
-      yaw: clamp(ax('yawR', 'yawL') - this.left.x),
+      forward: clamp(ax('back', 'fwd') - stick(this.right.y)),
+      strafe: clamp(ax('left', 'right') + stick(this.right.x)),
+      up: clamp(ax('down', 'up') - stick(this.left.y)),
+      yaw: clamp(ax('yawR', 'yawL') - stick(this.left.x)),
     };
   }
 }
@@ -97,12 +98,14 @@ export class Uav {
     this.model = buildUavModel();
     this.pos = new THREE.Vector3(); this.vel = new THREE.Vector3(); this.yaw = 0;
     this.tilt = { pitch: 0, roll: 0 };
+    this.yawRate = 0;            // rad/s, eased towards the command
+    this.yawMax = 0.6;           // rad/s at full command (~34°/s); adjustable from the HUD
     this.auto = null;            // {curve, length, s}
     this.touches = 0; this.crashes = 0; this.cooldown = 0; this.flash = 0; this.lastHit = '';
     this.status = { agl: 0, overWater: false, clearanceUp: NaN };
   }
 
-  place(x, y, z, yaw = 0) { this.pos.set(x, y, z); this.vel.set(0, 0, 0); this.yaw = yaw; this.auto = null; this.sync(); }
+  place(x, y, z, yaw = 0) { this.pos.set(x, y, z); this.vel.set(0, 0, 0); this.yaw = yaw; this.yawRate = 0; this.auto = null; this.sync(); }
 
   sync() {
     this.model.position.copy(this.pos);
@@ -148,7 +151,9 @@ export class Uav {
       if (u >= 1) { this.auto = null; this.vel.set(0, 0, 0); this.onAutoEnd && this.onAutoEnd(); }
     } else {
       const c = input;
-      this.yaw += c.yaw * 1.5 * dt;
+      // yaw eases in/out (~0.3 s), so a short tap turns only a few degrees instead of snapping
+      this.yawRate += (c.yaw * this.yawMax - this.yawRate) * Math.min(1, dt * 3.5);
+      this.yaw += this.yawRate * dt;
       const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
       // forward is -z in the model frame
       const ax = (-sin * c.forward + cos * c.strafe) * 16, az = (-cos * c.forward - sin * c.strafe) * 16;
