@@ -4,6 +4,8 @@ Xếp theo mức nghiêm trọng đối với từng mục tiêu. "Căn cứ" tr
 
 Ký hiệu mục tiêu: **(1)** bản đồ 3D để xem; **(2)** chỉ đường; **(3)** mô phỏng bay UAV dạng game.
 
+> **Phạm vi demo (chốt 2026-11-14):** chưa xin dữ liệu bên thứ ba, không dùng Mapillary, mô phỏng UAV ở cấp minh họa. Trong demo, G2 và G3 được xử lý bằng mô hình tham số gắn nhãn `inferred`; G1 và G4 để nguyên vì chỉ đường nằm ngoài demo. Các phương án "xin" bên dưới áp dụng khi chuyển sang sản phẩm.
+
 ## A. Nghiêm trọng — chặn mục tiêu
 
 | # | Thiếu | Căn cứ đo được | Ảnh hưởng | Phương án bổ sung (theo thứ tự ưu tiên) | Cần quyền/chi phí? |

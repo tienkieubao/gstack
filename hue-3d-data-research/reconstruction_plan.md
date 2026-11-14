@@ -222,7 +222,7 @@ Lựa chọn nền tảng (cần thử nghiệm, chưa quyết):
 - **Web** (CesiumJS / Three.js / Babylon.js): chạy trên trình duyệt, dễ chia sẻ; hiệu ứng và vật lý đơn giản hơn.
 - Nên giữ **một nguồn dữ liệu 3D Tiles/glTF dùng chung** cho cả bản xem web và bản game để không dựng hai lần.
 
-Hai cấp mô phỏng — phải chọn trước vì quyết định chi phí dữ liệu:
+Hai cấp mô phỏng. **Chủ dự án đã chọn cấp 1 (minh họa) ngày 2026-11-14**, nên nguyên mẫu không phụ thuộc LiDAR gầm cầu:
 
 1. **Giải trí/trình diễn**: gầm cầu dựng tham số theo số nhịp và ảnh; sai số dm–m chấp nhận được; ghi rõ "mô phỏng minh họa".
 2. **Huấn luyện/lập kế hoạch bay thật**: cần tĩnh không đo được (E4), chướng ngại nhỏ, mực nước theo ngày. Chưa nguồn mở nào đáp ứng.

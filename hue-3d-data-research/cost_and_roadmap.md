@@ -118,14 +118,14 @@ Quy tắc giao thông ở Huế thay đổi thường xuyên — các ví dụ t
 | Giai đoạn | Nội dung | Đầu vào | Kết quả | Điều kiện sang bước sau |
 |---|---|---|---|---|
 | 0. Khảo sát nguồn | (đã xong) | — | Thư mục này | — |
-| 1. Pilot hiển thị từ dữ liệu mở | Nạp PostGIS; dựng địa hình + nước + đường + cầu (mô hình ràng buộc) + khối nhà LoD1; trình xem web; 12 cảnh kiểm thử | Mẫu trong repo; token Mapillary; thử DeltaDTM | Bản xem 3D pilot, mọi thuộc tính có status/nguồn | Đạt tiêu chí §4.1 |
+| 1. Pilot hiển thị từ dữ liệu mở | Nạp PostGIS; dựng địa hình + nước + đường + cầu (mô hình ràng buộc) + khối nhà LoD1; trình xem web; 12 cảnh kiểm thử | Mẫu trong repo; thử DeltaDTM | Bản xem 3D pilot, mọi thuộc tính có status/nguồn | Đạt tiêu chí §4.1 |
 | 2. Tích hợp UAV LiDAR + ảnh | Tiếp nhận theo đặc tả; DTM/DSM; chiều cao, mái, mép đường, cao độ cầu; photogrammetry di tích | Dữ liệu chủ dự án | LoD2 khu lõi, LoD3 cho 5–10 công trình; **bảng sai số của nguồn mở so với LiDAR** | Đạt §4.2; có số đo để ngoại suy vùng B |
 | 3. Xác minh giao thông pilot | Khảo sát thực địa; nhập thuộc tính; đối chiếu văn bản; engine định tuyến thử | Giai đoạn 1; nhân lực khảo sát | Mạng định tuyến pilot đã xác minh trên tuyến chính | Đạt §4.3 |
-| 4. Nguyên mẫu mô phỏng bay UAV | Collision mesh; mặt nước; gầm cầu Trường Tiền; điều khiển + hiệu ứng | Giai đoạn 2 (bắt buộc có hình học gầm cầu) | Bản chơi thử một tuyến bay | Đạt §4.4 |
+| 4. Nguyên mẫu mô phỏng bay UAV (cấp minh họa — đã chốt) | Collision mesh; mặt nước; gầm cầu Trường Tiền dựng tham số; điều khiển + hiệu ứng | Giai đoạn 1 (không cần chờ LiDAR ở cấp minh họa) | Bản chơi thử một tuyến bay, ghi rõ "minh họa" | Đạt §4.4 |
 | 5. Mở rộng vùng B | Lặp 1–3 với đơn giá đã đo | Quyết định ngân sách dựa trên số đo pilot | — | — |
 | 6. Vùng C | Chỉ LoD1 + mạng đường mở; chỉ đường giới hạn ở tuyến đã xác minh | — | — | — |
 
-Giai đoạn 1 và việc xin dữ liệu (GISHue, HMCC, HueIOC, mô hình AASCTF) nên chạy song song vì thời gian chờ phản hồi không kiểm soát được.
+**Phạm vi demo đã chốt ngày 2026-11-14:** chưa xin dữ liệu bên thứ ba (để sau), không dùng Mapillary, mô phỏng UAV ở cấp minh họa. Vì vậy demo gồm giai đoạn 1 và 4, cộng giai đoạn 2 khi có dữ liệu UAV; giai đoạn 3 (chỉ đường) và 5–6 nằm ngoài demo. Khi chuyển từ demo sang sản phẩm, việc xin dữ liệu (GISHue, Trung tâm Bảo tồn Di tích, trung tâm điều hành đô thị, mô hình AASCTF) nên bắt đầu sớm vì thời gian chờ phản hồi không kiểm soát được.
 
 ## 4. Tiêu chí nghiệm thu pilot
 
@@ -171,9 +171,9 @@ L2–L4 không phải ngưỡng đạt/không đạt mà là **phép đo bắt b
 | # | Tiêu chí | Cách đo |
 |---|---|---|
 | S1 | UAV bay lọt qua từng nhịp cầu Trường Tiền không va chạm giả; va chạm thật khi chạm trụ/dầm | kịch bản bay tự động |
-| S2 | Khoảng thông thủy mô phỏng lệch ≤ ngưỡng do chủ dự án đặt so với số đo (bắt buộc có số đo nếu dùng cho huấn luyện) | so với LiDAR |
+| S2 | *Không áp dụng ở cấp minh họa.* (Chỉ khi nâng lên cấp "đã đo": khoảng thông thủy lệch ≤ ngưỡng do chủ dự án đặt so với số đo) | — |
 | S3 | Chạm/bay sát mặt nước kích hoạt hiệu ứng nước; mực nước là tham số cấu hình có ghi nguồn | thử tay |
-| S4 | Bản hiển thị ghi rõ cấp mô phỏng ("minh họa" hay "đã đo") | rà soát |
+| S4 | Bản hiển thị ghi rõ "mô phỏng minh họa — không dùng để lập kế hoạch bay thật" | rà soát |
 
 ## 5. Rủi ro chi phí chính
 

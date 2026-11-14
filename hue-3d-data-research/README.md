@@ -53,11 +53,23 @@ Phân tích giấy phép: `source_catalog.md`. Danh mục 59 nguồn: `source_ca
 
 ### 6. Bước triển khai cụ thể tiếp theo?
 
-1. Chủ dự án quyết định ba việc: (a) cấp token Mapillary; (b) có gửi yêu cầu xin dữ liệu tới GISHue / Trung tâm Bảo tồn Di tích / HueIOC hay không; (c) cấp mô phỏng UAV mong muốn ("minh họa" hay "đã đo").
-2. Gửi đặc tả tiếp nhận dữ liệu UAV (`reconstruction_plan.md` §8) cho đội bay **trước khi bay** — đặc biệt hệ độ cao, điểm kiểm tra, và đường bay thấp dọc cầu Trường Tiền nếu muốn mô phỏng bay dưới cầu.
-3. Giai đoạn 1 (không phụ thuộc bên ngoài): nạp mẫu vào PostGIS, cài mô hình ràng buộc cho cầu, dựng LoD1 và trình xem web cho pilot, chạy 12 cảnh kiểm thử.
+Phạm vi đã được chủ dự án chốt ngày 2026-11-14 (xem mục "Quyết định phạm vi demo" bên dưới), nên thứ tự là:
+
+1. Giai đoạn 1 (không phụ thuộc bên ngoài, làm được ngay): nạp mẫu vào PostGIS, cài mô hình ràng buộc cho cầu, dựng LoD1 và trình xem web cho pilot, chạy 12 cảnh kiểm thử.
+2. Nguyên mẫu mô phỏng bay UAV cấp **minh họa**: gầm cầu Trường Tiền dựng tham số từ số nhịp công bố và ảnh tham chiếu — không cần chờ LiDAR.
+3. Khi có dữ liệu UAV: gửi đặc tả tiếp nhận (`reconstruction_plan.md` §8) cho đội bay **trước khi bay** — đặc biệt hệ độ cao và điểm kiểm tra. Đường bay thấp dọc cầu không còn bắt buộc ở cấp minh họa; ảnh xiên vẫn có ích cho hình dáng.
 4. Thử DeltaDTM và truy vấn OpenAerialMap (hai việc nhỏ chưa làm được do giới hạn mạng).
 5. Tư vấn pháp lý về bay UAV và công bố dữ liệu độ cao/3D chi tiết trước giai đoạn 2.
+
+## Quyết định phạm vi demo (chủ dự án, 2026-11-14)
+
+| Vấn đề | Quyết định | Hệ quả |
+|---|---|---|
+| Token Mapillary | Không cấp ở giai đoạn demo | Độ phủ ảnh đường phố mở tại Huế vẫn **chưa biết**; lớp biển báo/mặt tiền để trống. (Token Mapillary miễn phí — có thể làm sau, không phát sinh chi phí.) |
+| Xin dữ liệu GISHue, Trung tâm Bảo tồn Di tích, trung tâm điều hành đô thị | Chưa gửi; sẽ xin phép sau | Demo chỉ dùng dữ liệu mở đã tải + dữ liệu UAV của chủ dự án. Di tích dựng theo số đo công bố và ảnh, gắn nhãn `inferred` |
+| Cấp mô phỏng UAV | **Minh họa** | Không cần tĩnh không gầm cầu đo đạc; gầm cầu dựng tham số. Bản mô phỏng phải ghi rõ "minh họa", không dùng để lập kế hoạch bay thật |
+
+Mục tiêu chỉ đường nằm ngoài phạm vi demo: không quyết định nào ở trên thay đổi kết luận rằng dữ liệu hiện có chưa đủ để chỉ đường.
 
 ## Hai câu hỏi bổ sung của chủ dự án
 
