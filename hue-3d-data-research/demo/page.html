@@ -76,6 +76,7 @@ label.opt input { accent-color: var(--gold); width: 15px; height: 15px; margin: 
 .counts { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); }
 .counts b { font: 500 13px var(--f-num); color: var(--ivory); }
 .hud-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+#btn-sound[aria-pressed="false"] { color: var(--muted); }
 #hud-alert { margin: 0; padding: 5px 9px; border-radius: 6px; background: var(--vermilion); color: #fff6ee; font-weight: 600; font-size: 12.5px; }
 
 #keys { right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); padding: 10px 12px; font-size: 12px; color: var(--muted); display: grid; grid-template-columns: auto auto; gap: 3px 12px; }
@@ -217,6 +218,7 @@ body.flying #info { display: none; }
   <div class="hud-btns">
     <button type="button" class="ghost" id="btn-view">Góc nhìn: bám sau</button>
     <button type="button" class="ghost" id="btn-reset">Về điểm xuất phát</button>
+    <button type="button" class="ghost" id="btn-sound" aria-pressed="true">Âm thanh: bật</button>
   </div>
 </section>
 
@@ -226,6 +228,7 @@ body.flying #info { display: none; }
   <span><kbd>A</kbd><kbd>D</kbd></span><span>Sang trái / phải</span>
   <span><kbd>Space</kbd><kbd>Shift</kbd> <kbd>R</kbd><kbd>F</kbd></span><span>Lên / xuống</span>
   <span><kbd>C</kbd></span><span>Đổi góc nhìn</span>
+  <span><kbd>M</kbd></span><span>Bật / tắt âm thanh</span>
   <span><kbd>Esc</kbd></span><span>Về chế độ khám phá</span>
   <span class="keys-note">Không dùng bàn phím được? Kéo hai cần tròn ở giữa đáy màn hình bằng chuột.</span>
 </section>

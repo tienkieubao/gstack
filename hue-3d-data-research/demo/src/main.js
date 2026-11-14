@@ -7,6 +7,7 @@ import {
 } from './world.js';
 import { WaterFx } from './fx.js';
 import { Uav, Input, truongTienPath, ACTION_NAME } from './uav.js';
+import { RotorSound } from './audio.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (v, d = 1) => (Number.isFinite(v) ? v.toLocaleString('vi-VN', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—');
@@ -71,6 +72,7 @@ async function main() {
   fx.rings.forEach((r) => { r.mesh.visible = false; });
   uav.model.visible = false;
   const input = new Input();
+  const sound = new RotorSound();
 
   // ------------------------------------------------------------------ explore controls
   const controls = new MapControls(camera, canvas);
@@ -158,13 +160,19 @@ async function main() {
     camPos.copy(uav.pos).add(new THREE.Vector3(Math.sin(uav.yaw) * 14, 5, Math.cos(uav.yaw) * 14));
     camera.position.copy(camPos);
   }
-  document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  // clicking a mode is the user gesture that lets the browser start audio
+  document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.mode !== 'explore') sound.ensure(); setMode(b.dataset.mode); }));
+  const soundLabel = () => { $('btn-sound').textContent = sound.enabled ? 'Âm thanh: bật' : 'Âm thanh: tắt'; $('btn-sound').setAttribute('aria-pressed', String(sound.enabled)); };
+  $('btn-sound').addEventListener('click', () => { sound.setEnabled(!sound.enabled); soundLabel(); });
+  soundLabel();
   canvas.addEventListener('pointerdown', () => canvas.focus({ preventScroll: true }));
   $('focus-hint').addEventListener('click', () => canvas.focus({ preventScroll: true }));
   $('btn-view').addEventListener('click', () => { view = view === 'chase' ? 'fpv' : 'chase'; $('btn-view').textContent = view === 'chase' ? 'Góc nhìn: bám sau' : 'Góc nhìn: buồng lái'; });
   $('btn-reset').addEventListener('click', () => { uav.started = false; uav.crashes = 0; uav.touches = 0; setMode('manual'); });
   window.addEventListener('keydown', (e) => {
     if ((e.code === 'KeyC' || e.key === 'c') && mode !== 'explore' && !e.repeat) { e.preventDefault(); $('btn-view').click(); }
+    if ((e.code === 'KeyM' || e.key === 'm') && mode !== 'explore' && !e.repeat) { e.preventDefault(); $('btn-sound').click(); }
+    if (mode !== 'explore') sound.ensure();          // a key press is also a gesture that may start audio
     if (e.code === 'Escape' && mode !== 'explore') setMode('explore');
   });
 
@@ -306,6 +314,12 @@ async function main() {
       const cmd = mode === 'manual' ? input.read() : { forward: 0, strafe: 0, up: 0, yaw: 0 };
       const n = Math.max(1, Math.ceil(dt * 30));
       for (let i = 0; i < n && mode !== 'explore'; i++) uav.update(dt / n, cmd, bounds);
+      // rotor load for the engine sound: hover ~0.45; climbing, pushing forward and yawing spin the props up
+      let loadTarget;
+      if (mode === 'manual') loadTarget = 0.45 + 0.35 * Math.max(0, cmd.up) - 0.2 * Math.max(0, -cmd.up) + 0.2 * Math.min(1, Math.hypot(cmd.forward, cmd.strafe)) + 0.08 * Math.abs(cmd.yaw);
+      else loadTarget = 0.45 + THREE.MathUtils.clamp(uav.vel.y * 0.06, -0.2, 0.35) + Math.min(1, uav.vel.length() / 40) * 0.2;
+      const st = uav.status, wash = st.overWater && st.agl < 3.2 ? Math.min(1, 1 - (st.agl - 0.3) / 2.9) : 0;
+      sound.update(dt, { active: true, loadTarget: THREE.MathUtils.clamp(loadTarget, 0, 1), wash, camDist: view === 'fpv' ? 4 : camera.position.distanceTo(uav.pos), touches: uav.touches, crashes: uav.crashes });
       fwd.set(-Math.sin(uav.yaw), 0, -Math.cos(uav.yaw));
       if (view === 'fpv') {
         camera.position.copy(uav.pos).addScaledVector(fwd, 1.3).add(new THREE.Vector3(0, 0.35, 0));
@@ -336,6 +350,7 @@ async function main() {
         } else { $('focus-hint').hidden = true; $('hud-input').textContent = 'Bay tự động'; }
       }
     }
+    if (mode === 'explore') sound.update(dt, { active: false, loadTarget: 0.45, wash: 0, camDist: 100, touches: uav.touches, crashes: uav.crashes });
     fx.update(dt);
     if (skipRender === true) return;
     updateLabels();
@@ -352,7 +367,7 @@ async function main() {
   };
   renderer.setAnimationLoop(frame);
   // console/test hook: __hue.tick(dt) advances one frame deterministically when the loop is paused
-  window.__hue = { scene, camera, uav, input, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(frame) };
+  window.__hue = { scene, camera, uav, input, sound, setMode, T, meta, bridges, renderer, tick, pause: () => renderer.setAnimationLoop(null), resume: () => renderer.setAnimationLoop(frame) };
 
   // stats in the about panel
   const c = meta.counts;

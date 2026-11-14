@@ -28,6 +28,12 @@ npm install && npm run build               # src/*.js -> app.js, page.html -> in
 
 Bảng thông số khi bay: độ cao trên mặt nước/mặt đất, tốc độ, khoảng trống tới đáy cầu (khi đang ở dưới mặt cầu), số lần chạm nước, số lần va chạm.
 
+Âm thanh động cơ: bật khi bấm "Lái UAV" hoặc "Bay dưới cầu Trường Tiền" (trình duyệt chỉ cho phát âm thanh sau một thao tác của người xem). Phím `M` hoặc nút "Âm thanh" trên bảng thông số để bật/tắt; trang nhớ lựa chọn trên trình duyệt đó. Âm thanh được tổng hợp trực tiếp bằng Web Audio, không dùng tệp ghi âm:
+
+- 4 cánh quạt quay lệch nhau một chút, tạo tiếng "vo vo" có nhịp phách như máy thật; cao độ và độ to tăng theo lực đẩy (lên cao, tăng tốc, xoay), giảm khi hạ độ cao.
+- Tiếng gió cánh quạt; tiếng xì bụi nước khi bay thấp hơn ~3 m trên mặt sông; tiếng nước bắn khi chạm nước; tiếng va đập khi đâm vào công trình, trụ cầu.
+- Âm lượng giảm theo khoảng cách từ camera tới UAV; tự tắt khi về chế độ Khám phá.
+
 ## Cái gì là dữ liệu, cái gì là giả định
 
 | Thành phần | Nguồn | Mức |
@@ -41,7 +47,7 @@ Bảng thông số khi bay: độ cao trên mặt nước/mặt đất, tốc đ
 | Cầu Trường Tiền | 6 nhịp đều dọc tim cầu OSM (số nhịp, chiều dài 402,6 m theo nguồn công bố); vòm cao 9 m, dầm 1,2 m, kích thước trụ là giả định | Phác thảo |
 | Ngọ Môn, Kỳ Đài, điện Thái Hòa | Dấu chân OSM + số liệu công bố (Kỳ Đài 17,5 m, cột cờ 37 m; nền Ngọ Môn ~5 m); tỷ lệ các tầng mái là giả định | Phác thảo |
 | Cây | Rải ngẫu nhiên (hạt giống cố định) trong ô "tree cover" của ESA WorldCover, tránh nhà/đường/nước; 72 cây có vị trí OSM | Minh họa |
-| Vật lý UAV, va chạm, nước bắn | Mô hình đơn giản kiểu trò chơi | Minh họa |
+| Vật lý UAV, va chạm, nước bắn, âm thanh động cơ | Mô hình đơn giản kiểu trò chơi; âm thanh tổng hợp, không ghi từ máy bay thật | Minh họa |
 
 Danh sách giả định đầy đủ cũng nằm trong `data/meta.json` (khóa `assumptions`) và trong `provenance.json` ở thư mục gốc.
 
@@ -60,6 +66,7 @@ Hai chi tiết đến thẳng từ đợt kiểm định dữ liệu:
 | `src/world.js` | Dựng địa hình, nước, đường, cầu, công trình, tường thành, mốc di tích, cây, bầu trời; hình khối va chạm |
 | `src/uav.js` | Mô hình UAV, điều khiển, quỹ đạo bay dưới cầu Trường Tiền |
 | `src/fx.js` | Bụi nước dưới cánh quạt, nước bắn khi chạm, vòng sóng |
+| `src/audio.js` | Âm thanh động cơ tổng hợp (Web Audio) |
 | `app.js` | Bản đóng gói (three.js 0.169.0 + mã trên) |
 | `data/*.json` | Dữ liệu cảnh sinh bởi `../scripts/11_build_demo_data.py` |
 
