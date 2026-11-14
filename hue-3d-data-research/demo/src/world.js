@@ -42,18 +42,28 @@ export class Terrain {
   }
 }
 
+// value noise + fbm used for ground grain and roof/wall detail (cheap, no textures)
+const NOISE_GLSL = `
+float hz_h(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float hz_n(vec2 p){ vec2 i = mod(floor(p), 289.0), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);   // small hash inputs keep float precision
+  return mix(mix(hz_h(i), hz_h(i + vec2(1, 0)), u.x), mix(hz_h(i + vec2(0, 1)), hz_h(i + vec2(1, 1)), u.x), u.y); }
+float hz_fbm(vec2 p){ float a = 0.5, v = 0.0; for (int k = 0; k < 4; k++) { v += a * hz_n(p); p *= 2.03; a *= 0.5; } return v; }
+`;
+
 const LC_COLOR = {
   10: [0.34, 0.50, 0.28], 20: [0.47, 0.58, 0.36], 30: [0.52, 0.64, 0.40], 40: [0.62, 0.68, 0.42],
   50: [0.74, 0.71, 0.65], 60: [0.74, 0.67, 0.56], 80: [0.50, 0.52, 0.44], 90: [0.45, 0.58, 0.45], 95: [0.40, 0.55, 0.42],
 };
 
-export function buildTerrainMesh(T) {
+export function buildTerrainMesh(T, photo) {
   const { nx, nz, cell } = T;
-  const pos = new Float32Array(nx * nz * 3), col = new Float32Array(nx * nz * 3);
+  const pos = new Float32Array(nx * nz * 3), col = new Float32Array(nx * nz * 3), uv = new Float32Array(nx * nz * 2);
+  const tint = new Float32Array(nx * nz * 3);   // vertex colours used on top of the photo (river bed darkening only)
   const raw = new Float32Array(nx * nz * 3);
   for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
     const k = j * nx + i;
     pos[k * 3] = T.x0 + i * cell; pos[k * 3 + 1] = T.h[k]; pos[k * 3 + 2] = T.z0 + j * cell;
+    uv[k * 2] = i / (nx - 1); uv[k * 2 + 1] = 1 - j / (nz - 1);   // image row 0 is the north edge (z0)
     const c = LC_COLOR[T.lc[k]] || LC_COLOR[50];   // palette is written in sRGB; vertex colours are linear
     raw[k * 3] = c[0] ** 2.2; raw[k * 3 + 1] = c[1] ** 2.2; raw[k * 3 + 2] = c[2] ** 2.2;
   }
@@ -69,6 +79,7 @@ export function buildTerrainMesh(T) {
     const grain = 0.94 + 0.12 * (((i * 73856093) ^ (j * 19349663)) >>> 0) % 1000 / 1000;
     const wet = !Number.isNaN(T.wl[k]) && T.wl[k] > T.h[k] ? 0.72 : 1;   // darker river bed
     col[k * 3] = r / n * grain * wet; col[k * 3 + 1] = g / n * grain * wet; col[k * 3 + 2] = b / n * grain * wet;
+    tint[k * 3] = tint[k * 3 + 1] = tint[k * 3 + 2] = wet;
   }
   const idx = new Uint32Array((nx - 1) * (nz - 1) * 6);
   let p = 0;
@@ -78,11 +89,33 @@ export function buildTerrainMesh(T) {
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const colAttr = new THREE.BufferAttribute(photo ? tint : col, 3);
+  g.setAttribute('color', colAttr);
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
   g.setIndex(new THREE.BufferAttribute(idx, 1));
   g.computeVertexNormals();
-  const mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true }));
+  const mat = new THREE.MeshLambertMaterial({ vertexColors: true, map: photo || null });
+  // close-up grain so the 4 m photo does not look like a blurred print when flying low; fades out with distance
+  mat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vTerrW;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTerrW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vTerrW;' + NOISE_GLSL)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+        float tDist = length(cameraPosition - vTerrW);
+        float tFade = 1.0 - smoothstep(120.0, 900.0, tDist);
+        vec2 tl = mod(vTerrW.xz, 600.0);
+        float tg = hz_fbm(tl * 0.45) * 0.7 + hz_n(tl * 2.7) * 0.3;
+        diffuseColor.rgb *= 1.0 + (tg - 0.5) * 0.22 * tFade;`);
+  };
+  const mesh = new THREE.Mesh(g, mat);
   mesh.name = 'terrain';
+  mesh.receiveShadow = true;
+  /** 'photo' = Sentinel-2 image, 'landcover' = ESA WorldCover colours */
+  mesh.userData.setMode = (mode) => {
+    const usePhoto = mode === 'photo' && !!photo;
+    colAttr.array.set(usePhoto ? tint : col); colAttr.needsUpdate = true;
+    mat.map = usePhoto ? photo : null; mat.needsUpdate = true;
+  };
   return mesh;
 }
 
@@ -147,7 +180,7 @@ class Builder {
     g.setAttribute('normal', new THREE.Float32BufferAttribute(this.nor, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.col, 3));
     g.setIndex(this.idx);
-    return new THREE.Mesh(g, material || new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }));
+    return new THREE.Mesh(g, material || new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide, shadowSide: THREE.BackSide }));
   }
 }
 
@@ -437,7 +470,7 @@ export function buildBuildings(B, solids, tilesPerSide = 6, bounds) {
   }
   const tiles = [];
   for (let t = 0; t < vCount.length; t++) {
-    tiles.push(vCount[t] ? { pos: new Float32Array(vCount[t] * 3), nor: new Int8Array(vCount[t] * 3), col: new Uint8Array(vCount[t] * 3), idx: new Uint32Array(iCount[t]), v: 0, i: 0, ranges: [] } : null);
+    tiles.push(vCount[t] ? { pos: new Float32Array(vCount[t] * 3), nor: new Int8Array(vCount[t] * 3), col: new Uint8Array(vCount[t] * 3), bt: new Int16Array(vCount[t] * 2), su: new Float32Array(vCount[t]), idx: new Uint32Array(iCount[t]), v: 0, i: 0, ranges: [] } : null);
   }
   const contour = [];
   for (let i = 0; i < nB; i++) {
@@ -447,27 +480,71 @@ export function buildBuildings(B, solids, tilesPerSide = 6, bounds) {
     for (let k = 0; k < n; k++) contour.push(new THREE.Vector2(ring[k * 2], ring[k * 2 + 1]));
     const ccw = signedArea(contour) > 0;
     const v0 = T.v;
+    const b0 = Math.round(y0 * 10), b1 = Math.round(y1 * 10);
     // roof
-    for (let k = 0; k < n; k++) { const q = T.v * 3; T.pos[q] = ring[k * 2]; T.pos[q + 1] = y1; T.pos[q + 2] = ring[k * 2 + 1]; T.nor[q + 1] = 127; T.v++; }
+    for (let k = 0; k < n; k++) { const q = T.v * 3; T.pos[q] = ring[k * 2]; T.pos[q + 1] = y1; T.pos[q + 2] = ring[k * 2 + 1]; T.nor[q + 1] = 127; T.bt[T.v * 2] = b0; T.bt[T.v * 2 + 1] = b1; T.v++; }
     for (const f of THREE.ShapeUtils.triangulateShape(contour, [])) {
       const a = contour[f[0]], b = contour[f[1]], c = contour[f[2]];
       const upw = (b.y - a.y) * (c.x - a.x) - (b.x - a.x) * (c.y - a.y);
       T.idx[T.i++] = v0 + f[0]; T.idx[T.i++] = v0 + (upw >= 0 ? f[1] : f[2]); T.idx[T.i++] = v0 + (upw >= 0 ? f[2] : f[1]);
     }
-    // walls
+    // walls; su = metres along the building's perimeter, so facade patterns are computed in small local numbers
+    let perim = 0;
     for (let k = 0; k < n; k++) {
       const px = ring[k * 2], pz = ring[k * 2 + 1], qx = ring[((k + 1) % n) * 2], qz = ring[((k + 1) % n) * 2 + 1];
       const dx = qx - px, dz = qz - pz, len = Math.hypot(dx, dz) || 1;
       let nxn = dz / len, nzn = -dx / len; if (!ccw) { nxn = -nxn; nzn = -nzn; }
       const b = T.v;
-      const put = (x, y, z) => { const q = T.v * 3; T.pos[q] = x; T.pos[q + 1] = y; T.pos[q + 2] = z; T.nor[q] = Math.round(nxn * 127); T.nor[q + 2] = Math.round(nzn * 127); T.v++; };
+      const put = (x, y, z) => { const q = T.v * 3; T.pos[q] = x; T.pos[q + 1] = y; T.pos[q + 2] = z; T.nor[q] = Math.round(nxn * 127); T.nor[q + 2] = Math.round(nzn * 127); T.bt[T.v * 2] = b0; T.bt[T.v * 2 + 1] = b1; T.v++; };
       put(px, y0, pz); put(qx, y0, qz); put(qx, y1, qz); put(px, y1, pz);
+      T.su[b] = perim; T.su[b + 1] = perim + len; T.su[b + 2] = perim + len; T.su[b + 3] = perim; perim += len;
       if (-dz * nxn + dx * nzn > 0) { T.idx[T.i++] = b; T.idx[T.i++] = b + 1; T.idx[T.i++] = b + 2; T.idx[T.i++] = b; T.idx[T.i++] = b + 2; T.idx[T.i++] = b + 3; } else { T.idx[T.i++] = b; T.idx[T.i++] = b + 2; T.idx[T.i++] = b + 1; T.idx[T.i++] = b; T.idx[T.i++] = b + 3; T.idx[T.i++] = b + 2; }
     }
     T.ranges.push(i, v0, n);
     solids.add([ring], y0, y1, { type: 'building', index: i });
   }
-  const material = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
+  const material = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.FrontSide, shadowSide: THREE.BackSide });
+  const detail = { value: 1 };
+  // procedural facades: storeys of 3.3 m with windows, an open shop front on the ground floor (tube houses),
+  // clay-tile rows on warm roofs, weathering on concrete roofs. Faded out with distance to avoid shimmer.
+  material.onBeforeCompile = (sh) => {
+    sh.uniforms.uDetail = detail;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec2 aBT; attribute float aSU;\nvarying vec3 vBW; varying vec3 vBN; varying vec2 vBT; varying float vSU;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvBW = (modelMatrix * vec4(transformed, 1.0)).xyz; vBN = normal; vBT = aBT * 0.1; vSU = aSU;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uDetail; varying vec3 vBW; varying vec3 vBN; varying vec2 vBT; varying float vSU;' + NOISE_GLSL)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+        if (uDetail > 0.5) {
+          float bDist = length(cameraPosition - vBW);
+          float near = 1.0 - smoothstep(350.0, 1400.0, bDist);
+          vec3 n = normalize(vBN);
+          // interpolated varyings wobble in the last bits; round to whole decimetres before hashing,
+          // otherwise the high-frequency hash turns that wobble into per-pixel speckle
+          vec2 btq = mod(floor(vBT * 10.0 + 0.5), 113.0);
+          float seed = hz_h(btq * vec2(0.731, 0.379) + 0.21);
+          if (abs(n.y) < 0.5) {
+            float u = vSU + seed * 3.0;
+            float h = vBW.y - vBT.x;
+            float storey = 3.3, fy = fract(h / storey), fl = floor(h / storey);
+            float bay = 2.6 + seed * 1.2, fx = fract(u / bay);
+            float win = step(0.24, fx) * step(fx, 0.76) * step(0.34, fy) * step(fy, 0.84);
+            if (fl < 1.0) win = step(0.06, fx) * step(fx, 0.94) * step(0.04, fy) * step(fy, 0.80) * 0.9;   // shop front
+            win *= step(0.7, vBT.y - vBW.y);                                                        // nothing in the parapet
+            win *= step(2.4, vBT.y - vBT.x);                                                        // sheds stay plain
+            float lit = hz_h(vec2(floor(u / bay), fl) + seed);
+            vec3 glass = mix(vec3(0.10, 0.13, 0.16), vec3(0.34, 0.42, 0.50), clamp(0.5 + 0.45 * n.x + 0.2 * lit, 0.0, 1.0));
+            diffuseColor.rgb = mix(diffuseColor.rgb, glass, win * 0.9 * near);
+            diffuseColor.rgb *= mix(0.86, 1.0, 1.0 - near);                                         // average window darkness far away
+            diffuseColor.rgb *= 0.9 + 0.1 * smoothstep(0.0, 1.2, h);                                 // grime at street level
+            diffuseColor.rgb *= 0.94 + 0.12 * hz_fbm(vec2(u * 0.3, vBW.y * 0.6));                   // plaster stains
+          } else {
+            float warm = step(diffuseColor.g * 1.25, diffuseColor.r);
+            vec2 rl = mod(vBW.xz, 500.0);                                   // local roof coordinates
+            float rows = smoothstep(0.0, 0.18, fract(rl.x * 2.6 + rl.y * 0.4)) * 0.18 + 0.82;
+            float conc = 0.86 + 0.24 * hz_fbm(rl * 0.35);
+            diffuseColor.rgb *= mix(conc, rows * (0.92 + 0.12 * hz_n(rl * 0.9)), warm) * mix(1.0, 0.96, near);
+          }
+        }`);
+  };
   const meshes = [];
   for (const T of tiles) {
     if (!T) continue;
@@ -475,14 +552,18 @@ export function buildBuildings(B, solids, tilesPerSide = 6, bounds) {
     g.setAttribute('position', new THREE.BufferAttribute(T.pos, 3));
     g.setAttribute('normal', new THREE.BufferAttribute(T.nor, 3, true));
     g.setAttribute('color', new THREE.BufferAttribute(T.col, 3, true));
+    g.setAttribute('aBT', new THREE.BufferAttribute(T.bt, 2));
+    g.setAttribute('aSU', new THREE.BufferAttribute(T.su, 1));
     g.setIndex(new THREE.BufferAttribute(T.idx.subarray(0, T.i), 1));
     g.computeBoundingSphere();
     const mesh = new THREE.Mesh(g, material);
+    mesh.castShadow = true; mesh.receiveShadow = true;
     mesh.userData.ranges = T.ranges;
     meshes.push(mesh); group.add(mesh);
   }
 
   function recolor(mode) {
+    detail.value = mode === 'natural' ? 1 : 0;   // data-colour modes stay flat so the legend colours read cleanly
     const c = new THREE.Color();
     for (const mesh of meshes) {
       const col = mesh.geometry.attributes.color.array, R = mesh.userData.ranges;
@@ -566,8 +647,18 @@ export function buildLandmarks(meta, solids) {
 // ---------------------------------------------------------------------------- trees
 export function buildTrees(tr) {
   const n = tr.x.length, group = new THREE.Group(); group.name = 'trees';
-  const crownG = new THREE.IcosahedronGeometry(1, 0), trunkG = new THREE.CylinderGeometry(0.16, 0.24, 1, 5);
+  const crownG = new THREE.IcosahedronGeometry(1, 1), trunkG = new THREE.CylinderGeometry(0.16, 0.24, 1, 5);
+  // jitter crown vertices once so instances don't look like perfect balls
+  { const pa = crownG.attributes.position;
+    for (let i = 0; i < pa.count; i++) {
+      const x = pa.getX(i), y = pa.getY(i), z = pa.getZ(i);
+      const key = (Math.round(x * 1000) * 73856093) ^ (Math.round(y * 1000) * 19349663) ^ (Math.round(z * 1000) * 83492791);
+      const f = 0.86 + 0.28 * ((key >>> 0) % 1000) / 1000;      // same position -> same factor, so faces stay joined
+      pa.setXYZ(i, x * f, y * f, z * f);
+    }
+    crownG.computeVertexNormals(); }
   const crown = new THREE.InstancedMesh(crownG, new THREE.MeshLambertMaterial({ flatShading: true }), n);
+  crown.castShadow = true; crown.receiveShadow = true;
   const trunk = new THREE.InstancedMesh(trunkG, new THREE.MeshLambertMaterial({ color: '#6b5544' }), n);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), c = new THREE.Color();
   for (let i = 0; i < n; i++) {

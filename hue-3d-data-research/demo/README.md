@@ -9,12 +9,13 @@ cd hue-3d-data-research/demo
 python3 serve.py            # mở http://localhost:8000
 ```
 
-Không cần cài gì thêm để xem: `app.js` (đã đóng gói) và `data/*.json` nằm sẵn trong thư mục. Cần trình duyệt có WebGL (Chrome, Edge, Firefox, Safari bản mới). Lần tải đầu đọc khoảng 9 MB dữ liệu.
+Không cần cài gì thêm để xem: `app.js` (đã đóng gói) và `data/*.json` nằm sẵn trong thư mục. Cần trình duyệt có WebGL (Chrome, Edge, Firefox, Safari bản mới). Lần tải đầu đọc khoảng 9,4 MB dữ liệu (gồm ảnh nền Sentinel-2 0,4 MB).
 
 Dựng lại từ mã nguồn:
 
 ```bash
 python3 ../scripts/11_build_demo_data.py   # samples/ -> demo/data/*.json
+python3 ../scripts/12_build_demo_imagery.py  # Sentinel-2 -> demo/data/ground_s2.jpg
 npm install && npm run build               # src/*.js -> app.js, page.html -> index.html
 ```
 
@@ -45,6 +46,16 @@ Bảng thông số khi bay: độ cao trên mặt nước/mặt đất, tốc đ
 - Tiếng gió cánh quạt; tiếng xì bụi nước khi bay thấp hơn ~3 m trên mặt sông; tiếng nước bắn khi chạm nước; tiếng va đập khi đâm vào công trình, trụ cầu.
 - Âm lượng giảm theo khoảng cách từ camera tới UAV; tự tắt khi về chế độ Khám phá.
 
+## Hình ảnh
+
+- **Ảnh vệ tinh phủ mặt đất**: Sentinel-2 L2A cảnh S2B_48QYD_20260330 (màu thật, độ phân giải gốc 10 m), chiếu về khung cảnh và nội suy lên 4 m/px. Nội suy chỉ làm ảnh mịn hơn, không thêm chi tiết: ở độ phân giải này thấy rõ ruộng, mảng cây, bãi cát, màu nước, nhưng không thấy từng nhà hay vạch đường. Ảnh được chỉnh sáng, tương phản, độ bão hòa để hiển thị; điểm ảnh không còn là số đo phản xạ. Ở gần, mặt đất có thêm hạt nhiễu thủ tục để đỡ nhòe.
+- **Bầu trời và nắng**: bầu trời tán xạ vật lý (Sky của three.js), mặt trời cố định hướng tây tây nam, cao 38° (khoảng 15 giờ). Không gắn với ngày giờ thật.
+- **Bóng đổ**: công trình, cây, cầu, tường thành và UAV đổ bóng lên nhau và lên mặt đất. Vùng bóng đi theo UAV khi bay, theo tâm nhìn khi khám phá. Mặc định bật trên máy tính, tắt trên điện thoại.
+- **Mặt tiền và mái**: cửa sổ theo tầng 3,3 m, tầng trệt mở kiểu nhà ống, vệt bẩn chân tường, ố vữa; mái màu ấm có hàng ngói, mái bê tông có vết loang. Tất cả là **mẫu vẽ thủ tục**, không lấy từ ảnh thật của từng nhà: số tầng, vị trí cửa, loại mái chỉ là minh họa. Chi tiết mờ dần sau ~350 m để không nhấp nháy.
+- **Cây**: tán cây có độ gồ ghề, đổ bóng.
+
+Bảng "Lớp dữ liệu" có hai công tắc: "Ảnh vệ tinh mặt đất" (tắt để về màu theo lớp phủ ESA WorldCover) và "Bóng đổ" (tắt nếu máy chậm). Khi tô màu "Theo nguồn chiều cao", mẫu mặt tiền tự tắt để màu nguồn dễ đọc.
+
 ## Cái gì là dữ liệu, cái gì là giả định
 
 | Thành phần | Nguồn | Mức |
@@ -52,6 +63,8 @@ Bảng thông số khi bay: độ cao trên mặt nước/mặt đất, tốc đ
 | Vị trí đường, cầu, mặt nước, dấu chân công trình, tường thành | OpenStreetMap / Overture 2026-10-21.0 | Dữ liệu (cộng đồng vẽ hoặc học máy) |
 | Chiều cao công trình | Thẻ OSM (34 nhà) → ước lượng học máy Open Buildings 2.5D 2023 (≈ 84%) → mặc định 4,5 m (≈ 16%) | Chủ yếu ước lượng; xem bằng chế độ tô màu "Theo nguồn chiều cao" |
 | Mặt đất | Copernicus GLO-30 (30 m), lọc và làm mượt | Thay thế gần đúng, không phải số đo địa hình |
+| Màu mặt đất | Ảnh Sentinel-2 L2A 2026-03-30 (10 m), chỉnh màu hiển thị | Dữ liệu ảnh, độ phân giải thô; nhà nhỏ hơn ~20 m không nhận ra |
+| Cửa sổ, mặt tiền, ngói, bóng đổ, hướng nắng | Vẽ thủ tục trong shader | Minh họa |
 | Mực nước, độ sâu lòng sông | Quy ước 0,5 m; độ sâu tự đặt | Giả định |
 | Bề rộng đường | Theo cấp đường OSM (và số làn khi có) | Giả định |
 | Cao độ mặt cầu | Mô hình ràng buộc: cao độ mặt đất hai đầu, dốc lên mượt, phẳng ở độ cao = mực nước + khoảng tĩnh không giả định (6,5 m cầu lớn, 2,2 m cầu nhỏ) | Giả định |
@@ -96,4 +109,6 @@ Hệ tọa độ cảnh: mét, gốc tại tâm pilot trong EPSG:32648 (E 775352
 - Khoảng 1,5 triệu tam giác (chưa kể cây và cầu dạng instance); máy tính phổ thông nên chạy tốt, điện thoại cũ có thể giật.
 - Va chạm dùng hình lăng trụ theo dấu chân, đủ cho mái phẳng; không mô phỏng gió, pin, tín hiệu.
 - Camera bám sau có thể chui vào dưới mặt cầu khi UAV vừa ra khỏi gầm cầu.
-- Mái nhà phẳng; không có texture ảnh; không có biển báo, cột điện, dây điện.
+- Mái nhà phẳng (không có mái dốc, trừ mốc di tích); mặt tiền là mẫu thủ tục, không phải ảnh chụp từng nhà; không có biển báo, cột điện, dây điện.
+- Bóng đổ tốn GPU: máy tính yếu có thể giật khi bật. Chưa đo khung hình trên GPU thật.
+- Ảnh vệ tinh là một cảnh duy nhất (30/03/2026), không ghép nhiều ngày; chưa kiểm tra mây từng điểm ảnh trong vùng pilot.

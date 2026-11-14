@@ -1,9 +1,10 @@
 // Huế 3D pilot — browser demo. Explore mode (map controls), manual UAV flight, scripted pass under Cầu Trường Tiền.
 import * as THREE from 'three';
 import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
+import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import {
   Terrain, Solids, buildTerrainMesh, buildWater, buildRoads, buildBridges, buildBuildings,
-  buildWalls, buildLandmarks, buildTrees, buildSky, SRC_NAME, HS_NAME,
+  buildWalls, buildLandmarks, buildTrees, SRC_NAME, HS_NAME,
 } from './world.js';
 import { WaterFx } from './fx.js';
 import { Uav, Input, truongTienPath, ACTION_NAME } from './uav.js';
@@ -41,31 +42,60 @@ async function main() {
     throw new Error('Trình duyệt này không bật được WebGL. Hãy thử Chrome, Edge, Firefox hoặc Safari bản mới.');
   }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 700 ? 1.5 : 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
+  // shadows: on by default on desktop, off on phones (they roughly double the drawing work)
+  const phone = window.innerWidth <= 720 || matchMedia('(pointer: coarse)').matches;
+  renderer.shadowMap.enabled = !phone; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
-  const env = { skyColor: new THREE.Color('#a9c8e2'), fogColor: new THREE.Color('#cfdbe0'), sunDir: new THREE.Vector3(-0.45, 0.62, -0.64).normalize(), fogNear: 1400, fogFar: 7800 };
+  // mid-afternoon sun from the west-south-west (Huế, 16.5°N, ~15:00): azimuth ~245°, elevation ~38°.
+  // The default views look from the south-east, so shadows fall towards the viewer and stay visible.
+  const az = THREE.MathUtils.degToRad(245), el = THREE.MathUtils.degToRad(38);
+  const sunDir = new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), -Math.cos(az) * Math.cos(el)).normalize();
+  const env = { skyColor: new THREE.Color('#b9d2e6'), fogColor: new THREE.Color('#c8d6df'), sunDir, fogNear: 1600, fogFar: 9000 };
   scene.background = env.fogColor;
   scene.fog = new THREE.Fog(env.fogColor, env.fogNear, env.fogFar);
   const camera = new THREE.PerspectiveCamera(50, 1, 0.3, 14000);
-  scene.add(new THREE.HemisphereLight('#dfeaf2', '#7b6f5a', 1.25));
-  const sun = new THREE.DirectionalLight('#fff3dc', 2.1); sun.position.copy(env.sunDir).multiplyScalar(1000); scene.add(sun);
+  scene.add(new THREE.HemisphereLight('#d6e6f4', '#6e6553', 1.0));
+  const sun = new THREE.DirectionalLight('#ffe9c8', 2.7); sun.position.copy(sunDir).multiplyScalar(1500); scene.add(sun, sun.target);
+  sun.castShadow = renderer.shadowMap.enabled;
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 1.2;
+  let shadowHalf = 0;
+  const setShadowArea = (half) => {
+    if (Math.abs(half - shadowHalf) < half * 0.15) return;
+    shadowHalf = half; const c = sun.shadow.camera;
+    c.left = -half; c.right = half; c.top = half; c.bottom = -half; c.near = 10; c.far = 4000; c.updateProjectionMatrix();
+  };
+  setShadowArea(400);
+  status('Đang tải ảnh vệ tinh…');
+  let groundPhoto = null;
+  try {
+    groundPhoto = await new THREE.TextureLoader().loadAsync('data/ground_s2.jpg');
+    groundPhoto.colorSpace = THREE.SRGBColorSpace; groundPhoto.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  } catch (e) { console.warn('[Huế 3D] không tải được ảnh vệ tinh, dùng màu lớp phủ', e); }
 
   const T = new Terrain(terrainD);
   const bounds = { xmin: meta.frame.xmin, xmax: meta.frame.xmax, zmin: meta.frame.zmin, zmax: meta.frame.zmax };
   const solids = new Solids(32);
-  const sky = buildSky(env); scene.add(sky);
-  const terrainMesh = buildTerrainMesh(T); scene.add(terrainMesh);
+  const sky = new Sky(); sky.scale.setScalar(9000); sky.name = 'sky';
+  { const u = sky.material.uniforms; u.turbidity.value = 7; u.rayleigh.value = 1.4; u.mieCoefficient.value = 0.006; u.mieDirectionalG.value = 0.82; u.sunPosition.value.copy(sunDir); }
+  sky.material.fog = false; scene.add(sky);
+  const terrainMesh = buildTerrainMesh(T, groundPhoto); scene.add(terrainMesh);
   const water = buildWater(waterD, env); scene.add(water);
   const roads = buildRoads(roadsD); scene.add(roads);
   const bridges = buildBridges(bridgesD, T, meta); scene.add(bridges.group);
   const buildings = buildBuildings(buildingsD, solids, 6, bounds); scene.add(buildings.group);
   const walls = buildWalls(wallsD, solids); scene.add(walls);
+  roads.traverse((o) => { if (o.isMesh) o.receiveShadow = true; });
+  bridges.group.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  walls.castShadow = true; walls.receiveShadow = true;
   const landmarks = buildLandmarks(meta, solids); scene.add(landmarks);
+  landmarks.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   const trees = buildTrees(treesD); scene.add(trees);
   const fx = new WaterFx(scene);
 
   const world = { terrain: T, solids, bridgeCol: { decks: bridges.decks, piers: bridges.piers } };
   const uav = new Uav(world, fx); scene.add(uav.model);
+  uav.model.traverse((o) => { if (o.isMesh) o.castShadow = true; });
   // compile every shader now (UAV, spray, ripples included) so entering flight mode does not stall on first use
   status('Đang lập lộ trình bay…');
   await new Promise((r) => setTimeout(r, 20));
@@ -263,6 +293,13 @@ async function main() {
     $('legend-source').hidden = r.value !== 'source'; $('legend-height').hidden = r.value !== 'height';
   }));
   $('opt-trees').addEventListener('change', (e) => { trees.visible = e.target.checked; });
+  $('opt-photo').checked = !!groundPhoto; $('opt-photo').disabled = !groundPhoto;
+  $('opt-photo').addEventListener('change', (e) => terrainMesh.userData.setMode(e.target.checked ? 'photo' : 'landcover'));
+  $('opt-shadows').checked = renderer.shadowMap.enabled;
+  $('opt-shadows').addEventListener('change', (e) => {
+    renderer.shadowMap.enabled = e.target.checked; sun.castShadow = e.target.checked;
+    scene.traverse((o) => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { m.needsUpdate = true; }); });
+  });
   $('opt-buildings').addEventListener('change', (e) => { buildings.group.visible = e.target.checked; });
   $('btn-layers').addEventListener('click', () => { const p = $('layers'); p.classList.toggle('open'); $('btn-layers').setAttribute('aria-expanded', String(p.classList.contains('open'))); });
 
@@ -301,7 +338,7 @@ async function main() {
         body = rows([
           ['Dấu chân', SRC_NAME[buildingsD.src[i]]], ['Chiều cao dựng', `${fmt(buildingsD.h[i] / 10 - 0.3)} m`],
           ['Nguồn chiều cao', HS_NAME[buildingsD.hs[i]]], ['Diện tích nền', `${fmt(areaOf(i), 0)} m²`],
-        ]) + '<p class="note">Mái phẳng là giả định. Chiều cao học máy lệch khoảng ±3 m trên mẫu đối chiếu nhỏ.</p>';
+        ]) + '<p class="note">Mái phẳng là giả định; cửa sổ, mặt tiền và vân mái ngói là họa tiết minh họa, không phải ảnh chụp ngôi nhà này. Chiều cao học máy lệch khoảng ±3 m trên mẫu đối chiếu nhỏ.</p>';
       } else if (it.type === 'wall') {
         title = it.kind === 'rampart' ? 'Tường thành Kinh thành' : 'Tường Hoàng thành / tường trong';
         body = rows([['Chiều cao dựng', it.kind === 'rampart' ? '6,6 m' : '4,0 m'], ['Nguồn', 'Tim tường OSM; chiều cao theo số liệu công bố']]) + '<p class="note">Cổng thành được khoét ở nơi có đường đi qua. Kích thước cổng chưa đo.</p>';
@@ -371,6 +408,12 @@ async function main() {
     water.material.uniforms.uTime.value = t;
     if (landmarks.userData.flag && !reduceMotion) landmarks.userData.flag.rotation.y = Math.sin(t * 1.7) * 0.25;
     sky.position.copy(camera.position);
+    if (renderer.shadowMap.enabled) {
+      // keep the shadow map centred on what the viewer looks at, sized to the viewing distance
+      const focus = isFlying() ? uav.pos : controls.target;
+      setShadowArea(isFlying() ? 260 : THREE.MathUtils.clamp(camera.position.distanceTo(controls.target) * 0.75, 200, 1400));
+      sun.target.position.copy(focus); sun.position.copy(focus).addScaledVector(sunDir, 1500);
+    }
     if (!isFlying()) {
       if (fly) {
         fly.t = Math.min(1, fly.t + dt / fly.dur); const e = fly.t < 0.5 ? 4 * fly.t ** 3 : 1 - (-2 * fly.t + 2) ** 3 / 2;
